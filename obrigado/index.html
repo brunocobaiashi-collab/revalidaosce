@@ -168,11 +168,13 @@ async function checkAndSetup(){
     }
   }
 
-  // Strategy 3: most recent active subscription (fallback)
+  // Strategy 3: most recent active subscription created in last 30 minutes
   if(!email){
     for(var i = 0; i < 5; i++){
+      var cutoff = new Date(Date.now() - 30*60*1000).toISOString();
       var { data: latest } = await client.from('subscriptions')
         .select('email').eq('status','active')
+        .gte('created_at', cutoff)
         .order('created_at', { ascending: false }).limit(1).single();
       if(latest && latest.email){ email = latest.email; break; }
       await new Promise(function(r){ setTimeout(r, 2000); });
