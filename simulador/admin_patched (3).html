@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerenciar — RevalidaOSCE</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0e;--bg2:#0a1520;--bg3:#0f1f30;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#e8f0f8;--text2:#7a9ab5;--text3:#445566;
+  --accent:#00c9ff;--accent2:#0077cc;
+  --green:#22c55e;--yellow:#f5c842;--red:#ef4444;
+  --serif:'DM Serif Display',Georgia,serif;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --r:8px;--rl:14px;
+}
+html{font-size:15px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;
+  background-image:radial-gradient(ellipse 80% 50% at 70% 0%,rgba(0,100,200,.08) 0%,transparent 60%)}
+
+/* ── LAYOUT ── */
+.app{max-width:960px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+/* ── NAV ── */
+nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:2.5rem;
+  padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:1.25rem;color:var(--text);text-decoration:none}
+.nav-logo em{color:var(--accent);font-style:italic}
+.nav-links{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+/* ── TABS ── */
+.page-tabs{display:flex;gap:4px;margin-bottom:2rem;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--rl);padding:4px}
+.page-tab{flex:1;padding:10px 16px;font-size:.875rem;font-weight:500;border:none;
+  background:transparent;color:var(--text2);border-radius:10px;cursor:pointer;
+  transition:all .2s;text-align:center;font-family:var(--sans)}
+.page-tab:hover{color:var(--text);background:var(--bg3)}
+.page-tab.active{background:var(--accent);color:#000;font-weight:600}
+
+/* ── SECTION HEADERS ── */
+.section-hdr{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem}
+.section-title{font-family:var(--serif);font-size:1.5rem;font-weight:400}
+.section-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+button,a.btn-link{cursor:pointer;font-family:var(--sans)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:.855rem;
+  font-weight:500;border-radius:var(--r);border:1px solid var(--border2);
+  background:transparent;color:var(--text);transition:all .18s;text-decoration:none;cursor:pointer}
+.btn:hover{background:var(--bg3);border-color:rgba(255,255,255,.25)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-p{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600}
+.btn-p:hover{background:#33d4ff;border-color:#33d4ff}
+.btn-d{border-color:rgba(239,68,68,.3);color:var(--red)}
+.btn-d:hover{background:rgba(239,68,68,.1)}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.btn-icon{padding:6px 8px;font-size:.9rem}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);
+  padding:1.25rem;margin-bottom:.875rem}
+.clabel{font-family:var(--mono);font-size:.68rem;font-weight:500;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.15em;margin-bottom:.5rem}
+
+/* ── STATION CARDS ── */
+.st-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);
+  padding:1.1rem 1.25rem;margin-bottom:.625rem;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  transition:border-color .2s}
+.st-card:hover{border-color:var(--border2)}
+.st-area{font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:.2rem}
+.st-name{font-size:.95rem;font-weight:500;color:var(--text)}
+.st-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── FORM ── */
+.ilabel{font-size:.78rem;color:var(--text2);margin-bottom:.35rem;display:block;margin-top:.75rem}
+.tinput{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);font-family:var(--sans);font-size:.875rem;
+  transition:border-color .15s}
+.tinput:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,201,255,.1)}
+select.tinput{cursor:pointer}
+textarea.tinput{resize:vertical;line-height:1.6}
+.ta-sm{min-height:80px}
+.ta-md{min-height:140px}
+.ta-lg{min-height:220px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ── INVITE CARDS ── */
+.inv-row{display:flex;justify-content:space-between;align-items:center;
+  padding:.75rem 0;border-bottom:1px solid var(--border);gap:.75rem;flex-wrap:wrap}
+.inv-row:last-child{border-bottom:none}
+.inv-code{font-family:var(--mono);font-size:.85rem;color:var(--accent);letter-spacing:.08em}
+.inv-email{font-size:.82rem;color:var(--text2)}
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.68rem;
+  font-weight:500;padding:2px 9px;border-radius:4px;letter-spacing:.04em}
+.bg{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.by{background:rgba(245,200,66,.1);color:var(--yellow);border:1px solid rgba(245,200,66,.25)}
+.br{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.bb{background:rgba(0,201,255,.1);color:var(--accent);border:1px solid rgba(0,201,255,.2)}
+
+/* ── STATUS / ALERTS ── */
+.alert{border-radius:var(--r);padding:.875rem 1rem;font-size:.855rem;margin-bottom:.875rem}
+.alert-warn{background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);color:#fcd34d}
+.alert-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.alert-ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;
+  width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:2rem;
+  transform:translateY(16px);transition:transform .2s}
+.modal-overlay.open .modal{transform:none}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
+.modal-title{font-family:var(--serif);font-size:1.4rem;font-weight:400}
+.modal-close{background:none;border:none;color:var(--text2);font-size:1.25rem;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:.15s}
+.modal-close:hover{background:var(--bg3);color:var(--text)}
+
+/* ── SECTION PANELS ── */
+.panel{display:none}.panel.active{display:block}
+
+/* ── CHECKLIST TABLE ── */
+.cl-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.cl-table th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border2);
+  font-family:var(--mono);font-size:.65rem;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.08em;font-weight:400}
+.cl-table td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+.cl-table tr:last-child td{border-bottom:none}
+
+/* ── EXAM ROWS ── */
+.exam-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:.875rem;margin-bottom:.5rem}
+
+/* ── PROGRESS ── */
+.gen-steps{display:flex;gap:8px;margin-bottom:1.5rem}
+.gen-step{flex:1;height:3px;border-radius:2px;background:var(--border)}
+.gen-step.done{background:var(--accent)}
+.gen-step.active{background:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .app{padding:1rem .875rem 3rem}
+  .page-tab{padding:8px 10px;font-size:.8rem}
+  .section-hdr{flex-direction:column;align-items:flex-start}
+  nav{flex-wrap:wrap;gap:.5rem}
+}
+</style>
+<script>
+// ── HELPERS PARA orientAtor JSONB (nova migração) ──────────────────────
+// O banco agora armazena orientAtor como JSONB estruturado.
+// Para compatibilidade visual, este admin lê/escreve como JSON pretty-printed
+// quando o campo for objeto, ou como texto puro quando for string legada.
+
+function orientAtorToTextarea(oa){
+  if(!oa) return '';
+  if(typeof oa === 'string') return oa;
+  // Objeto JSONB → JSON formatado pra usuário ver
+  try{ return JSON.stringify(oa, null, 2); }
+  catch(e){ return String(oa); }
+}
+
+function orientAtorFromTextarea(txt){
+  txt = (txt||'').trim();
+  if(!txt) return null;
+  // Se começar com { tenta parsear como JSON
+  if(txt.charAt(0) === '{'){
+    try{ return JSON.parse(txt); }
+    catch(e){ /* JSON inválido, salva como texto */ }
+  }
+  // Texto puro → wrap como objeto JSONB básico
+  return { regra_fundamental: txt };
+}
+</script>
+<!-- Favicon — RevalidaOSCE -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#00c9ff">
+
+</head>
+<body>
+<div class="app">
+
+  <!-- NAV -->
+  <nav>
+    <a href="https://simulador.revalidaosce.com.br/" class="nav-logo">
+      Revalida<em>OSCE</em>
+    </a>
+    <div class="nav-links">
+      <span id="admin-user" style="font-size:.78rem;color:var(--text3);font-family:var(--mono)"></span>
+      <a href="https://simulador.revalidaosce.com.br/" class="btn btn-sm">← Simulador</a>
+    </div>
+  </nav>
+
+  <!-- PAGE TITLE -->
+  <div style="margin-bottom:2rem">
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.18em;margin-bottom:.4rem;text-transform:uppercase">Revalida · OSCE</div>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:400;letter-spacing:-.02em">
+      Gerenciar
+    </h1>
+  </div>
+
+  <!-- PAGE TABS -->
+  <div class="page-tabs">
+    <button class="page-tab active" onclick="switchTab('estacoes')">📋 Estações</button>
+    <button class="page-tab" id="tab-pendentes" onclick="switchTab('pendentes')">⏳ Pendentes</button>
+    <button class="page-tab" onclick="switchTab('convites')">✉ Convites</button>
+  </div>
+
+  <!-- ── PANEL: ESTAÇÕES ───────────────────────────────────────────────── -->
+  <div id="panel-estacoes" class="panel active">
+    <div class="section-hdr">
+      <h2 class="section-title">Estações cadastradas</h2>
+      <div class="section-actions">
+        <button class="btn btn-p" id="btn-new">+ Nova estação</button>
+        <button class="btn" id="btn-gen-ai">✨ Gerar com IA</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem">
+      <select id="area-filter" class="tinput" style="max-width:240px;font-family:var(--sans)">
+        <option value="">Todas as áreas</option>
+        <option>Clínica</option><option>Cirurgia</option>
+        <option>Ginecologia</option><option>Pediatria</option>
+        <option>Medicina de Família/Comunidade</option>
+      </select>
+    </div>
+    <div id="status-bar" style="display:none" class="alert alert-warn"></div>
+    <div id="station-list">
+      <div style="text-align:center;padding:2rem;color:var(--text3)">
+        <div style="font-size:2rem;margin-bottom:.5rem">⏳</div>
+        Carregando estações...
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: PENDENTES ─────────────────────────────────────────────────── -->
+  <div id="panel-pendentes" class="panel">
+    <div class="section-hdr">
+      <h2 class="section-title">Estações Pendentes</h2>
+      <button class="btn btn-sm" onclick="loadPending()">↻ Atualizar</button>
+    </div>
+    <p style="font-size:.875rem;color:var(--text2);margin-bottom:1.5rem;line-height:1.7">
+      Estações geradas pelos usuários com IA aguardando sua revisão. Aprove para disponibilizar a todos ou rejeite para descartar.
+    </p>
+    <div id="pending-list">
+      <div style="text-align:center;padding:2rem;color:var(--text3)">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: CONVITES ───────────────────────────────────────────────── -->
+  <div id="panel-convites" class="panel">
+    <div class="section-hdr">
+      <h2 class="section-title">Convites</h2>
+      <button class="btn btn-p" id="btn-gen-invite">✉ Gerar convite</button>
+    </div>
+    <p style="font-size:.875rem;color:var(--text2);margin-bottom:1.5rem;line-height:1.7">
+      Gere códigos de acesso para usuários que não passaram pelo checkout. Cada código é de uso único e válido por 30 dias.
+    </p>
+
+    <!-- Gerar convite -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="clabel">Novo convite</div>
+      <div class="g2" style="margin-top:.5rem">
+        <div>
+          <label class="ilabel" style="margin-top:0">E-mail do convidado (opcional)</label>
+          <input type="email" id="invite-email" class="tinput" placeholder="medico@email.com">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-p" id="btn-create-invite" style="width:100%;justify-content:center;padding:10px">✉ Gerar código</button>
+        </div>
+      </div>
+      <div id="invite-result" style="display:none;margin-top:1rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:1rem">
+        <div class="clabel">Código gerado</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:.25rem">
+          <span id="invite-code-display" style="font-family:var(--mono);font-size:1.15rem;color:var(--accent);letter-spacing:.1em;font-weight:500"></span>
+          <button onclick="copyInviteCode()" class="btn btn-sm">Copiar</button>
+        </div>
+        <div id="invite-expires-display" style="font-size:.75rem;color:var(--text3);margin-top:.4rem"></div>
+      </div>
+    </div>
+
+    <!-- Lista de convites -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
+        <div class="clabel" style="margin-bottom:0">Convites recentes</div>
+        <button class="btn btn-sm" onclick="loadInvites()">↻ Atualizar</button>
+      </div>
+      <div id="invite-list">
+        <div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:.875rem">Carregando...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── MODAL: FORMULÁRIO DE ESTAÇÃO ────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Nova Estação</div>
+      <button class="modal-close" onclick="closeModal('modal-form')">✕</button>
+    </div>
+    <input type="hidden" id="f-id" value="">
+    <div id="form-status" style="display:none" class="alert"></div>
+
+    <!-- Identificação -->
+    <div class="card" style="margin-bottom:.875rem">
+      <div class="clabel">Identificação</div>
+      <div class="g2">
+        <div>
+          <label class="ilabel" style="margin-top:0">Área médica *</label>
+          <select id="f-area" class="tinput" style="font-family:var(--sans)">
+            <option value="">Selecione...</option>
+            <option>Clínica</option><option>Cirurgia</option>
+            <option>Ginecologia</option><option>Pediatria</option>
+            <option>Medicina de Família/Comunidade</option>
+          </select>
+        </div>
+        <div>
+          <label class="ilabel" style="margin-top:0">Nível de atenção</label>
+          <input type="text" id="f-nivel" class="tinput" placeholder="Ex: Atenção Primária">
+        </div>
+      </div>
+      <div class="g2">
+        <div>
+          <label class="ilabel">Nome interno (diagnóstico)</label>
+          <input type="text" id="f-name" class="tinput" placeholder="Ex: IAM com supra">
+        </div>
+        <div>
+          <label class="ilabel">Local</label>
+          <input type="text" id="f-local" class="tinput" placeholder="Ex: UPA, Hospital">
+        </div>
+      </div>
+      <label class="ilabel">Infraestrutura disponível</label>
+      <input type="text" id="f-infra" class="tinput" placeholder="Ex: Maca, estetoscópio, esfigmomanômetro">
+    </div>
+
+    <!-- Caso clínico -->
+    <div class="card" style="margin-bottom:.875rem">
+      <div class="clabel">Caso clínico</div>
+      <label class="ilabel" style="margin-top:0">Descrição do caso</label>
+      <textarea id="f-caso" class="tinput ta-md" placeholder="Descreva o caso clínico que será apresentado ao médico..."></textarea>
+      <label class="ilabel">Orientações ao médico</label>
+      <textarea id="f-orient-med" class="tinput ta-sm" placeholder="O que o médico deve fazer nesta estação..."></textarea>
+    </div>
+
+    <!-- Paciente -->
+    <div class="card" style="margin-bottom:.875rem">
+      <div class="clabel">Dados do Paciente</div>
+      <div class="g3">
+        <div>
+          <label class="ilabel" style="margin-top:0">Nome</label>
+          <input type="text" id="f-p-nome" class="tinput" placeholder="Bianca">
+        </div>
+        <div>
+          <label class="ilabel" style="margin-top:0">Gênero</label>
+          <select id="f-p-genero" class="tinput" style="font-family:var(--sans)">
+            <option value="">Auto-detectar</option>
+            <option value="feminino">Feminino</option>
+            <option value="masculino">Masculino</option>
+          </select>
+        </div>
+        <div>
+          <label class="ilabel" style="margin-top:0">Idade</label>
+          <input type="text" id="f-p-idade" class="tinput" placeholder="25">
+        </div>
+      </div>
+      <div class="g2">
+        <div>
+          <label class="ilabel">Profissão</label>
+          <input type="text" id="f-p-prof" class="tinput" placeholder="Ex: Professora">
+        </div>
+        <div>
+          <label class="ilabel">Estado civil</label>
+          <input type="text" id="f-p-civil" class="tinput" placeholder="Ex: Casada">
+        </div>
+      </div>
+      <label class="ilabel">Queixa principal</label>
+      <input type="text" id="f-p-queixa" class="tinput" placeholder="Como o paciente descreve sua queixa...">
+
+      <!-- Acompanhante -->
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent);letter-spacing:.1em;margin-bottom:.5rem;text-transform:uppercase">Acompanhante (para menores ou quando outro fala)</div>
+        <div class="g2">
+          <div>
+            <label class="ilabel" style="margin-top:0">Nome do acompanhante</label>
+            <input type="text" id="f-acomp-nome" class="tinput" placeholder="Ex: Maria Silva">
+          </div>
+          <div>
+            <label class="ilabel" style="margin-top:0">Relação</label>
+            <input type="text" id="f-acomp-relacao" class="tinput" placeholder="Ex: Mãe, Pai, Esposa">
+          </div>
+        </div>
+        <div class="g2" style="margin-top:.5rem">
+          <div>
+            <label class="ilabel" style="margin-top:0">Gênero do acompanhante (TTS)</label>
+            <select id="f-acomp-genero" class="tinput" style="font-family:var(--sans)">
+              <option value="">— (auto)</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Masculino">Masculino</option>
+            </select>
+          </div>
+          <div>
+            <label class="ilabel" style="margin-top:0">Quem fala (informante)</label>
+            <select id="f-informante-tipo" class="tinput" style="font-family:var(--sans)">
+              <option value="paciente">Paciente</option>
+              <option value="acompanhante">Acompanhante</option>
+              <option value="profissional_saude">Profissional de saúde</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadados administrativos -->
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--accent);letter-spacing:.1em;margin-bottom:.5rem;text-transform:uppercase">Metadados</div>
+        <div class="g2">
+          <div>
+            <label class="ilabel" style="margin-top:0">Complexidade</label>
+            <select id="f-complexity" class="tinput" style="font-family:var(--sans)">
+              <option value="medium">Medium</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div>
+            <label class="ilabel" style="margin-top:0">Status</label>
+            <select id="f-status" class="tinput" style="font-family:var(--sans)">
+              <option value="active">Active (visível)</option>
+              <option value="pending">Pending (aguardando aprovação)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orientações ao ator -->
+    <div class="card" style="margin-bottom:.875rem">
+      <div class="clabel">Orientações ao Ator/Atriz</div>
+      <textarea id="f-orient-ator" class="tinput ta-md" placeholder="Como o ator deve se comportar, quais sintomas apresentar..."></textarea>
+    </div>
+
+    <!-- Exames -->
+    <div class="card" style="margin-bottom:.875rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
+        <div class="clabel" style="margin-bottom:0">Exames / Impressos</div>
+        <button class="btn btn-sm" type="button" onclick="addExamRow()">+ Adicionar exame</button>
+      </div>
+      <div id="exam-rows"></div>
+    </div>
+
+    <!-- Padrão Esperado de Procedimentos (PEP) -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
+        <div class="clabel" style="margin-bottom:0">Padrão Esperado de Procedimentos (PEP)</div>
+        <button class="btn btn-sm" type="button" onclick="addClRow()">+ Critério</button>
+      </div>
+      <div id="cl-rows"></div>
+    </div>
+
+    <!-- Botões -->
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn" onclick="closeModal('modal-form')">Cancelar</button>
+      <button class="btn btn-p" id="btn-save-station" onclick="saveStation()">Salvar estação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: GERAR COM IA ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-gen">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <div class="modal-title">✨ Gerar com IA</div>
+      <button class="modal-close" onclick="closeModal('modal-gen')">✕</button>
+    </div>
+    <div class="gen-steps">
+      <div class="gen-step active" id="gs-1"></div>
+      <div class="gen-step" id="gs-2"></div>
+      <div class="gen-step" id="gs-3"></div>
+    </div>
+    <div id="gen-step-1">
+      <label class="ilabel" style="margin-top:0">Área médica</label>
+      <select id="gen-area" class="tinput" style="font-family:var(--sans);margin-bottom:.875rem">
+        <option value="">Aleatória</option>
+        <option>Clínica</option><option>Cirurgia</option>
+        <option>Ginecologia</option><option>Pediatria</option>
+        <option>Medicina de Família/Comunidade</option>
+      </select>
+      <label class="ilabel">Nível de dificuldade</label>
+      <select id="gen-diff" class="tinput" style="font-family:var(--sans);margin-bottom:.875rem">
+        <option>Básico</option>
+        <option selected>Intermediário</option>
+        <option>Avançado</option>
+      </select>
+      <label class="ilabel">Tema específico (opcional)</label>
+      <input type="text" id="gen-tema" class="tinput" placeholder="Ex: Infarto agudo, Pré-natal de alto risco..." style="margin-bottom:.875rem">
+      <label class="ilabel">Nível de atenção (opcional)</label>
+      <input type="text" id="gen-nivel" class="tinput" placeholder="Ex: Atenção Primária, UPA, Hospital" style="margin-bottom:.875rem">
+      <label class="ilabel">Instruções extras (opcional)</label>
+      <textarea id="gen-instrucoes" class="tinput" rows="2" placeholder="Ex: Incluir exame físico detalhado, paciente idoso..." style="margin-bottom:1.25rem"></textarea>
+      <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="runGenStation()">✨ Gerar estação</button>
+    </div>
+    <div id="gen-step-2" style="display:none;text-align:center;padding:2rem 0">
+      <div style="font-size:2.5rem;margin-bottom:1rem;animation:spin 2s linear infinite">⚙</div>
+      <div id="gen-status" style="color:var(--text2);font-size:.9rem">Gerando estação com IA...</div>
+    </div>
+    <div id="gen-step-3" style="display:none">
+      <div id="gen-preview" style="margin-bottom:1.25rem"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn" onclick="closeModal('modal-gen')">Descartar</button>
+        <button class="btn btn-p" onclick="fillFormFromAI()">Usar esta estação →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js'"></script>
+<script>
+
+
+
+
+
+
+
+// ── PENDING STATIONS ──────────────────────────────────────────────────────────
+async function loadPending(){
+  var el = document.getElementById('pending-list');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text3)">Carregando...</div>';
+  try{
+    var res = await supaFetch('/rest/v1/stations?status=eq.pending&select=id,area,name,caso,pNome,created_at&order=created_at.desc');
+    if(!res.ok){ el.innerHTML = '<div style="color:var(--red);padding:1rem">Erro ao carregar.</div>'; return; }
+    var list = await res.json();
+
+    // Update tab badge
+    var tab = document.getElementById('tab-pendentes');
+    if(tab) tab.textContent = '⏳ Pendentes' + (list.length ? ' ('+list.length+')' : '');
+
+    if(!list.length){
+      el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3)"><div style="font-size:2rem;margin-bottom:.5rem">✓</div><p>Nenhuma estação pendente.</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(function(s){
+      var dt = new Date(s.created_at).toLocaleDateString('pt-BR');
+      var caso = (s.caso||'').substring(0,120) + ((s.caso||'').length > 120 ? '...' : '');
+      return '<div class="st-card" style="flex-direction:column;align-items:flex-start;gap:.75rem">'
+        + '<div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap">'
+        + '<div style="flex:1;min-width:0">'
+        + '<div class="st-area">'+esc(s.area||'Sem área')+' · '+dt+'</div>'
+        + '<div class="st-name">'+esc(s.name||'Sem nome')+'</div>'
+        + '<div style="font-size:.8rem;color:var(--text2);margin-top:.25rem">Paciente: '+esc(s.pNome||'—')+'</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;flex-shrink:0">'
+        + '<button class="btn btn-sm" style="color:var(--green);border-color:rgba(34,197,94,.3)" onclick="approveStation(&quot;'+s.id+'&quot;)">✓ Aprovar</button>'
+        + '<button class="btn btn-sm btn-d" onclick="rejectStation(&quot;'+s.id+'&quot;)">✕ Rejeitar</button>'
+        + '<button class="btn btn-sm" onclick="showForm(&quot;'+s.id+'&quot;)">✏ Editar</button>'
+        + '</div></div>'
+        + (caso ? '<div style="font-size:.8rem;color:var(--text2);line-height:1.5;border-top:1px solid var(--border);padding-top:.5rem;width:100%">'+esc(caso)+'</div>' : '')
+        + '</div>';
+    }).join('');
+  }catch(e){
+    el.innerHTML = '<div style="color:var(--red);padding:1rem">Erro: '+e.message+'</div>';
+  }
+}
+
+async function approveStation(id){
+  try{
+    var res = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: {'Prefer':'return=minimal','Content-Type':'application/json'},
+      body: JSON.stringify({ status: 'active' })
+    });
+    if(res.ok){ loadPending(); alert('Estação aprovada e disponível para todos!'); }
+    else { alert('Erro ao aprovar: ' + await res.text()); }
+  }catch(e){ alert('Erro: '+e.message); }
+}
+
+async function rejectStation(id){
+  if(!confirm('Rejeitar e excluir esta estação?')) return;
+  try{
+    var res = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id), {
+      method: 'DELETE'
+    });
+    if(res.ok){ loadPending(); }
+    else { alert('Erro ao rejeitar: ' + await res.text()); }
+  }catch(e){ alert('Erro: '+e.message); }
+}
+
+
+
+
+
+
+
+
+
+
+// ── TAB NAVIGATION ──────────────────────────────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.page-tab').forEach(function(t){ t.classList.remove('active'); });
+  var panel = document.getElementById('panel-'+tab);
+  if(panel) panel.classList.add('active');
+  var tabs = document.querySelectorAll('.page-tab');
+  if(tab==='estacoes'  && tabs[0]) tabs[0].classList.add('active');
+  if(tab==='pendentes' && tabs[1]){ tabs[1].classList.add('active'); loadPending(); }
+  if(tab==='convites'  && tabs[2]){ tabs[2].classList.add('active'); loadInvites(); }
+}
+function openModal(id){
+  var m=document.getElementById(id);
+  if(!m) return;
+  m.classList.add('open');
+  // Garantir que o botão save volte ao estado enabled ao reabrir o modal
+  if(id === 'modal-form'){
+    var _bsv = document.getElementById('btn-save-station');
+    if(_bsv){ _bsv.disabled = false; _bsv.textContent = 'Salvar estação'; }
+  }
+}
+function closeModal(id){ var m=document.getElementById(id); if(m) m.classList.remove('open'); }
+// Close modal on overlay click
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+// ── SUPABASE ─────────────────────────────────────────────────────────────────
+var SUPA_URL = localStorage.getItem('rv_supa_url') || 'https://cxxykjbjfcgbdgmjdpng.supabase.co';
+var SUPA_KEY = localStorage.getItem('rv_supa_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eHlramJqZmNnYmRnbWpkcG5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0OTE5NjYsImV4cCI6MjA5MjA2Nzk2Nn0.7rSQJ0rXsPej6OV7QUF9XkDVnh25KerTw94r3Z2Dmys';
+var clCount = 0;
+var examCount = 0;
+var editImages = [];
+var editOriginalStation = null; // Guarda dados originais ao editar (para preservar campos não editáveis)
+// ── RESOLVER URLs DE IMAGEM ─────────────────────────────────────────────────
+// Imagens podem vir como:
+//  - URL absoluta (https://...) — usar direto
+//  - data:URL (preview de upload local) — usar direto
+//  - nome relativo (estacao_03_ecg.png) — prefixar com bucket Supabase
+var STATION_IMAGES_BASE = 'https://cxxykjbjfcgbdgmjdpng.supabase.co/storage/v1/object/public/station-images/';
+function resolveImageUrl(src){
+  if(!src) return '';
+  if(typeof src !== 'string') return src.dataUrl || src.url || '';
+  if(/^(https?:|data:)/i.test(src)) return src;
+  return STATION_IMAGES_BASE + src;
+}
+
+
+
+// ── PARSER DE CHECKLIST EM TEXTO (formato PEP do INEP) ─────────────────────
+// Converte texto bruto em formato "=== ITEM N — Título (X pts) ===" para array de objetos
+function parseChecklistFromText(text){
+  if(!text || typeof text !== 'string') return [];
+  var items = [];
+  var blocks = text.split(/===\s*ITEM\s+(\d+)\s*[—\-–]\s*/);
+  for(var i = 1; i < blocks.length; i += 2){
+    var num = blocks[i];
+    var body = blocks[i+1] || '';
+    var firstLineEnd = body.indexOf('\n');
+    var titleLine = firstLineEnd > 0 ? body.substring(0, firstLineEnd).trim() : body.trim();
+    var ptsMatch = titleLine.match(/\(([\d,\.]+)\s*pts?\)/);
+    var maxScore = ptsMatch ? parseFloat(ptsMatch[1].replace(',', '.')) : 1.0;
+    var cleanTitle = titleLine.replace(/\s*\(===\s*$/,'').replace(/\s*===\s*$/,'').replace(/\s*\([\d,\.]+\s*pts?\)\s*$/,'').trim();
+    var hasParcial = /PARCIAL\s*\(/i.test(body);
+    var scores, labels;
+    if(hasParcial){
+      var halfScore = maxScore / 2;
+      var parcMatch = body.match(/PARCIAL\s*\(([\d,\.]+)\)/i);
+      if(parcMatch) halfScore = parseFloat(parcMatch[1].replace(',','.'));
+      scores = [0, halfScore, maxScore];
+      labels = ['Inadequado','Parcialmente adequado','Adequado'];
+    } else {
+      scores = [0, maxScore];
+      labels = ['Inadequado','Adequado'];
+    }
+    var critAdeq = '', critParc = '', critInad = '';
+    var adeqMatch = body.match(/ADEQUADO\s*\([\d,\.]+\)\s*:\s*([^\n•]+)/i);
+    if(adeqMatch) critAdeq = adeqMatch[1].trim();
+    var parcMatch2 = body.match(/PARCIAL\s*\([\d,\.]+\)\s*:\s*([^\n•]+)/i);
+    if(parcMatch2) critParc = parcMatch2[1].trim();
+    var inadMatch = body.match(/INADEQUADO\s*\([\d,\.]+\)\s*:\s*([^\n•]+)/i);
+    if(inadMatch) critInad = inadMatch[1].trim();
+    var subitensList = [];
+    var subitemRegex = /(?:^|\n)\s*(?:\(\d+\)|•)\s*([^\n]+)/g;
+    var subMatch;
+    while((subMatch = subitemRegex.exec(body)) !== null){
+      var st = subMatch[1].trim();
+      if(!/^(ADEQUADO|PARCIAL|INADEQUADO)/i.test(st) && st.length > 2){
+        subitensList.push(st);
+      }
+    }
+    items.push({
+      id: num,
+      text: cleanTitle,
+      scores: scores,
+      labels: labels,
+      kw: [],
+      partial: [],
+      kwRaw: '',
+      partialRaw: '',
+      subitens: subitensList.join('\n'),
+      crit_adeq: critAdeq,
+      crit_parc: critParc,
+      crit_inad: critInad
+    });
+  }
+  return items;
+}
+
+// ── NORMALIZADOR DE CHECKLIST ──────────────────────────────────────────────
+// Aceita: array, string JSON-stringificada, ou texto-PEP cru. Retorna sempre array.
+function normalizeChecklist(cl){
+  if(Array.isArray(cl)) return cl;
+  if(typeof cl !== 'string' || !cl.trim()) return [];
+  // Tentativa 1: parse como JSON (caso já seja array stringificado)
+  var trimmed = cl.trim();
+  if(trimmed.charAt(0) === '[' || trimmed.charAt(0) === '{'){
+    try{
+      var parsed = JSON.parse(trimmed);
+      if(Array.isArray(parsed)) return parsed;
+      if(parsed && Array.isArray(parsed.checklist)) return parsed.checklist;
+    }catch(e){
+      console.warn('[Admin] Checklist parece JSON mas não parseou:', e.message);
+    }
+  }
+  // Tentativa 2: parser de texto-PEP
+  var parsed2 = parseChecklistFromText(cl);
+  if(parsed2 && parsed2.length){
+    console.log('[Admin] Checklist parseado de texto-PEP:', parsed2.length, 'itens');
+    return parsed2;
+  }
+  console.warn('[Admin] Checklist não pôde ser parseado, ficará vazio');
+  return [];
+}
+
+
+
+function supaFetch(path, opts){
+  if(!SUPA_URL || !SUPA_KEY) throw new Error('Supabase não configurado');
+  var url = SUPA_URL.replace(/\/+$/,'') + path;
+  // Use session JWT (admin) when available, otherwise fallback to anon key
+  // Note: anon key tem RLS limitada — para DELETE/UPDATE/ver pending precisa JWT admin
+  var hasSession = window._adminSession && window._adminSession.access_token;
+  var token = hasSession ? window._adminSession.access_token : SUPA_KEY;
+  var headers = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+token};
+  if(opts && opts.headers) Object.assign(headers, opts.headers);
+  // Aviso quando opera sem sessão e tenta operação privilegiada
+  var method = (opts && opts.method) ? opts.method.toUpperCase() : 'GET';
+  if(!hasSession && (method === 'DELETE' || method === 'PATCH' || method === 'POST')){
+    console.warn('[Admin] '+method+' sem sessão admin — pode falhar por RLS. Path:', path);
+  }
+  return fetch(url, Object.assign({}, opts, {headers:headers}));
+}
+
+async function getStations(area){
+  if(SUPA_URL && SUPA_KEY){
+    try{
+      var path = '/rest/v1/stations?select=id,area,name&order=name';
+      if(area) path += '&area=eq.'+encodeURIComponent(area);
+      var res = await supaFetch(path);
+      if(res.ok){
+        var data = await res.json();
+        console.log('[Admin] Stations loaded:', data.length);
+        return data;
+      } else {
+        console.warn('[Admin] getStations error:', res.status, await res.text());
+      }
+    }catch(e){ console.warn('[Admin] Supabase error:', e); }
+  }
+  try{ return JSON.parse(localStorage.getItem('rv_stations')||'[]'); }catch(e){ return []; }
+}
+
+async function saveStationDB(obj){
+  if(SUPA_URL && SUPA_KEY){
+    try{
+      var eid2 = obj._editId; // original DB id for updates
+      var sendObj = Object.assign({}, obj);
+      delete sendObj._editId;
+      var isNew = !eid2;
+      if(isNew) delete sendObj.id; // let Supabase generate UUID
+      // Para edição, remover campos read-only que o Supabase não aceita no PATCH
+      if(!isNew){
+        delete sendObj.created_at;
+        delete sendObj.updated_at;
+      }
+      var method = isNew ? 'POST' : 'PATCH';
+      var path = isNew
+        ? '/rest/v1/stations'
+        : '/rest/v1/stations?id=eq.'+encodeURIComponent(eid2);
+      console.log('[Admin] '+method+' '+path+' fields:', Object.keys(sendObj).join(','));
+      var res = await supaFetch(path, {
+        method: method,
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify(sendObj)
+      });
+      if(res.ok){
+        var arr = await res.json();
+        var saved = Array.isArray(arr) ? arr[0] : arr;
+        console.log('[Admin] Save OK, id:', saved && saved.id);
+        return saved;
+      }
+      var errBody = await res.text();
+      console.error('[Admin] Save failed:', res.status, errBody);
+      var hint = '';
+      if(res.status===404) hint = ' — Tabela não encontrada. Execute o supabase-setup.sql no SQL Editor do Supabase.';
+      else if(res.status===401||res.status===403) hint = ' — Sem permissão. Faça login como admin (não usar anon key).';
+      else if(res.status===400){
+        // Tentar identificar campo problemático
+        if(errBody.indexOf('column') >= 0 || errBody.indexOf('schema') >= 0){
+          hint = ' — Campo inválido no banco (talvez um campo novo precise ALTER TABLE).';
+        } else if(errBody.indexOf('null value') >= 0){
+          hint = ' — Campo NOT NULL recebeu null.';
+        } else if(errBody.indexOf('check constraint') >= 0){
+          hint = ' — Constraint do banco violada (ex: complexity inválida).';
+        }
+      }
+      else if(res.status===0) hint = ' — Projeto pausado? Acesse supabase.com e verifique.';
+      throw new Error('Supabase erro '+res.status+hint+' ('+errBody.substring(0,200)+')');
+    }catch(e){
+      console.error('Supabase save failed:', e);
+      throw e;
+    }
+  }
+  // Fallback: localStorage
+  var stations;
+  try{ stations = JSON.parse(localStorage.getItem('rv_stations')||'[]'); }catch(e){ stations=[]; }
+  if(!obj.id) obj.id = String(Date.now());
+  var idx = stations.findIndex(function(s){ return String(s.id)===String(obj.id); });
+  if(idx>=0) stations[idx]=obj; else stations.push(obj);
+  localStorage.setItem('rv_stations',JSON.stringify(stations));
+  return obj;
+}
+
+async function deleteStationDB(id){
+  if(SUPA_URL && SUPA_KEY){
+    try{
+      var res = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id), {method:'DELETE'});
+      if(res.ok){
+        console.log('[Admin] DELETE successful for id', id);
+        return true;
+      }
+      // Propagar erro real para o usuário
+      var errBody = '';
+      try{ errBody = await res.text(); }catch(_){}
+      console.error('[Admin] DELETE failed:', res.status, errBody);
+      var hint = '';
+      if(res.status === 401 || res.status === 403){
+        hint = ' (sem permissão — faça login como admin no painel)';
+      } else if(res.status === 404){
+        hint = ' (estação já foi excluída ou ID inválido)';
+      } else if(res.status === 409){
+        hint = ' (existem registros relacionados — não pode excluir)';
+      }
+      throw new Error('HTTP ' + res.status + hint + ': ' + errBody.substring(0, 100));
+    }catch(e){
+      console.error('Supabase delete failed:', e);
+      throw e; // PROPAGA o erro em vez de silenciar
+    }
+  }
+  // Fallback: localStorage (só executa se SUPA_URL/KEY ausentes)
+  try{
+    var stations = JSON.parse(localStorage.getItem('rv_stations')||'[]');
+    localStorage.setItem('rv_stations', JSON.stringify(stations.filter(function(s){ return String(s.id)!==String(id); })));
+  }catch(e){}
+  return true;
+}
+
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function escHtml(t){ return esc(t||''); }
+
+function showList(){
+  renderList();
+}
+
+async function renderList(){
+  var el=document.getElementById('station-list');
+  if(!el) return;
+  var area = document.getElementById('area-filter') ? document.getElementById('area-filter').value : '';
+  getStations(area).then(function(stations){
+    console.log('[Admin] renderList stations:', stations ? stations.length : 'null', 'session:', window._adminSession ? 'ok' : 'none');
+
+    if(!stations||!stations.length){
+      el.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:.75rem">📋</div><p style="font-size:.9rem">Nenhuma estação cadastrada ainda.<br>Clique em <strong style="color:var(--accent)">+ Nova estação</strong> para começar.</p></div>';
+      return;
+    }
+    var areaSeq={};
+    el.innerHTML=stations.map(function(s){
+      areaSeq[s.area]=(areaSeq[s.area]||0)+1;
+      var seq=areaSeq[s.area];
+      return '<div class="st-card">'
+        +'<div style="flex:1;min-width:0">'
+        +'<div class="st-area">'+esc(s.area||'Sem área')+' · Simulação '+seq+'</div>'
+        +'<div class="st-name">'+esc(s.name||'Sem nome')+'</div>'
+        +'</div>'
+        +'<div class="st-actions">'
+        +'<button class="btn btn-sm" onclick="showForm(&quot;'+s.id+'&quot;)">✏ Editar</button>'
+        +'<button class="btn btn-sm btn-d" onclick="deleteStation(&quot;'+s.id+'&quot;,&quot;'+esc(s.name||'')+'&quot;)">✕</button>'
+        +'</div></div>';
+    }).join('');
+  
+  }).catch(function(e){
+    console.error('[Admin] getStations error:', e);
+    var el=document.getElementById('station-list');
+    if(el) el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--red)">Erro: '+e.message+'</div>';
+  });
+}
+
+async function deleteStation(id){
+  if(!confirm('Excluir esta estação?'))return;
+  try{ await deleteStationDB(id); }catch(e){ alert('Erro ao excluir: '+e.message); return; }
+  renderList();
+}
+
+async function showForm(id){
+  window.scrollTo(0, 0);
+  editImages=[];
+  editOriginalStation = null; // limpa estação anterior
+  var _ecr=document.getElementById('exam-rows')||document.getElementById('exams-container'); if(_ecr) _ecr.innerHTML='';
+  var _ccr=document.getElementById('cl-rows')||document.getElementById('cl-container'); if(_ccr) _ccr.innerHTML='';
+
+  if(id){
+    var s = null;
+    // Fetch full station data from Supabase
+    if(SUPA_URL && SUPA_KEY){
+      try{
+        var res = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id)+'&select=*&limit=1');
+        if(res.ok){ var arr=await res.json(); if(arr&&arr.length) s=arr[0]; }
+      }catch(e){ console.warn('Supabase fetch for edit failed:', e); }
+    }
+    // Fallback to localStorage
+    if(!s){
+      try{
+        var all=JSON.parse(localStorage.getItem('rv_stations')||'[]');
+        s=all.find(function(x){return String(x.id)===String(id);});
+      }catch(e){}
+    }
+    if(!s){ alert('Estação não encontrada.'); showList(); return; }
+    editOriginalStation = s; // guarda estação completa para preservar campos não editáveis no save
+    console.log('[Admin] Edit: loaded station with fields:', Object.keys(s).join(', '));
+    document.getElementById('modal-title').textContent='Editar estação';
+    (document.getElementById('f-id')||{value:''}).value=id;
+    document.getElementById('f-area').value=s.area||'Clínica';
+    document.getElementById('f-name').value=s.name||'';
+    document.getElementById('f-nivel').value=s.nivel||'';
+    document.getElementById('f-local').value=s.local||'';
+    document.getElementById('f-infra').value=s.infra||'';
+    document.getElementById('f-caso').value=s.caso||'';
+    document.getElementById('f-orient-med').value=s.orientMed||'';
+    document.getElementById('f-p-nome').value=s.pNome||'';
+    document.getElementById('f-p-idade').value=s.pIdade||'';
+    document.getElementById('f-p-prof').value=s.pProf||'';
+    document.getElementById('f-p-civil').value=s.pCivil||'';
+    document.getElementById('f-p-queixa').value=s.pQueixa||'';
+    document.getElementById('f-orient-ator').value=orientAtorToTextarea(s.orientAtor);
+    var _fg=document.getElementById('f-p-genero'); if(_fg) _fg.value=s.pGenero||'';
+    var _fan=document.getElementById('f-acomp-nome');    if(_fan) _fan.value=s.acompNome||'';
+    var _far=document.getElementById('f-acomp-relacao'); if(_far) _far.value=s.acompRelacao||'';
+    var _fag=document.getElementById('f-acomp-genero');  if(_fag) _fag.value=s.acompGenero||'';
+    var _fit=document.getElementById('f-informante-tipo');if(_fit) _fit.value=s.informante_tipo||'paciente';
+    var _fcx=document.getElementById('f-complexity');    if(_fcx) _fcx.value=s.complexity||'medium';
+    var _fst=document.getElementById('f-status');        if(_fst) _fst.value=s.status||'active';
+    (s.exams||[]).forEach(function(ex){addExamRow(ex);});
+    var clNormalized = normalizeChecklist(s.checklist);
+    clNormalized.forEach(function(cl){addClRow(cl);});
+    editImages=(s.images||[]).slice();
+    editImages.forEach(function(img,i){renderImgPreview(img,i);});
+  } else {
+    document.getElementById('modal-title').textContent='Nova estação';
+    (document.getElementById('f-id')||{value:''}).value='';
+    ['f-area','f-name','f-nivel','f-local','f-infra','f-caso','f-orient-med',
+     'f-p-nome','f-p-idade','f-p-prof','f-p-civil','f-p-queixa','f-orient-ator',
+     'f-acomp-nome','f-acomp-relacao']
+    .forEach(function(id){
+      var el=document.getElementById(id);
+      if(el && el.tagName==='SELECT')el.selectedIndex=0; else if(el) el.value='';
+    });
+    // Defaults para novos campos
+    var _ag=document.getElementById('f-acomp-genero');   if(_ag) _ag.value='';
+    var _it=document.getElementById('f-informante-tipo'); if(_it) _it.value='paciente';
+    var _cx=document.getElementById('f-complexity');     if(_cx) _cx.value='medium';
+    var _st=document.getElementById('f-status');         if(_st) _st.value='active';
+  }
+  openModal('modal-form');
+}
+
+function addExamRow(data){
+  examCount++;
+  var idx=examCount;
+  var d=document.createElement('div');
+  d.id='exam-row-'+idx;
+  d.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:.75rem';
+  d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">'
+    +'<span style="font-family:var(--mono);font-size:.75rem;color:var(--accent)">Impresso '+idx+'</span>'
+    +'<button class="btn btn-sm btn-d" onclick="removeExam('+idx+')">Remover</button></div>'
+    +'<label class="ilabel" style="margin-top:0">Título do impresso</label>'
+    +'<input type="text" class="tinput exam-title" placeholder="Ex: Exame Físico" value="'+(data&&data.title?esc(data.title):'')+'">'
+    +'<label class="ilabel">Dados (um por linha: Parâmetro: valor)</label>'
+    +'<textarea class="tinput ta-md exam-rows" placeholder="PA: 120x90 mmHg&#10;FC: 125 bpm&#10;FR: 32 irpm&#10;SatO2: 88%">'+(data&&data.rows?esc(data.rows.join('\n')):data&&data.rowsText?esc(data.rowsText):'')+'</textarea>'
+    +'<label class="ilabel">Imagens (opcional)</label>'
+    +'<div class="img-zone" onclick="document.getElementById(\'img-input-'+idx+'\').click()">Clique para adicionar imagens</div>'
+    +'<input type="file" id="img-input-'+idx+'" accept="image/*" multiple style="display:none" onchange="handleExamImages('+idx+',this.files)">'
+    +'<div class="img-previews" id="exam-imgs-'+idx+'"></div>';
+  var _ec = document.getElementById('exam-rows') || document.getElementById('exams-container');
+  if(_ec) _ec.appendChild(d);
+  if(data&&data.images){
+    data.images.forEach(function(src){
+      var prev=document.getElementById('exam-imgs-'+idx);
+      var pd=document.createElement('div');pd.className='img-prev';
+      // Resolver URL: aceita absoluta, data:URL ou nome relativo do bucket
+      var imgUrl = resolveImageUrl(src);
+      pd.innerHTML='<img src="'+imgUrl+'" data-original="'+(typeof src === 'string' ? src.replace(/"/g,'&quot;') : '')+'">';
+      prev.appendChild(pd);
+    });
+  }
+}
+
+function removeExam(idx){document.getElementById('exam-row-'+idx).remove();}
+
+function handleExamImages(idx,files){
+  var prev=document.getElementById('exam-imgs-'+idx);
+  Array.from(files).forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){
+      var pd=document.createElement('div');pd.className='img-prev';
+      pd.innerHTML='<img src="'+e.target.result+'">';
+      prev.appendChild(pd);
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function renderImgPreview(img,idx){
+  var prev=document.getElementById('img-previews')||document.createElement('div');
+  var d=document.createElement('div');d.className='img-prev';d.id='prev-'+idx;
+  // img pode ser objeto {dataUrl, name} OU string (nome no bucket)
+  var src = (typeof img === 'string') ? resolveImageUrl(img) : (img.dataUrl || resolveImageUrl(img.url || img.name || ''));
+  var alt = (typeof img === 'string') ? img : (img.name || '');
+  d.innerHTML='<img src="'+src+'" alt="'+esc(alt)+'"><button onclick="removeImage('+idx+')">&#215;</button>';
+  prev.appendChild(d);
+}
+
+function removeImage(idx){editImages.splice(idx,1);var el=document.getElementById('prev-'+idx);if(el)el.remove();}
+
+function autoExtractSubitens(text){
+  if(!text) return '';
+  var matches = [];
+  var NLchar = String.fromCharCode(10);
+  text.replace(new RegExp('\\(\\d+\\)\\s*([^(]+)', 'g'), function(m, txt){
+    var clean = txt.replace(/[;,]\s*$/, '').trim();
+    if(clean.length > 3) matches.push(clean);
+  });
+  return matches.join(NLchar);
+}
+
+function buildCriterioInputs(idx, tipo, crit_adeq, crit_parc, crit_inad){
+  var html = '<div style="margin-top:.5rem;display:flex;flex-direction:column;gap:.35rem">';
+  html += '<label class="ilabel" style="font-size:.72rem;margin-top:0">Descri\u00e7\u00e3o dos crit\u00e9rios de pontua\u00e7\u00e3o</label>';
+  html += '<div style="display:flex;gap:6px;align-items:center">'
+        + '<span style="font-size:.72rem;color:var(--green);min-width:70px;font-weight:500">Adequado:</span>'
+        + '<input type="text" placeholder="Ex: Realiza as tr\u00eas a\u00e7\u00f5es" value="'+crit_adeq+'" class="cl-crit-adeq tinput" style="font-size:.78rem;flex:1"></div>';
+  html += '<div style="display:'+(tipo===1?'flex':'none')+';gap:6px;align-items:center" id="cl-crit-parc-row-'+idx+'">'
+        + '<span style="font-size:.72rem;color:var(--yellow);min-width:70px;font-weight:500">Parcial:</span>'
+        + '<input type="text" placeholder="Ex: Realiza duas a\u00e7\u00f5es" value="'+crit_parc+'" class="cl-crit-parc tinput" style="font-size:.78rem;flex:1"></div>';
+  html += '<div style="display:flex;gap:6px;align-items:center">'
+        + '<span style="font-size:.72rem;color:var(--red);min-width:70px;font-weight:500">Inadequado:</span>'
+        + '<input type="text" placeholder="Ex: N\u00e3o realiza" value="'+crit_inad+'" class="cl-crit-inad tinput" style="font-size:.78rem;flex:1"></div>';
+  html += '</div>';
+  return html;
+}
+
+function addClRow(data){
+  clCount++;
+  var idx=clCount;
+  var d=document.createElement('div');
+  d.id='cl-row-'+idx;
+  d.className='checklist-row';
+
+  var tipo=(data&&data.scores&&data.scores.length===3)?1:0;
+  // Read saved fields; if missing (old station), auto-extract from text
+  var rawText   = data&&data.text ? data.text : '';
+  var subitens  = data&&data.subitens  ? data.subitens  : autoExtractSubitens(rawText);
+  var crit_adeq = data&&data.crit_adeq ? data.crit_adeq : '';
+  var crit_parc = data&&data.crit_parc ? data.crit_parc : '';
+  var crit_inad = data&&data.crit_inad ? data.crit_inad : '';
+  // Also infer crit labels from labels array when missing
+  if(!crit_adeq && data&&data.labels) crit_adeq = data.labels[data.labels.length-1]||'';
+  if(!crit_inad && data&&data.labels) crit_inad = data.labels[0]||'';
+  if(!crit_parc && data&&data.labels&&data.labels.length===3) crit_parc = data.labels[1]||'';
+  subitens  = esc(subitens);
+  crit_adeq = esc(crit_adeq);
+  crit_parc = esc(crit_parc);
+  crit_inad = esc(crit_inad);
+
+  d.innerHTML=
+     '<div class="num">'+idx+'</div>'
+    +'<div class="fields">'
+    +'<label class="ilabel" style="margin-top:0;font-size:.72rem">Texto do crit\u00e9rio de avalia\u00e7\u00e3o</label>'
+    +'<input type="text" placeholder="Ex: Apresenta-se ao paciente" value="'+(data&&data.text?esc(data.text):'')+'" class="cl-text">'
+    +'<label class="ilabel" style="font-size:.72rem">Itens considerados para a pontua\u00e7\u00e3o (um por linha)</label>'
+    +'<textarea rows="6" placeholder="Ex:&#10;Cumprimenta com empatia;&#10;Pergunta nome ou idade;&#10;Pergunta estado emocional." class="cl-subitens tinput" style="font-size:.8rem;resize:vertical">'+subitens+'</textarea>'
+    +'<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-top:.5rem">'
+    +'<div style="flex:1;min-width:180px">'
+    +'<label class="ilabel" style="font-size:.72rem;margin-top:0">Tipo de pontua\u00e7\u00e3o</label>'
+    +'<select class="cl-tipo" onchange="updateClScores('+idx+')">'
+    +'<option'+(tipo===0?' selected':'')+'>Bin\u00e1rio (Adequado/Inadequado)</option>'
+    +'<option'+(tipo===1?' selected':'')+'>Tr\u00eas n\u00edveis (Adequado/Parcial/Inadequado)</option>'
+    +'</select></div>'
+    +'<div id="cl-scores-'+idx+'" style="flex:1;min-width:200px">'
+    +buildScoreInputs(idx,tipo,data)
+    +'</div></div>'
+    +buildCriterioInputs(idx,tipo,crit_adeq,crit_parc,crit_inad)
+    +'<details style="margin-top:.5rem"><summary style="font-size:.72rem;color:var(--text3);cursor:pointer">&#9881; Padr\u00f5es regex (avan\u00e7ado)</summary>'
+    +'<div style="margin-top:.4rem">'
+    +'<input type="text" placeholder="Padr\u00f5es de reconhecimento (gerado automaticamente)" value="'+(data&&data.kwRaw?esc(data.kwRaw):'')+'" class="cl-kw" style="font-size:.75rem;font-family:var(--mono)">'
+    +'<input type="text" placeholder="Padr\u00f5es parciais (opcional)" value="'+(data&&data.partialRaw?esc(data.partialRaw):'')+'" class="cl-partial" style="font-size:.75rem;font-family:var(--mono);margin-top:.35rem">'
+    +'</div></details>'
+    +'</div>'
+    +'<button class="del-row" onclick="removeCl('+idx+')" title="Remover">&#10005;</button>';
+  var _cc = document.getElementById('cl-rows') || document.getElementById('cl-container');
+  if(_cc) _cc.appendChild(d);
+}
+
+function buildScoreInputs(idx,tipo,data){
+  if(tipo===0){
+    var s0=data&&data.scores?data.scores[0]:0;
+    var s1=data&&data.scores?data.scores[data.scores.length-1]:0;
+    return '<div style="display:flex;gap:6px;align-items:center">'
+      +'<span style="font-size:.75rem;color:var(--text3)">Inad:</span><input type="number" step=".05" style="width:60px" value="'+s0+'" class="cl-s0">'
+      +'<span style="font-size:.75rem;color:var(--text3)">Adeq:</span><input type="number" step=".05" style="width:60px" value="'+s1+'" class="cl-s1">'
+      +'</div>';
+  } else {
+    var s0=data&&data.scores?data.scores[0]:0;
+    var s1=data&&data.scores&&data.scores.length>=3?data.scores[1]:0;
+    var s2=data&&data.scores&&data.scores.length>=3?data.scores[2]:0;
+    return '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">'
+      +'<span style="font-size:.72rem;color:var(--text3)">Inad:</span><input type="number" step=".05" style="width:52px" value="'+s0+'" class="cl-s0">'
+      +'<span style="font-size:.72rem;color:var(--text3)">Parc:</span><input type="number" step=".05" style="width:52px" value="'+s1+'" class="cl-s1">'
+      +'<span style="font-size:.72rem;color:var(--text3)">Adeq:</span><input type="number" step=".05" style="width:52px" value="'+s2+'" class="cl-s2">'
+      +'</div>';
+  }
+}
+
+function updateClScores(idx){
+  var row=document.getElementById('cl-row-'+idx);
+  var tipo=Array.from(row.querySelectorAll('.cl-tipo'))[0].selectedIndex;
+  document.getElementById('cl-scores-'+idx).innerHTML=buildScoreInputs(idx,tipo,null);
+  // Show/hide partial criterio row
+  var parcRow=document.getElementById('cl-crit-parc-row-'+idx);
+  if(parcRow) parcRow.style.display = tipo===1 ? 'flex' : 'none';
+}
+
+function removeCl(idx){document.getElementById('cl-row-'+idx).remove();}
+
+async function saveStation(){
+  console.log('[Admin] >>> saveStation() CHAMADA');
+  try {
+    var areaEl = document.getElementById('f-area');
+    var nameEl = document.getElementById('f-name');
+    var casoEl = document.getElementById('f-caso');
+    var pNomeEl = document.getElementById('f-p-nome');
+    if(!areaEl || !nameEl || !casoEl || !pNomeEl){
+      alert('Erro interno: campos do form não encontrados. Recarregue a página.');
+      console.error('[Admin] Form elements missing:', {area:!!areaEl, name:!!nameEl, caso:!!casoEl, pNome:!!pNomeEl});
+      return;
+    }
+  } catch(initErr){
+    console.error('[Admin] Erro inicial em saveStation:', initErr);
+    alert('Erro: ' + initErr.message);
+    return;
+  }
+  var area=document.getElementById('f-area').value.trim();
+  var name=document.getElementById('f-name').value.trim();
+  var caso=document.getElementById('f-caso').value.trim();
+  var pNome=document.getElementById('f-p-nome').value.trim();
+  var pGenero=document.getElementById('f-p-genero') ? document.getElementById('f-p-genero').value : '';
+  var acompNome   = document.getElementById('f-acomp-nome')    ? document.getElementById('f-acomp-nome').value.trim()    : '';
+  var acompRelacao= document.getElementById('f-acomp-relacao') ? document.getElementById('f-acomp-relacao').value.trim() : '';
+  if(!name){alert('Informe o nome da estação.');return;}
+  if(!caso){alert('Informe a descrição do caso.');return;}
+  if(!pNome){alert('Informe o nome do paciente/ator.');return;}
+
+  // Collect exams
+  var exams=[];
+  document.querySelectorAll('[id^="exam-row-"]').forEach(function(row){
+    var title=row.querySelector('.exam-title').value.trim();
+    var rowsText=row.querySelector('.exam-rows').value.trim();
+    var rows=rowsText?rowsText.split('\n').map(function(r){return r.trim();}).filter(Boolean):[];
+    var images=Array.from(row.querySelectorAll('.img-prev img')).map(function(img){
+      // Se tem data-original (nome do arquivo no bucket), usa esse; senão usa src (data:URL ou novo upload)
+      return img.getAttribute('data-original') || img.src;
+    });
+    if(title||rows.length) exams.push({title:title||'Impresso',rows:rows,images:images});
+  });
+
+  // Collect checklist
+  var checklist=[];
+  document.querySelectorAll('[id^="cl-row-"]').forEach(function(row,i){
+    var text=row.querySelector('.cl-text').value.trim();
+    if(!text)return;
+    var tipo=row.querySelector('.cl-tipo').selectedIndex;
+    var s0=parseFloat(row.querySelector('.cl-s0').value)||0;
+    var s1=parseFloat(row.querySelector('.cl-s1').value)||0;
+    var scores,labels;
+    if(tipo===0){
+      scores=[s0,s1]; labels=['Inadequado','Adequado'];
+    } else {
+      var s2=parseFloat(row.querySelector('.cl-s2')?row.querySelector('.cl-s2').value:0)||0;
+      scores=[s0,s1,s2]; labels=['Inadequado','Parcialmente adequado','Adequado'];
+    }
+    var kwRaw=row.querySelector('.cl-kw').value.trim();
+    var partialRaw=row.querySelector('.cl-partial').value.trim();
+    var kw=kwRaw?kwRaw.split(',').map(function(x){return x.trim();}).filter(Boolean):[];
+    var partial=partialRaw?partialRaw.split(',').map(function(x){return x.trim();}).filter(Boolean):[];
+    var subitensEl=row.querySelector('.cl-subitens');
+    var subitens=subitensEl?subitensEl.value.trim():'';
+    var critAdeqEl=row.querySelector('.cl-crit-adeq');
+    var critParcEl=row.querySelector('.cl-crit-parc');
+    var critInadEl=row.querySelector('.cl-crit-inad');
+    var crit_adeq=critAdeqEl?critAdeqEl.value.trim():'';
+    var crit_parc=critParcEl?critParcEl.value.trim():'';
+    var crit_inad=critInadEl?critInadEl.value.trim():'';
+    checklist.push({id:String(i+1),text:text,scores:scores,labels:labels,kwRaw:kwRaw,partialRaw:partialRaw,kw:kw,partial:partial,subitens:subitens,crit_adeq:crit_adeq,crit_parc:crit_parc,crit_inad:crit_inad});
+  });
+
+  var eid=(document.getElementById('f-id')||{value:''}).value;
+
+  // Construir obj com campos do form
+  // Campos novos (acompGenero, informante_tipo, complexity, status)
+  var acompGenero    = document.getElementById('f-acomp-genero')   ? document.getElementById('f-acomp-genero').value   : '';
+  var informanteTipo = document.getElementById('f-informante-tipo')? document.getElementById('f-informante-tipo').value: 'paciente';
+  var complexityV    = document.getElementById('f-complexity')     ? document.getElementById('f-complexity').value     : 'medium';
+  var statusV        = document.getElementById('f-status')         ? document.getElementById('f-status').value         : 'active';
+
+  var formObj = {
+    area:area, name:name,
+    nivel:document.getElementById('f-nivel').value.trim(),
+    local:document.getElementById('f-local').value.trim(),
+    infra:document.getElementById('f-infra').value.trim(),
+    caso:caso,
+    orientMed:document.getElementById('f-orient-med').value.trim(),
+    pNome:pNome, pGenero:pGenero, acompNome:acompNome, acompRelacao:acompRelacao,
+    acompGenero:acompGenero,
+    informante_tipo:informanteTipo,
+    complexity:complexityV,
+    status:statusV,
+    pIdade:document.getElementById('f-p-idade').value.trim(),
+    pProf:document.getElementById('f-p-prof').value.trim(),
+    pCivil:document.getElementById('f-p-civil').value.trim(),
+    pQueixa:document.getElementById('f-p-queixa').value.trim(),
+    orientAtor:orientAtorFromTextarea(document.getElementById('f-orient-ator').value),
+    exams:exams,
+    checklist:checklist,
+    images:editImages
+  };
+
+  // Se editando, fazer MERGE preservando campos não editáveis (acompGenero,
+  // informante_tipo, complexity, fonte, edicao, status, user_id, created_by, etc)
+  // Isso evita que campos importantes virem NULL no PATCH.
+  var obj;
+  if(eid && editOriginalStation){
+    // Preserva tudo da estação original e SOBRESCREVE com o que veio do form
+    obj = Object.assign({}, editOriginalStation, formObj);
+    // Limpar campos read-only do Supabase que não devem ir no PATCH
+    delete obj.created_at;
+    delete obj.updated_at;
+    console.log('[Admin] Save (edit): merged form with original. Keys:', Object.keys(obj).join(', '));
+  } else {
+    obj = formObj;
+    console.log('[Admin] Save (new): form keys:', Object.keys(obj).join(', '));
+  }
+
+  obj._editId = eid || null;
+  if(eid) obj.id = eid;
+  try{
+    var _bsv=document.getElementById('btn-save-station'); if(_bsv){ _bsv.disabled=true; _bsv.textContent='Salvando...'; }
+    await saveStationDB(obj);
+    if(_bsv){ _bsv.disabled=false; _bsv.textContent='Salvar estação'; }
+    closeModal('modal-form'); renderList(); alert('Estação salva!');
+  }catch(e){
+    if(_bsv){ _bsv.disabled=false; _bsv.textContent='Salvar estação'; }
+    alert('Erro ao salvar: '+e.message);
+  }
+}
+
+function normParse(s){
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s]/g,' ');
+}
+
+function parseStationText(text){
+  var r = {
+    name:'', area:'', nivel:'', local:'', infra:'', caso:'', orientMed:'',
+    pNome:'', pIdade:'', pProf:'', pCivil:'', pQueixa:'', orientAtor:'',
+    exams:[], checklist:[]
+  };
+
+  var NL = String.fromCharCode(10);
+  var lines = text.split(NL);
+
+  // Name — first non-empty line
+  for(var i=0;i<lines.length;i++){
+    if(lines[i].trim()){ r.name=lines[i].trim(); break; }
+  }
+
+  // Area — detect from keywords
+  var tl = normParse(text);
+  if(/ginecolog|obstetric|parto|gravidez|gestac|vaginal|vulv|mamograf|cancer de colo/.test(tl)) r.area='Ginecologia';
+  else if(/pediatr|crianca|neonat|lactente|adolesc|puberdade/.test(tl)) r.area='Pediatria';
+  else if(/cirurgi|trauma|pneumotorax|abdomen agudo|apendicite|hernia|colecistite/.test(tl)) r.area='Cirurgia';
+  else if(/familia|comunidade|ubs|atenção primaria|atencao basica|saúde da familia/.test(tl)) r.area='Medicina de Família/Comunidade';
+  else r.area='Clínica';
+
+  // Nivel
+  var m = text.match(/n[íi]vel de aten[çc][ãa]o[:\s]*([^.\n;]{3,60})/i);
+  if(m) r.nivel = m[1].trim().replace(/\.$/,'');
+
+  // Local
+  m = text.match(/tipo de atendimento[:\s]*([^.\n;A-Z\u00C0-\u00DC]{5,100})/i);
+  if(m) r.local = m[1].trim().replace(/\.$/,'');
+
+  // Infra
+  m = text.match(/(?:infraestrutura|unidade conta)[^:]*:([\s\S]*?)(?=DESCRI[CÇ][AÃ]O|tarefas|[Oo]rienta[çc]|Impresso|CHECKLIST|$)/i);
+  if(m) r.infra = m[1].replace(/\s+/g,' ').trim();
+
+  // Caso — match various section headers
+  var casoRx = /(?:DESCRI[CÇ][AÃ]O DO CASO|CASO CL[IÍ]NICO)[:\s]*([\s\S]*?)(?=Nos \d+|[Oo]rienta[çc][õo]es ao [Mm][eé]dico|[Oo]rienta[çc][õo]es ao [Pp]articipante|tarefas|dever[aá] executar|Impresso|CHECKLIST|$)/i;
+  m = text.match(casoRx);
+  if(m) r.caso = m[1].replace(/\s+/g,' ').trim();
+  // Also try "Descrição do caso" subsection
+  if(!r.caso){
+    m = text.match(/Descri[çc][ãa]o do caso[^\n]*\n([\s\S]*?)(?=[Oo]rienta|Impresso|CHECKLIST|$)/i);
+    if(m) r.caso = m[1].replace(/\s+/g,' ').trim();
+  }
+
+  // Orient Med — multiple possible headers
+  var orientMedRx = /(?:orienta[çc][õo]es ao m[eé]dico|orienta[çc][õo]es ao participante|tarefas|dever[aá] executar|o participante dever[aá])[^:\n]*:?\s*([\s\S]*?)(?=[Oo]rienta[çc][õo]es do [Aa]tor|DADOS PESSOAIS|Impresso\s*\d|CHECKLIST|ATOR\s*\/|$)/i;
+  m = text.match(orientMedRx);
+  if(m) r.orientMed = m[1].replace(/\s+/g,' ').trim();
+  // Also try matching bullet list after "Orientações ao médico" header
+  if(!r.orientMed){
+    m = text.match(/[Oo]rienta[çc][õo]es ao [Mm][eé]dico[^\n]*\n([\s\S]*?)(?=[Oo]rienta[çc][õo]es|DADOS|Impresso|CHECKLIST|$)/i);
+    if(m) r.orientMed = m[1].replace(/\s+/g,' ').trim();
+  }
+
+  // Patient name
+  m = text.match(/DADOS PESSOAIS[^:]*:?\s*-?\s*([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+)/);
+  if(m) r.pNome = m[1].trim();
+
+  // Age
+  m = text.match(/DADOS PESSOAIS[\s\S]{0,60}?(\d{1,2})\s*anos/i);
+  if(m) r.pIdade = m[1];
+
+  // Profession
+  m = text.match(/DADOS PESSOAIS[\s\S]{0,100}?\d{1,2}\s*anos[,.\s]+([^.\n\-]{3,40?}?)(?:\s*[-.]|\s*MOTIVO|$)/i);
+  if(m) r.pProf = m[1].trim().replace(/[,.]$/,'');
+
+  // Civil status
+  m = text.match(/estado civil[:\s]*([^\n;.]{3,30})/i);
+  if(m) r.pCivil = m[1].trim();
+
+  // Chief complaint
+  m = text.match(/MOTIVO DE CONSULTA[^:]*:?\s*-?\s*([\s\S]*?)(?=SOBRE|ANTECEDENTES|SE O PARTICIPANTE|$)/i);
+  if(m) r.pQueixa = m[1].replace(/\s+/g,' ').trim().replace(/^-\s*/,'').substring(0,600);
+
+  // Actor instructions
+  m = text.match(/[Oo]rienta[çc][õo]es do [Aa]tor[\s\S]{0,20}\n([\s\S]*?)(?=\nImpresso|\nCHECKLIST|$)/i);
+  if(m) r.orientAtor = m[1].trim();
+
+  // Exams
+  var examRe = /Impresso\s*\d+\s*\(([^)]+)\)([\s\S]*?)(?=Impresso\s*\d+|CHECKLIST|$)/gi;
+  var em;
+  while((em=examRe.exec(text))!==null){
+    var title = em[1].trim();
+    var block = em[2];
+    // Split on semicolons before capital letters and on newlines
+    var raw = block.replace(/;(?=[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g,';\n');
+    raw = raw.replace(/\.(?=[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-z])/g,'.\n');
+    var rows = raw.split('\n').map(function(s){return s.trim().replace(/^[-\s]+/,'');}).filter(function(s){return s.length>2;});
+    r.exams.push({title:title, rows:rows, images:[]});
+  }
+
+  // Checklist — robust multi-format parser
+  var clStart = text.search(/(?:^|\n)\s*1\.\s+\w/);
+  if(clStart>=0){
+    var clText = text.substring(clStart);
+    var blocks = clText.split(/(?=(?:^|\n)\s*\d+\.\s)/m).filter(function(b){return /^\s*\d+\./.test(b.trim());});
+    blocks.forEach(function(block){
+      var numM = block.trim().match(/^(\d+)\.\s*/);
+      if(!numM) return;
+      var itemId = numM[1];
+
+      // ── Extract scores and labels ──────────────────────────────────────────
+      var scores = [], labels = [];
+
+      // Format A: "Adequado.*: 0,50" / "Parcialmente.*: 0,25" / "Inadequado.*: 0,00"
+      var labelRx = [
+        {rx:/inadequado[^:\n]*:\s*([\d,\.]+)/i, label:'Inadequado'},
+        {rx:/parcialmente[^:\n]*:\s*([\d,\.]+)/i, label:'Parcialmente adequado'},
+        {rx:/adequado[^:\n]*:\s*([\d,\.]+)/i, label:'Adequado'},
+      ];
+      var found = labelRx.map(function(e){
+        var m = block.match(e.rx);
+        return m ? {label:e.label, score:parseFloat(m[1].replace(',','.'))} : null;
+      }).filter(Boolean);
+      if(found.length>=2){
+        found.sort(function(a,b){return a.score-b.score;});
+        scores = found.map(function(f){return f.score;});
+        labels = found.map(function(f){return f.label;});
+      }
+
+      // Format B: "Inad: 0  Parc: 0.5  Adeq: 1.0" inline
+      if(!scores.length){
+        var m3 = block.match(/inad[^:\s]*[:\s]+([\d,\.]+)\s+parc[^:\s]*[:\s]+([\d,\.]+)\s+adeq[^:\s]*[:\s]+([\d,\.]+)/i);
+        var m2 = !m3 && block.match(/inad[^:\s]*[:\s]+([\d,\.]+)\s+adeq[^:\s]*[:\s]+([\d,\.]+)/i);
+        if(m3){
+          scores = [parseFloat(m3[1]),parseFloat(m3[2]),parseFloat(m3[3])];
+          labels = ['Inadequado','Parcialmente adequado','Adequado'];
+        } else if(m2){
+          scores = [parseFloat(m2[1]),parseFloat(m2[2])];
+          labels = ['Inadequado','Adequado'];
+        }
+      }
+
+      // Format C: standalone numeric lines
+      if(!scores.length){
+        var lines = block.split('\n');
+        var nums = [];
+        for(var li=1; li<lines.length; li++){
+          var ln = lines[li].trim();
+          if(/^[\d,\.]+$/.test(ln)){
+            var n = parseFloat(ln.replace(',','.'));
+            if(!isNaN(n)) nums.push(n);
+          }
+        }
+        if(nums.length>=2){
+          nums.sort(function(a,b){return a-b;});
+          scores = nums;
+          labels = nums.length===3
+            ? ['Inadequado','Parcialmente adequado','Adequado']
+            : ['Inadequado','Adequado'];
+        }
+      }
+
+      if(scores.length<2) return; // skip items without valid scores
+
+      // ── Extract item text ──────────────────────────────────────────────────
+      // Text is everything before the first scoring-related line
+      var textEnd = block.search(/\n\s*(?:adequado|parcialmente|inadequado|inad[:\s]|[\d,\.]+\s*$)/im);
+      var rawText = textEnd > 0 ? block.substring(0, textEnd) : block;
+      var itemText = rawText.replace(/^\d+\.\s*/,'').replace(/\s+/g,' ').trim().substring(0,3000);
+      if(itemText.length < 5) return;
+
+      // Extract criterio descriptions from block
+      var crit_adeq='', crit_parc='', crit_inad='', subitens='', subMatches=[];
+      // Extract criterio descriptions and subitens by scanning block lines
+      block.split('\n').forEach(function(line){
+        var ln = line.trim();
+        var lnL = ln.toLowerCase();
+        var colon = ln.indexOf(':');
+        if(colon < 0) return;
+        var desc = ln.substring(colon+1).trim().replace(/[\d,\.]+\s*pts?\.?\s*$/i,'').trim();
+        if(desc.length < 2) return;
+        if(lnL.indexOf('adequado') === 0 && lnL.indexOf('parcialmente') < 0) crit_adeq = desc;
+        else if(lnL.indexOf('parcialmente') === 0) crit_parc = desc;
+        else if(lnL.indexOf('inadequado') === 0) crit_inad = desc;
+      });
+      // Extract subitens: find (1) text; (2) text patterns
+      var subIdx = 0;
+      itemText.replace(new RegExp('\\(' + '\\d+' + '\\)' + '\\s*([^(]+)', 'g'), function(m, txt){
+        subMatches.push(txt.replace(/[;,]\s*$/,'').trim());
+      });
+      if(subMatches.length) subitens = subMatches.join('\n');
+
+      var kw = autoPatterns(itemText);
+      r.checklist.push({
+        id: itemId, text: itemText, scores: scores, labels: labels,
+        kw: kw, kwRaw: kw.join(','), partial: [], partialRaw: '',
+        subitens: subitens, crit_adeq: crit_adeq, crit_parc: crit_parc, crit_inad: crit_inad
+      });
+    });
+  }
+
+  return r;
+}
+
+function autoPatterns(text){
+  var tl = normParse(text);
+  var patterns = [];
+
+  // Each entry: [keyword_in_item_text, [patterns_to_match_doctor_speech]]
+  var map = [
+    // Apresentação
+    ['apresent|cumprimet|boas.vind|nome.{0,8}med|diz.{0,8}nome',
+      ['meu nome (e|eh)', 'me chamo', 'sou (dr|dra|doutor|doutora|medic)', 'ola', 'bom.{0,8}(dia|tarde|noite)', 'boa.{0,8}(tarde|noite|manha)']],
+    // Nome do paciente
+    ['nome.{0,15}pacient|pergunta.{0,8}nome',
+      ['qual.{0,10}(seu|o).{0,5}nome', 'como.{0,8}se chama', 'me fala.{0,8}nome', 'fale.{0,8}nome']],
+    // Dados pessoais
+    ['\\bidade\\b(?!de|m|nto|nto)', ['qual.{0,8}(sua|a).{0,5}idade', 'quantos anos tem', 'quantos anos voce']],
+    ['profiss|trabalh|ocupa', ['profiss', 'trabalh', 'ocupa', 'o que (faz|voce faz)']],
+    ['estado.{0,5}civil|casad|solteir', ['estado.{0,5}civil', 'casad', 'solteir', 'divorc', 'viuv']],
+    // Queixa principal
+    ['queixa.{0,10}principal|motivo.{0,10}(consulta|atend)|o.que.{0,10}(traz|trouxe)',
+      ['queixa', 'motivo.{0,8}(consulta|atend)', 'o que.{0,15}(traz|trouxe|sente|aconteceu)', 'posso.{0,10}ajud', 'me (conta|fala).{0,15}(sintoma|problem|queixa)']],
+    // HDA — características
+    ['inicio|quando.{0,10}(comec|inici)|tempo.{0,8}sintoma',
+      ['quando.{0,10}(comec|inici|aparec)', 'ha.{0,6}(dias|semanas|meses)', 'desde quando', 'ha quanto tempo']],
+    ['duracao|quanto tempo',
+      ['quanto tempo', 'ha quantos', 'duracao']],
+    ['intensidad|escala|quant.{0,5}dor',
+      ['intensidad', 'escala.{0,8}(dor|0)', 'quant.{0,8}(doi|dor)']],
+    ['irradia|espalha',
+      ['irradia', 'espalha', 'vai.{0,10}outro']],
+    ['melhora|alivia',
+      ['melhora', 'alivia', 'o que.{0,10}melhora']],
+    ['piora|agrava',
+      ['piora', 'agrava', 'o que.{0,10}piora']],
+    // Sintomas gerais
+    ['febre|temperatura',   ['febre', 'temperatura', 'calafrio']],
+    ['\bdor\b',           ['\bdor\b', '\bdoi\b', 'doendo', 'doloroso']],
+    ['nausea|enjoo|vomit',  ['nausea', 'enjoo', 'vomit']],
+    ['falta.{0,6}ar|dispneia|respirac', ['falta.{0,8}ar', 'dispneia', 'respira.{0,10}(difici|mal)']],
+    // Ginecologia
+    ['corrimento|secreção|descarga', ['corrimento', 'secreç', 'descarga']],
+    ['prurido|coceira|coça|coce',    ['prurido', 'coc[ea]', 'coceira', 'coç']],
+    ['odor|cheiro|fedor',            ['odor', 'cheiro', 'fedor']],
+    ['cor.{0,15}(corriment|secreç)|esbranquic',  ['cor.{0,10}corriment', 'qual.{0,5}(a )?cor', 'esbranquic', 'amarelad']],
+    ['aspecto|consist|grumoso|cremoso', ['aspecto', 'consist', 'grosso', 'grumoso', 'cremoso']],
+    ['urinari|disuri|ardencia.{0,8}urin', ['urin', 'disuri', 'ardencia', 'doi.{0,10}urin']],
+    ['les.{0,3}(ao|oes).{0,15}extern|vesicul', ['lesao', 'ferida', 'vesicula', 'ulcera']],
+    ['dum|ultima.{0,8}menstrua|ciclo.{0,8}menstrual', ['dum', 'ultima.{0,10}menstrua', 'menstrua', 'ciclo']],
+    ['menarca', ['menarca', 'primeira.{0,10}menstrua']],
+    ['sexarca|inicio.{0,8}vida.sexual', ['sexarca', 'primeira.{0,10}relacao', 'inicio.{0,10}vida.sexual']],
+    ['vida.{0,8}sexual|parceiro', ['vida sexual', 'parceiro', 'relacao.{0,8}sexual', 'ativa.{0,8}sexual', 'tem.{0,10}(namorad|marido)']],
+    ['contraceptiv|anticoncepcional|preservativo', ['contraceptiv', 'anticoncepcional', 'preservativo', 'camisinha', 'diu']],
+    // Antecedentes
+    ['comorbidade|doenca.{0,10}cronic|diabetes|hipertensao', ['comorbidade', 'doenca.{0,10}cronic', 'diabetes', 'hipertensao']],
+    ['medicac|remedio|uso.{0,8}medicament', ['medicac', 'remedio', 'medicament', 'usa.{0,10}(remedio|medicac)']],
+    ['alergi', ['alergi', 'reacao.{0,8}(remedio|medicac)']],
+    ['cirurgia.{0,10}anterior|operac|historico.{0,10}cirurg', ['cirurgi', 'operac', 'procedimento.{0,10}cirurg']],
+    ['historico.{0,8}famil|familiar', ['familiar', 'historico.{0,8}famil', 'pai.{0,5}mae']],
+    ['tabag|etilis|alcool|fumante', ['tabag', 'etilis', 'alcool', 'fumante', 'cigarro']],
+    // Exame físico
+    ['exame.{0,10}fisic|vou.{0,8}examinar|auscultar|palpar', ['exame.{0,10}fisic', 'vou.{0,10}examinar', 'auscultar', 'palpar', 'vou.{0,10}(avaliar|verificar)']],
+    ['exame.{0,10}ginecol|inspecao.{0,8}vulv|examinar.{0,8}vulv|regiao.{0,8}vulv', ['exame.{0,10}(vulv|ginecol)', 'inspecao.{0,8}vulv', 'examinar.{0,10}(vulv|regiao)', 'vulvar', 'regiao.{0,8}(vulv|intim)']],
+    ['enfermagem|tecnica.{0,8}enferm|acompanhan', ['enfermagem', 'tecnica.{0,8}enferm', 'acompanhante']],
+    // ATLS / trauma
+    ['abcde|xabcde', ['abcde', 'xabcde']],
+    ['via.{0,6}aere|pervied', ['via.{0,8}aere', 'pervi', 'pervied']],
+    ['mascara.{0,8}oxig|oxigenio', ['mascara.{0,8}ox', 'oxigenio', 'o2']],
+    ['colar.{0,8}cervic|manut.{0,8}colar', ['colar.{0,10}cervic', 'manut.{0,8}colar', 'manter.{0,8}colar']],
+    ['acesso.{0,8}venoso|jelco|abocath', ['acesso.{0,8}venoso', 'jelco', 'abocath', 'cateter.{0,8}venoso']],
+    ['sangr|hemorragia', ['sangr', 'hemorragia', 'perda.{0,8}sangue']],
+    ['exposi|hipotermia', ['exposi', 'hipotermia', 'despir', 'tirar.{0,8}roupa']],
+    ['drenagem|toracostomia', ['drenagem.{0,10}fech', 'toracostomia', 'selo.{0,6}agua']],
+    ['puncao|descompressao|toracocentese', ['puncao', 'descompressao', 'toracocentese']],
+    ['monitor|saturac|oximetr', ['monitor', 'saturac', 'oximetr', 'spo2']],
+    ['radiograf|raio.{0,3}x', ['radiogr', 'raio.x', 'rx.{0,6}torax']],
+    ['transferenci|remocao|nao.{0,8}transfer', ['nao.{0,10}transfer', 'nao.{0,10}remov', 'nao.{0,10}remoc']],
+    // Diagnóstico
+    ['hipotese.{0,10}diagn|diagnostico.{0,10}(principal|provavel)|orienta.{0,10}diagn',
+      ['hipotese.{0,10}diagn', 'diagnostico.{0,10}(principal|provavel)', 'acredito.{0,10}(que|ser)', 'trata.{0,10}(se de|de um)', 'e um caso de']],
+    ['diagnostico.{0,8}diferenci|diferenci|outras.{0,8}hipotes',
+      ['diferencial', 'outras.{0,10}(hipotes|possibil)', 'pode.{0,10}ser', 'diagnostico.{0,10}diferenci']],
+    // Específicos
+    ['candid|fungo.{0,10}vaginal',  ['candid', 'fungo', 'candidose']],
+    ['vaginose',                    ['vaginose']],
+    ['tricomoni',                   ['tricomoni']],
+    ['\\bist\\b|\\bdst\\b|transmiss.{0,10}sexual', ['nao.{0,15}ist', 'nao.{0,15}dst', 'nao.{0,15}(transmiss|sexual)', 'ist\b', 'dst\b']],
+    ['pneumotorax|pth',             ['pneumotorax.{0,10}hiper', '\bpth\b']],
+    // Tratamento
+    ['antifungic|fluconazol|nistatina', ['antifungic', 'fluconazol', 'nistatina', 'clotrimazol']],
+    ['antibiotico|amoxicilina|metronidazol', ['antibiotico', 'amoxicilina', 'metronidazol', 'azitromicin']],
+    ['analgesic|antiespasmodic|hioscina|escopolamina|dipirona|paracetamol|ibuprofeno|buscopan',
+      // Require therapeutic context — drug name alone is not enough
+      ['(tomar|usar|indicar|prescrev|recomendar).{0,25}(analgesic|antiespasmodic|hioscina|escopolamina|dipirona|paracetamol|ibuprofeno|buscopan)',
+       '(analgesic|antiespasmodic|hioscina|escopolamina|dipirona|paracetamol|ibuprofeno|buscopan).{0,25}(dor|colica|cramp|espasmo)',
+       'pode.{0,20}(tomar|usar).{0,20}(remedio|medicac|analgesic|antiespasmodic)',
+       'classe.{0,20}(analgesic|antiespasmodic)', 'hioscina', 'escopolamina', 'dipirona', 'paracetamol']],
+    ['conduta|plano.{0,8}terapeu|prescrev', ['conduta', 'prescrev', 'plano.{0,8}terapeu', 'indicar.{0,8}tratamento']],
+    ['encaminh|referenci|especialist', ['encaminh', 'referenci', 'especialist']],
+    // Orientações
+    ['microbiota|flora.{0,8}vaginal', ['microbiota', 'flora.{0,8}(vaginal|normal)']],
+    ['fator.{0,8}(risco|predispon)|predispos', ['fator.{0,8}risco', 'predispos', 'fator.{0,8}predispon']],
+    ['higiene|calcinha|roupa.{0,8}intim', ['higiene', 'calcinha', 'roupa.{0,8}(intim|molhad)']],
+    ['retorno|acompanhamento', ['retorno', 'acompanhamento', 'retornar', 'voltar.{0,10}se']],
+    ['exame.{0,8}complement|laboratori|cultura', ['exame.{0,8}complement', 'laboratori', 'cultura.{0,8}vaginal']],
+    ['nao.{0,15}(necessari|precis).{0,15}exame|desnec|historia.{0,10}suficiente',
+      ['nao.{0,20}(necessari|precis).{0,20}exame', 'historia.{0,15}(clinica.{0,10})?suficiente', 'exame.{0,15}desnec', 'sem.{0,10}necessidade.{0,10}exame']],
+  ];
+
+  map.forEach(function(entry){
+    // Use word boundary version of key to avoid substring matches
+    // e.g. 'idade' should not match 'intensidade', 'necessidade'
+    var keyStr = entry[0];
+    // Wrap simple word keys with word boundaries automatically
+    var safeKey = keyStr.replace(/^([a-z]+)(\|[a-z]+)*$/, function(m){
+      return m.split('|').map(function(w){ return '\\b'+w+'\\b'; }).join('|');
+    });
+    try{
+      if(new RegExp(safeKey).test(tl)){
+        entry[1].forEach(function(p){
+          if(patterns.indexOf(p) < 0) patterns.push(p);
+        });
+      }
+    }catch(e){
+      // Fallback to original key if safeKey is invalid
+      if(new RegExp(keyStr).test(tl)){
+        entry[1].forEach(function(p){
+          if(patterns.indexOf(p) < 0) patterns.push(p);
+        });
+      }
+    }
+  });
+  return patterns.slice(0, 8); // increased from 5 to 8
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────────────
+var _bn=document.getElementById('btn-new'); if(_bn) _bn.addEventListener('click', function(){ showForm(null); openModal('modal-form'); });
+var _bc=document.getElementById('btn-cancel'); if(_bc) _bc.addEventListener('click', showList);
+var _bc2=document.getElementById('btn-cancel2'); if(_bc2) _bc2.addEventListener('click', showList);
+var _bim=document.getElementById('btn-import'); if(_bim) _bim.addEventListener('click', function(){
+  var _it=document.getElementById('import-text'); var text = _it ? _it.value.trim() : '';
+  if(!text) return;
+  var r = parseStationText(text);
+  var msg = (document.getElementById('import-status')||document.getElementById('form-status'));
+  if(r.checklist && r.checklist.length){
+    fillForm(r);
+    msg.textContent = 'Preenchido automaticamente: ' + r.checklist.length + ' itens de checklist, ' + (r.exams||[]).length + ' impresso(s). Revise os campos e salve.';
+    msg.style.display = 'block';
+  } else {
+    msg.textContent = 'Não foi possível identificar o checklist. Preencha manualmente.';
+    msg.style.color = 'var(--yellow)';
+    msg.style.display = 'block';
+  }
+});
+var _bci=document.getElementById('btn-clear-import'); if(_bci) _bci.addEventListener('click', function(){
+  document.getElementById('import-text').value = '';
+  var msg = (document.getElementById('import-status')||document.getElementById('form-status'));
+  msg.style.display = 'none';
+});
+var _bae=document.getElementById('btn-add-exam'); if(_bae) _bae.addEventListener('click', function(){ addExamRow(null); });
+var _bac=document.getElementById('btn-add-cl'); if(_bac) _bac.addEventListener('click', function(){ addClRow(null); });
+
+
+// ── FILL FORM ────────────────────────────────────────────────────────────────
+function fillForm(r){
+  var fields = {
+    'f-area': r.area||'', 'f-name': r.name||'', 'f-nivel': r.nivel||'',
+    'f-local': r.local||'', 'f-infra': r.infra||'', 'f-caso': r.caso||'',
+    'f-orient-med': r.orientMed||'', 'f-p-nome': r.pNome||'',
+    'f-p-idade': r.pIdade||'', 'f-p-prof': r.pProf||'',
+    'f-p-civil': r.pCivil||'', 'f-p-queixa': r.pQueixa||'',
+    'f-orient-ator': orientAtorToTextarea(r.orientAtor)
+  };
+  Object.keys(fields).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = fields[id];
+  });
+  // Area select
+  var areaEl = document.getElementById('f-area');
+  if(areaEl && r.area){
+    for(var i=0;i<areaEl.options.length;i++){
+      if(areaEl.options[i].value === r.area || areaEl.options[i].text === r.area){
+        areaEl.selectedIndex = i; break;
+      }
+    }
+  }
+  (document.getElementById('exam-rows')||document.getElementById('exams-container')||{innerHTML:''}).innerHTML='';
+  (r.exams||[]).forEach(function(ex){ addExamRow(ex); });
+  (document.getElementById('cl-rows')||document.getElementById('cl-container')||{innerHTML:''}).innerHTML='';
+  clCount = 0;
+  (r.checklist||[]).forEach(function(item){ addClRow(item); });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+// ── INVITE FUNCTIONS ──────────────────────────────────────────────────────────
+async function generateInvite(){
+  var email = document.getElementById('invite-email').value.trim();
+  var btn = document.getElementById('btn-create-invite');
+  var result = document.getElementById('invite-result');
+  if(btn){ btn.disabled = true; btn.textContent = 'Gerando...'; }
+  try{
+    // Insert invite directly via REST
+    var body = { created_by: null };
+    if(email) body.email = email;
+    var res = await supaFetch('/rest/v1/invites', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok){ alert('Erro ao gerar convite: ' + await res.text()); return; }
+    var data = await res.json();
+    var inv = Array.isArray(data) ? data[0] : data;
+    document.getElementById('invite-code-display').textContent = inv.code;
+    var exp = new Date(inv.expires_at);
+    document.getElementById('invite-expires-display').textContent = 
+      'Válido até ' + exp.toLocaleDateString('pt-BR') + (email ? ' · Para: ' + email : '');
+    result.style.display = 'block';
+    loadInvites();
+  // Area filter
+  var _af = document.getElementById('area-filter');
+  if(_af) _af.addEventListener('change', renderList);
+  // Load pending count for badge
+  supaFetch('/rest/v1/stations?status=eq.pending&select=id').then(function(r){
+    if(r.ok) r.json().then(function(list){
+      var tab = document.getElementById('tab-pendentes');
+      if(tab && list.length) tab.textContent = '⏳ Pendentes ('+list.length+')';
+    });
+  }).catch(function(){});
+  }catch(e){ alert('Erro: ' + e.message); }
+  if(btn){ btn.disabled = false; btn.textContent = '✉ Gerar código'; }
+}
+
+function copyInviteCode(){
+  var code = document.getElementById('invite-code-display').textContent;
+  navigator.clipboard.writeText(code).then(function(){
+    var btn = event.target;
+    btn.textContent = 'Copiado!';
+    setTimeout(function(){ btn.textContent = 'Copiar'; }, 2000);
+  });
+}
+
+async function loadInvites(){
+  var el = document.getElementById('invite-list');
+  try{
+    var res = await supaFetch('/rest/v1/invites?select=code,email,used,expires_at&order=created_at.desc&limit=10');
+    if(!res.ok){ el.textContent = 'Erro ao carregar.'; return; }
+    var list = await res.json();
+    if(!list.length){ el.textContent = 'Nenhum convite gerado ainda.'; return; }
+    el.innerHTML = '<table style="width:100%;border-collapse:collapse">'
+      + '<tr style="font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:.08em">'
+      + '<th style="text-align:left;padding:4px 8px">CÓDIGO</th>'
+      + '<th style="text-align:left;padding:4px 8px">E-MAIL</th>'
+      + '<th style="text-align:left;padding:4px 8px">STATUS</th>'
+      + '<th style="text-align:left;padding:4px 8px">EXPIRA</th>'
+      + '</tr>'
+      + list.map(function(inv){
+          var exp = new Date(inv.expires_at);
+          var expired = exp < new Date();
+          var status = inv.used ? '<span style="color:var(--text3)">Usado</span>' 
+            : expired ? '<span style="color:var(--red)">Expirado</span>'
+            : '<span style="color:var(--green)">Ativo</span>';
+          return '<tr style="border-top:1px solid var(--border);font-size:.8rem">'
+            + '<td style="padding:6px 8px;font-family:var(--mono);color:var(--accent)">' + inv.code + '</td>'
+            + '<td style="padding:6px 8px;color:var(--text2)">' + (inv.email||'—') + '</td>'
+            + '<td style="padding:6px 8px">' + status + '</td>'
+            + '<td style="padding:6px 8px;color:var(--text3)">' + exp.toLocaleDateString('pt-BR') + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</table>';
+  }catch(e){ el.textContent = 'Erro ao carregar convites.'; }
+}
+
+window.addEventListener('load', function(){
+  SUPA_URL = localStorage.getItem('rv_supa_url') || SUPA_URL;
+  SUPA_KEY = localStorage.getItem('rv_supa_key') || SUPA_KEY;
+  window._adminSession = null;
+
+  // Show loading state
+  var el = document.getElementById('station-list');
+  if(el) el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text3)"><div style="font-size:1.5rem;margin-bottom:.5rem">⏳</div>Carregando...</div>';
+
+  if(!window.supabase){ setTimeout(function(){ renderList(); loadInvites(); }, 1000); return; }
+
+  // Create Supabase client and check session
+  var _sc = window.supabase.createClient(SUPA_URL, SUPA_KEY, {
+    auth: { storageKey: 'sb-cxxykjbjfcgbdgmjdpng-auth-token' }
+  });
+  _sc.auth.getSession().then(function(r){
+    if(r.data && r.data.session){
+      window._adminSession = r.data.session;
+      var uel = document.getElementById('admin-user');
+      if(uel) uel.textContent = r.data.session.user.email;
+      console.log('[Admin] Session OK:', r.data.session.user.email);
+    } else {
+      console.warn('[Admin] No session — using anon key');
+      // Try to get session from simulador subdomain via localStorage key
+      try{
+        var stored = localStorage.getItem('sb-cxxykjbjfcgbdgmjdpng-auth-token');
+        if(!stored) stored = localStorage.getItem('supabase.auth.token');
+        if(stored){
+          var parsed = JSON.parse(stored);
+          var token = parsed.access_token || (parsed.currentSession && parsed.currentSession.access_token);
+          if(token) window._adminSession = { access_token: token };
+          console.log('[Admin] Token from localStorage:', !!token);
+        }
+      }catch(e){}
+    }
+    renderList();
+    loadInvites();
+  // Area filter listener
+  var _af = document.getElementById('area-filter');
+  if(_af) _af.addEventListener('change', renderList);
+  // Load pending count for badge
+  supaFetch('/rest/v1/stations?status=eq.pending&select=id').then(function(r){
+    if(r.ok) r.json().then(function(list){
+      var tab = document.getElementById('tab-pendentes');
+      if(tab && list.length) tab.textContent = '⏳ Pendentes ('+list.length+')';
+    });
+  }).catch(function(){});
+  }).catch(function(e){
+    console.error('[Admin] Session error:', e);
+    renderList();
+    loadInvites();
+  // Area filter listener
+  var _af = document.getElementById('area-filter');
+  if(_af) _af.addEventListener('change', renderList);
+  // Load pending count for badge
+  supaFetch('/rest/v1/stations?status=eq.pending&select=id').then(function(r){
+    if(r.ok) r.json().then(function(list){
+      var tab = document.getElementById('tab-pendentes');
+      if(tab && list.length) tab.textContent = '⏳ Pendentes ('+list.length+')';
+    });
+  }).catch(function(){});
+  });
+  var _bi=document.getElementById('btn-create-invite'); if(_bi) _bi.addEventListener('click', generateInvite);
+  // Modal listeners (modal HTML is after <\/script>, registered on load)
+  var _bg=document.getElementById('btn-gen-ai'); if(_bg) _bg.addEventListener('click', function(){ openModal('modal-gen'); showGenStep(1); });
+  // Gen modal buttons — use safe selectors
+  var _bgc = document.getElementById('btn-gen-close'); if(_bgc) _bgc.addEventListener('click', closeGenModal);
+  var _bgca = document.getElementById('btn-gen-cancel'); if(_bgca) _bgca.addEventListener('click', closeGenModal);
+  var _bgr = document.getElementById('btn-gen-run'); if(_bgr) _bgr.addEventListener('click', runGenStation);
+  var _bgret = document.getElementById('btn-gen-retry'); if(_bgret) _bgret.addEventListener('click', function(){ showGenStep(1); });
+  var _bgs = document.getElementById('btn-gen-save'); if(_bgs) _bgs.addEventListener('click', function(){ if(genStationData) fillFormFromAI(genStationData); });
+  // Form save button
+  var _bss = document.getElementById('btn-save-station'); if(_bss) _bss.addEventListener('click', saveStation);
+  // Form cancel
+  var _bsc = document.getElementById('btn-cancel-form'); if(_bsc) _bsc.addEventListener('click', function(){ closeModal('modal-form'); });
+});
+
+// ── AI STATION GENERATOR ─────────────────────────────────────────────────────
+var genStationData = null;
+
+function openGenModal(){
+  openModal('modal-gen');
+  showGenStep(1);
+}
+
+function closeGenModal(){
+  closeModal('modal-gen');
+}
+
+function showGenStep(n){
+  document.getElementById('gen-step-1').style.display = n===1?'block':'none';
+  document.getElementById('gen-step-2').style.display = n===2?'block':'none';
+  document.getElementById('gen-step-3').style.display = n===3?'block':'none';
+}
+
+function renderGenPreview(d){
+  var cl = d.checklist || [];
+  var totalPts = cl.reduce(function(s,c){ return s + Math.max.apply(null, c.scores||[0]); }, 0);
+  var clHtml = cl.map(function(c,i){
+    var max = Math.max.apply(null, c.scores||[0]);
+    return '<tr><td style="padding:4px 8px;font-size:.8rem;border-bottom:1px solid var(--border)">'+(i+1)+'. '+esc(c.text.substring(0,80))+(c.text.length>80?'...':'')+'</td>'
+      +'<td style="padding:4px 8px;font-family:var(--mono);font-size:.8rem;text-align:right;border-bottom:1px solid var(--border);color:var(--text2)">'+max.toFixed(1)+'</td></tr>';
+  }).join('');
+  document.getElementById('gen-preview').innerHTML =
+    '<div style="margin-bottom:.75rem">'
+    +'<div style="font-size:1.05rem;font-weight:500;margin-bottom:2px">'+esc(d.name||'')+'</div>'
+    +'<div style="font-size:.8rem;color:var(--text2)">'+esc(d.area||'')+' &middot; '+esc(d.nivel||'')+' &middot; '+esc(d.local||'')+'</div>'
+    +'</div>'
+    +'<div style="font-size:.8rem;color:var(--text2);margin-bottom:.75rem;line-height:1.5">'+esc((d.caso||'').substring(0,200))+'...</div>'
+    +'<div style="font-size:.8rem;font-weight:500;margin-bottom:.4rem">Paciente: '+esc(d.pNome||'')+', '+esc(d.pIdade||'')+' anos &middot; '+esc(d.pQueixa||'')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-top:.5rem">'
+    +'<thead><tr><th style="padding:4px 8px;font-size:.72rem;text-align:left;color:var(--text3);border-bottom:1px solid var(--border2)">CHECKLIST ('+cl.length+' itens)</th>'
+    +'<th style="padding:4px 8px;font-size:.72rem;text-align:right;color:var(--text3);border-bottom:1px solid var(--border2)">PTS</th></tr></thead>'
+    +'<tbody>'+clHtml+'</tbody>'
+    +'<tfoot><tr><td style="padding:4px 8px;font-size:.8rem;font-weight:500">Total</td>'
+    +'<td style="padding:4px 8px;font-family:var(--mono);font-size:.8rem;font-weight:500;text-align:right">'+totalPts.toFixed(1)+'</td></tr></tfoot>'
+    +'</table>';
+}
+
+function fillFormFromAI(d){
+  closeGenModal();
+  // Trigger the new station form
+  document.getElementById('btn-new').click();
+  setTimeout(function(){
+    var fields = {
+      'f-area':d.area||'','f-name':d.name||'','f-nivel':d.nivel||'',
+      'f-local':d.local||'','f-infra':d.infra||'','f-caso':d.caso||'',
+      'f-orient-med':d.orientMed||'','f-p-nome':d.pNome||'','f-p-idade':d.pIdade||'',
+      'f-p-prof':d.pProf||'','f-p-civil':d.pCivil||'','f-p-queixa':d.pQueixa||'',
+      'f-orient-ator':orientAtorToTextarea(d.orientAtor)
+    };
+    Object.keys(fields).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.value = fields[id];
+    });
+    // Exams
+    var ec = document.getElementById('exam-rows')||document.getElementById('exams-container');
+    if(ec && d.exams && d.exams.length){
+      ec.innerHTML='';
+      examCount=0;
+      d.exams.forEach(function(ex){
+          var title = ex.title || ex.name || ('Exame '+(ex.id||''));
+          var resultText = ex.result || ex.text || '';
+          var rows = resultText.split(/[;\n]/).map(function(r){return r.trim();}).filter(Boolean);
+          if(!rows.length) rows = [resultText];
+          addExamRow({title:title, rows:rows, images:[]});
+        });
+    }
+    // Checklist
+    var cc = document.getElementById('cl-rows')||document.getElementById('cl-container');
+    if(cc && d.checklist && d.checklist.length){
+      cc.innerHTML='';
+      clCount=0;
+      d.checklist.forEach(function(item){ addClRow(item); });
+    }
+    window.scrollTo(0,0);
+    // Toast
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:1rem;right:1rem;background:var(--green);color:#000;padding:.75rem 1.25rem;border-radius:var(--r);font-size:.875rem;z-index:999;font-weight:500';
+    t.textContent = '\u2713 Estacao gerada \u2014 revise e salve';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 4000);
+  }, 300);
+}
+
+async function runGenStation(){
+  var area  = document.getElementById('gen-area').value;
+  var tema  = document.getElementById('gen-tema').value.trim();
+  var nivel = document.getElementById('gen-nivel').value;
+  var extra = document.getElementById('gen-instrucoes').value.trim();
+  var errEl = document.getElementById('gen-error');
+  errEl.style.display = 'none';
+  showGenStep(2);
+
+  var msgs = ['Buscando exemplos INEP no banco...','Gerando caso clinico (Call 1 de 2)...','Aguarde — gerando caso...','Gerando PEP (Call 2 de 2)...','Finalizando estacao...'];
+  var mi = 0;
+  var msgInt = setInterval(function(){ document.getElementById('gen-loading-msg').textContent = msgs[mi%msgs.length]; mi++; }, 4000);
+
+  try{
+    var NL = '\n';
+
+    // ── BUSCAR FEW-SHOT INEP ────────────────────────────────────────────────
+    var fewShotExamples = '';
+    try{
+      var fewShotRes = await supaFetch('/rest/v1/stations?fonte=eq.inep&complexity=eq.simple&select=*&limit=2');
+      if(fewShotRes.ok){
+        var examples = await fewShotRes.json();
+        if(examples && examples.length){
+          fewShotExamples = examples.map(function(s, i){
+            var clTrunc = (s.checklist||'').substring(0, 800) + (((s.checklist||'').length > 800) ? '...[truncado]' : '');
+            return '═══ EXEMPLO ' + (i+1) + ' (estação INEP oficial) ═══\n'
+              + JSON.stringify({
+                  area: s.area, name: s.name, nivel: s.nivel,
+                  local: s.local, caso: s.caso, orientMed: s.orientMed,
+                  pNome: s.pNome, pIdade: s.pIdade, pGenero: s.pGenero,
+                  pProf: s.pProf, pCivil: s.pCivil, pQueixa: s.pQueixa,
+                  orientAtor: s.orientAtor,
+                  exams: s.exams,
+                  checklist_amostra: clTrunc
+                }, null, 2);
+          }).join('\n\n');
+        }
+      }
+    }catch(e){ console.warn('[Admin Few-shot] Falha ao buscar exemplos INEP:', e); }
+
+    // ── CALL 1: Station base com FEW-SHOT INEP ──────────────────────────────
+    var sys1 = [
+      'Voce e especialista em criar estacoes OSCE no padrao do INEP/Revalida brasileiro.',
+      'Sua tarefa: gerar uma nova estacao no MESMO padrao dos exemplos oficiais abaixo.',
+      'Responda SOMENTE JSON valido sem markdown.',
+      '',
+      '═══════════════════════════════════════════════════',
+      'REGRA DE OURO #1 — ANTI-VAZAMENTO DE GABARITO',
+      '═══════════════════════════════════════════════════',
+      'O campo "caso" e visivel ao medico ANTES de entrar na sala.',
+      'Ele deve conter APENAS 1 frase: "Voce e medico em [local] e atendera paciente de X anos com queixa de Y."',
+      'NUNCA mencione: diagnostico, hipoteses, procedimentos especificos do PEP, exames a solicitar.',
+      'O campo "orientMed" lista APENAS tarefas amplas (anamnese, exame fisico, exames complementares, hipotese, conduta).',
+      'NUNCA cite procedimentos especificos ou keywords do PEP no orientMed.',
+      '',
+      '═══════════════════════════════════════════════════',
+      'REGRA DE OURO #2 — ATOR NAO ANTECIPA',
+      '═══════════════════════════════════════════════════',
+      'O orientAtor e um OBJETO ESTRUTURADO (JSONB) com:',
+      '• regra_fundamental: instrucao geral pro ator (paciente nao antecipa info, so responde quando perguntado)',
+      '• fala_inicial_espontanea: 1 frase MINIMA — apenas a queixa principal, sem nome/idade/profissao',
+      '• tom_emocional: humor/postura',
+      '• se_perguntado_sobre: OBJETO com 15-25 chaves em snake_case, cada uma com a resposta natural em primeira pessoa',
+      '• nao_falar_espontaneamente: ARRAY com 3-5 topicos criticos que o paciente JAMAIS antecipa',
+      '',
+      'O campo "name" e descritivo SEM revelar diagnostico (ex: NUNCA "Apendicite aguda" — use "Dor em fossa iliaca direita").',
+      '',
+      '═══════════════════════════════════════════════════',
+      'EXEMPLOS OFICIAIS DO INEP 2025/1 (siga este padrao)',
+      '═══════════════════════════════════════════════════',
+      fewShotExamples || '(Sem exemplos disponiveis no banco. Siga padrao INEP geral.)',
+      '',
+      '═══════════════════════════════════════════════════',
+      'FORMATO DA SAIDA (mesmo dos exemplos)',
+      '═══════════════════════════════════════════════════',
+      '{"name":"","area":"","nivel":"","local":"","infra":"","caso":"","orientMed":"","pNome":"","pIdade":0,"pGenero":"","pProf":"","pCivil":"","pQueixa":"","orientAtor":{"regra_fundamental":"","fala_inicial_espontanea":"","tom_emocional":"","se_perguntado_sobre":{},"nao_falar_espontaneamente":[]},"exams":[{"title":"","trigger_keywords":[],"rows":[]}]}',
+      '',
+      'Area: ' + area,
+    ].join(NL);
+
+    var msg1 = 'Crie uma NOVA estacao OSCE no padrao INEP. Area: ' + area + '. '
+      + (tema ? 'Tema-alvo (sugestao): ' + tema + '. ' : 'Escolha tema relevante para Revalida. ')
+      + 'Nivel: ' + nivel + '. '
+      + (extra ? 'Instrucoes extras: ' + extra + '. ' : '')
+      + 'Responda APENAS o JSON, no formato dos exemplos. NAO copie os exemplos — crie estacao original.';
+
+    var r1 = await supaFetch('/functions/v1/quick-api', {
+      method: 'POST',
+      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:4000, system:sys1, messages:[{role:'user',content:msg1}] })
+    });
+    if(!r1.ok) throw new Error('HTTP '+r1.status+' na chamada 1');
+    var d1 = await r1.json();
+    var t1 = '';
+    if(d1.content && d1.content[0]) t1 = d1.content[0].text||'';
+    else if(d1.choices && d1.choices[0]) t1 = d1.choices[0].message.content||'';
+    t1 = t1.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    var base = JSON.parse(t1);
+
+    document.getElementById('gen-loading-msg').textContent = 'Gerando Padrão Esperado de Procedimentos (PEP)...';
+
+    // ── CALL 2: PEP estruturado com FEW-SHOT INEP ──────────────────────────
+    var sys2 = [
+      'Voce e especialista em criar PEP (Padrao Esperado de Procedimentos) no formato INEP/Revalida.',
+      'Responda SOMENTE JSON valido sem markdown.',
+      '',
+      'Gere o PEP estruturado em ARRAY de itens. Total deve somar EXATAMENTE 10 pontos.',
+      '8-12 itens cobrindo: Apresentacao, Anamnese, Exame Fisico, Exames Complementares, Hipotese Diagnostica, Conduta, Orientacao.',
+      '',
+      'FORMATO DE CADA ITEM:',
+      '{',
+      '  "id": "1",',
+      '  "text": "Titulo curto do item (ex: Apresentacao, Anamnese: caracteristicas da dor)",',
+      '  "subitens": "(1) primeira acao\\n(2) segunda acao\\n(3) terceira acao",',
+      '  "scores": [0, 0.5, 1.0],',
+      '  "labels": ["Inadequado", "Parcialmente adequado", "Adequado"],',
+      '  "crit_adeq": "criterio para Adequado",',
+      '  "crit_parc": "criterio para Parcial (omitir se 2 niveis)",',
+      '  "crit_inad": "criterio para Inadequado"',
+      '}',
+      '',
+      'Use 3 niveis (Adequado/Parcial/Inadequado) quando o item tem multiplos subitens.',
+      'Use 2 niveis quando o item e binario (ex: "Solicita radiografia").',
+      'Total das pontuacoes maximas (ultimo score de cada item) deve = 10.0',
+      '',
+      '═══════════════════════════════════════════════════',
+      'EXEMPLO DO INEP 2025/1 (PEP estação 1 — siga este padrao):',
+      '═══════════════════════════════════════════════════',
+      '[',
+      '  {"id":"1","text":"Apresentação","subitens":"(1) identifica-se\\n(2) cumprimenta o paciente","scores":[0,0.25,0.5],"labels":["Inadequado","Parcialmente adequado","Adequado"],"crit_adeq":"realiza as duas ações","crit_parc":"realiza apenas uma","crit_inad":"não realiza nenhuma"},',
+      '  {"id":"6","text":"Solicita radiografia","scores":[0,2.0],"labels":["Inadequado","Adequado"],"crit_adeq":"solicita radiografia","crit_inad":"não solicita"}',
+      ']'
+    ].join(NL);
+
+    var resumo = JSON.stringify({
+      name: base.name,
+      area: base.area,
+      caso: (base.caso||'').substring(0,300),
+      orientMed: base.orientMed,
+      orientAtor_resumo: typeof base.orientAtor === 'object' ? Object.keys(base.orientAtor.se_perguntado_sobre||{}).slice(0,15).join(', ') : (base.orientAtor||'').substring(0,200),
+      exams: (base.exams||[]).map(function(e){return e.title||e.name;})
+    });
+
+    var msg2 = 'Estacao: ' + resumo + '. Gere o PEP completo (10 pts total). Responda APENAS o array JSON dos itens.';
+
+    var r2 = await supaFetch('/functions/v1/quick-api', {
+      method: 'POST',
+      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:4000, system:sys2, messages:[{role:'user',content:msg2}] })
+    });
+    if(!r2.ok) throw new Error('HTTP '+r2.status+' na chamada 2');
+    var d2 = await r2.json();
+    var t2 = '';
+    if(d2.content && d2.content[0]) t2 = d2.content[0].text||'';
+    else if(d2.choices && d2.choices[0]) t2 = d2.choices[0].message.content||'';
+    t2 = t2.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+
+    // Repair truncated JSON if needed
+    var clArr;
+    try{
+      var parsed = JSON.parse(t2);
+      clArr = Array.isArray(parsed) ? parsed : (parsed.checklist || []);
+    }
+    catch(e){
+      var rep = t2.replace(/,\s*\{[^{}]*$/, '').replace(/,\s*"[^"]*$/, '');
+      var ob=(rep.match(/\{/g)||[]).length-(rep.match(/\}/g)||[]).length;
+      var ab=(rep.match(/\[/g)||[]).length-(rep.match(/\]/g)||[]).length;
+      for(var x=0;x<ab;x++) rep+=']'; for(var x=0;x<ob;x++) rep+='}';
+      var parsed2 = JSON.parse(rep);
+      clArr = Array.isArray(parsed2) ? parsed2 : (parsed2.checklist || []);
+      console.warn('Checklist JSON reparado');
+    }
+
+    // Merge: base + checklist + flags de origem
+    var parsed = Object.assign({}, base, {
+      checklist: clArr,
+      fonte: 'ia_generated',
+      complexity: 'simple'
+    });
+
+    genStationData = parsed;
+    renderGenPreview(genStationData);
+    showGenStep(3);;
+
+  } catch(e){
+    clearInterval(msgInt);
+    showGenStep(1);
+    var errEl2 = document.getElementById('gen-error');
+    errEl2.textContent = 'Erro ao gerar: ' + e.message;
+    errEl2.style.display = 'block';
+  }
+}
+
+function renderGenPreview(d){
+  var cl = d.checklist || [];
+  var totalPts = cl.reduce(function(s,c){ return s + Math.max.apply(null, c.scores||[0]); }, 0);
+  var clHtml = cl.map(function(c,i){
+    var max = Math.max.apply(null, c.scores||[0]);
+    return '<tr><td style="padding:4px 8px;font-size:.8rem;border-bottom:1px solid var(--border)">'+(i+1)+'. '+esc(c.text.substring(0,80))+(c.text.length>80?'...':'')+'</td>'
+      +'<td style="padding:4px 8px;font-family:var(--mono);font-size:.8rem;text-align:right;border-bottom:1px solid var(--border);color:var(--text2)">'+max.toFixed(1)+'</td></tr>';
+  }).join('');
+  document.getElementById('gen-preview').innerHTML =
+    '<div style="margin-bottom:.75rem">'
+    +'<div style="font-size:1.05rem;font-weight:500;margin-bottom:2px">'+esc(d.name||'')+'</div>'
+    +'<div style="font-size:.8rem;color:var(--text2)">'+esc(d.area||'')+' &middot; '+esc(d.nivel||'')+' &middot; '+esc(d.local||'')+'</div>'
+    +'</div>'
+    +'<div style="font-size:.8rem;color:var(--text2);margin-bottom:.75rem;line-height:1.5">'+esc((d.caso||'').substring(0,200))+'...</div>'
+    +'<div style="font-size:.8rem;font-weight:500;margin-bottom:.4rem">Paciente: '+esc(d.pNome||'')+', '+esc(d.pIdade||'')+' anos &middot; '+esc(d.pQueixa||'')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin-top:.5rem">'
+    +'<thead><tr><th style="padding:4px 8px;font-size:.72rem;text-align:left;color:var(--text3);border-bottom:1px solid var(--border2)">CHECKLIST ('+cl.length+' itens)</th>'
+    +'<th style="padding:4px 8px;font-size:.72rem;text-align:right;color:var(--text3);border-bottom:1px solid var(--border2)">PTS</th></tr></thead>'
+    +'<tbody>'+clHtml+'</tbody>'
+    +'<tfoot><tr><td style="padding:4px 8px;font-size:.8rem;font-weight:500">Total</td>'
+    +'<td style="padding:4px 8px;font-family:var(--mono);font-size:.8rem;font-weight:500;text-align:right">'+totalPts.toFixed(1)+'</td></tr></tfoot>'
+    +'</table>';
+}
+
+function fillFormFromAI(d){
+  closeGenModal();
+  // Trigger the new station form
+  document.getElementById('btn-new').click();
+  setTimeout(function(){
+    var fields = {
+      'f-area':d.area||'','f-name':d.name||'','f-nivel':d.nivel||'',
+      'f-local':d.local||'','f-infra':d.infra||'','f-caso':d.caso||'',
+      'f-orient-med':d.orientMed||'','f-p-nome':d.pNome||'','f-p-idade':d.pIdade||'',
+      'f-p-prof':d.pProf||'','f-p-civil':d.pCivil||'','f-p-queixa':d.pQueixa||'',
+      'f-orient-ator':orientAtorToTextarea(d.orientAtor)
+    };
+    Object.keys(fields).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.value = fields[id];
+    });
+    // Exams
+    var ec = document.getElementById('exam-rows')||document.getElementById('exams-container');
+    if(ec && d.exams && d.exams.length){
+      ec.innerHTML='';
+      examCount=0;
+      d.exams.forEach(function(ex){
+          var title = ex.title || ex.name || ('Exame '+(ex.id||''));
+          var resultText = ex.result || ex.text || '';
+          var rows = resultText.split(/[;\n]/).map(function(r){return r.trim();}).filter(Boolean);
+          if(!rows.length) rows = [resultText];
+          addExamRow({title:title, rows:rows, images:[]});
+        });
+    }
+    // Checklist
+    var cc = document.getElementById('cl-rows')||document.getElementById('cl-container');
+    if(cc && d.checklist && d.checklist.length){
+      cc.innerHTML='';
+      clCount=0;
+      d.checklist.forEach(function(item){ addClRow(item); });
+    }
+    window.scrollTo(0,0);
+    // Toast
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:1rem;right:1rem;background:var(--green);color:#000;padding:.75rem 1.25rem;border-radius:var(--r);font-size:.875rem;z-index:999;font-weight:500';
+    t.textContent = '\u2713 Estacao gerada \u2014 revise e salve';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 4000);
+  }, 300);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
