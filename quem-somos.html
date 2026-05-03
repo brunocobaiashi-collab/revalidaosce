@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quem somos — RevalidaOSCE</title>
+<meta name="description" content="Entenda por que o RevalidaOSCE existe. Construído por quem vive de perto a maratona do Revalida.">
+<link rel="canonical" href="https://revalidaosce.com.br/quem-somos.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Quem somos — RevalidaOSCE">
+<meta property="og:description" content="Por que o RevalidaOSCE existe e quem está por trás.">
+<meta property="og:url" content="https://revalidaosce.com.br/quem-somos.html">
+<meta property="og:site_name" content="RevalidaOSCE">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0e;--bg2:#0a1520;--bg3:#0f1f30;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#e8f0f8;--text2:#7a9ab5;--text3:#445566;
+  --accent:#00c9ff;--accent2:#0077cc;
+  --green:#22c55e;--yellow:#f5c842;--red:#ef4444;
+  --serif:'DM Serif Display',Georgia,serif;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.7;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 70% 0%,rgba(0,100,200,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 10% 100%,rgba(0,201,255,.04) 0%,transparent 50%);
+}
+header{
+  border-bottom:1px solid var(--border);
+  padding:1.25rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:10;
+  background:rgba(5,10,14,.92);backdrop-filter:blur(12px);
+  flex-wrap:wrap;gap:.5rem;
+}
+.logo{font-family:var(--serif);font-size:1.2rem;color:var(--text);text-decoration:none}
+.logo em{color:var(--accent);font-style:italic}
+.header-nav{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.nav-link{
+  font-size:.82rem;color:var(--text2);text-decoration:none;
+  border:1px solid var(--border2);border-radius:8px;padding:6px 14px;
+  transition:.2s;font-family:var(--sans)
+}
+.nav-link:hover{color:var(--accent);border-color:var(--accent)}
+.nav-link.primary{color:var(--accent);border-color:rgba(0,201,255,.3)}
+.hero{max-width:760px;margin:0 auto;padding:4rem 1.5rem 2rem;text-align:center}
+.hero-tag{
+  font-family:var(--mono);font-size:.7rem;color:var(--text3);
+  letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;display:block;
+}
+.hero h1{
+  font-family:var(--serif);font-size:clamp(2rem,6vw,3rem);
+  font-weight:400;letter-spacing:-.02em;line-height:1.15;margin-bottom:1rem;
+}
+.hero h1 em{color:var(--accent);font-style:italic}
+.hero p.lead{font-size:1.05rem;color:var(--text2);max-width:520px;margin:0 auto;line-height:1.7}
+.content-wrap{max-width:680px;margin:0 auto;padding:0 1.5rem 4rem}
+.content-block{margin-bottom:3rem}
+.content-block h2{
+  font-family:var(--serif);font-size:1.5rem;font-weight:400;
+  color:var(--text);margin-bottom:1rem;letter-spacing:-.01em;
+  display:flex;align-items:center;gap:.75rem;
+}
+.content-block h2::before{content:'';display:block;width:24px;height:1px;background:var(--accent)}
+.content-block p{font-size:.95rem;color:var(--text2);line-height:1.85;margin-bottom:1rem}
+.content-block p strong{color:var(--text);font-weight:500}
+.content-block ul{list-style:none;padding:0;margin:1rem 0}
+.content-block ul li{
+  font-size:.92rem;color:var(--text2);line-height:1.75;
+  padding:.4rem 0 .4rem 1.5rem;position:relative;
+}
+.content-block ul li::before{content:'→';position:absolute;left:0;color:var(--accent)}
+.content-block ul li strong{color:var(--text);font-weight:500}
+.highlight{
+  background:linear-gradient(135deg,rgba(0,201,255,.06) 0%,rgba(0,119,204,.03) 100%);
+  border:1px solid rgba(0,201,255,.2);border-radius:14px;
+  padding:1.5rem 1.75rem;margin:1.5rem 0;
+}
+.highlight p{margin:0;font-size:.95rem;color:var(--text);line-height:1.75}
+.highlight p em{color:var(--accent);font-style:italic;font-family:var(--serif)}
+.contact-block{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
+  padding:2rem;text-align:center;margin-top:1rem;
+}
+.contact-label{
+  font-family:var(--mono);font-size:.7rem;color:var(--text3);
+  letter-spacing:.15em;text-transform:uppercase;margin-bottom:.75rem;
+}
+.contact-email{
+  font-family:var(--mono);font-size:1.1rem;color:var(--accent);
+  text-decoration:none;display:inline-block;margin-bottom:1rem;
+  border-bottom:1px solid rgba(0,201,255,.3);padding-bottom:2px;transition:.2s;
+}
+.contact-email:hover{border-color:var(--accent)}
+.contact-cta{
+  display:inline-block;background:var(--accent);color:#000;
+  font-weight:600;font-size:.9rem;text-decoration:none;
+  padding:.7rem 1.5rem;border-radius:8px;transition:.2s;margin-top:.5rem;
+}
+.contact-cta:hover{background:#33d4ff;transform:translateY(-1px)}
+.contact-note{font-size:.78rem;color:var(--text3);margin-top:1rem}
+.cta-section{
+  text-align:center;padding:3rem 1.5rem 0;border-top:1px solid var(--border);margin-top:2rem;
+}
+.cta-section h3{
+  font-family:var(--serif);font-size:1.5rem;font-weight:400;
+  margin-bottom:.5rem;letter-spacing:-.01em;
+}
+.cta-section p{font-size:.9rem;color:var(--text2);margin-bottom:1.5rem}
+.cta-button{
+  display:inline-block;background:var(--accent);color:#000;
+  font-weight:600;font-size:1rem;text-decoration:none;
+  padding:.875rem 2rem;border-radius:10px;transition:.2s;
+}
+.cta-button:hover{background:#33d4ff;transform:translateY(-1px)}
+footer{
+  border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;
+  font-size:.8rem;color:var(--text3);
+}
+footer a{color:var(--accent);text-decoration:none}
+.footer-links{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem;font-size:.85rem}
+.footer-links a{color:var(--text2);text-decoration:none;transition:.2s}
+.footer-links a:hover{color:var(--accent)}
+@media(max-width:600px){
+  .hero{padding:3rem 1rem 2rem}
+  .content-wrap{padding:0 1rem 3rem}
+  .contact-block{padding:1.5rem}
+}
+</style>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#00c9ff">
+</head>
+<body>
+<header>
+  <a href="https://revalidaosce.com.br" class="logo">Revalida<em>OSCE</em></a>
+  <nav class="header-nav">
+    <a href="/faq.html" class="nav-link">FAQ</a>
+    <a href="https://simulador.revalidaosce.com.br" class="nav-link primary">Acessar simulador →</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <span class="hero-tag">Quem somos</span>
+  <h1>Por que o <em>RevalidaOSCE</em> existe</h1>
+  <p class="lead">Construído por quem vive de perto a maratona do Revalida — e percebeu que outras pessoas vivem o mesmo.</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="content-block">
+    <h2>A história</h2>
+    <p>
+      Sou esposo de uma médica revalidanda. Há três anos acompanho de perto essa maratona — os anos de espera entre editais, as estações praticadas em casa com cronômetro improvisado e acompanhante de mentira, a ansiedade que cresce na semana da prova, a frustração de chegar perto do Padrão Esperado de Procedimentos (PEP) e perder pontos por detalhes que ninguém te ensinou a perceber.
+    </p>
+    <p>
+      Quem revalida sabe: o conteúdo médico é a menor parte. O que falta é <strong>prática real</strong> — gente pra simular o paciente, alguém pra cronometrar, alguém pra dar feedback honesto sobre o que você falou e como falou. Cursos presenciais existem, mas custam caro e raramente cabem na rotina de quem trabalha em outra área enquanto espera o Revalida.
+    </p>
+    <div class="highlight">
+      <p>O <em>RevalidaOSCE</em> nasceu desse problema. Comecei construindo para ela. Foi ficando bom. Surgiu uma ideia: e se outras pessoas nessa mesma situação pudessem usar?</p>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h2>O que o sistema faz</h2>
+    <p>
+      Um simulador OSCE que reproduz o formato exato do Revalida INEP. Você atende um paciente virtual com voz natural em português, exatamente como na banca. Ao final, uma IA avalia cada item do <strong>Padrão Esperado de Procedimentos (PEP)</strong> e mostra o trecho exato da sua fala que foi considerado.
+    </p>
+    <ul>
+      <li><strong>Banco completo das edições oficiais 2020-2025</strong> do Revalida INEP</li>
+      <li><strong>Geração de estações inéditas com IA</strong> para treinar áreas específicas</li>
+      <li><strong>Histórico de desempenho</strong> por área médica para acompanhar evolução</li>
+      <li><strong>Interação por voz</strong> — fale com o paciente, ouça respostas naturais</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h2>Em quem confiar</h2>
+    <p>
+      Não somos uma startup com fundadores famosos nem um curso patrocinado. Somos uma pessoa que precisava resolver um problema próprio e percebeu que outras pessoas tinham o mesmo problema.
+    </p>
+    <p>
+      Tudo que está aqui foi <strong>construído porque foi testado em casa primeiro</strong>. Quando algo não funciona pra ela, não funciona pra ninguém. Quando ela aprova, você usa.
+    </p>
+  </div>
+
+  <div class="content-block">
+    <h2>Princípios</h2>
+    <ul>
+      <li><strong>Honestidade no que oferecemos.</strong> Banco oficial é banco oficial. IA é IA. Você sabe o que está usando.</li>
+      <li><strong>Foco no padrão INEP.</strong> Não inventamos formato — replicamos o oficial.</li>
+      <li><strong>Preço justo.</strong> R$ 97/mês. Cancela quando quiser. Sem fidelidade.</li>
+      <li><strong>Conversa direta.</strong> Tem um problema? Manda email. A gente lê e responde.</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h2>Fale com a gente</h2>
+    <p>
+      Pra dúvidas, sugestões, problemas técnicos ou histórias de aprovação — a gente lê tudo.
+    </p>
+    <div class="contact-block">
+      <div class="contact-label">E-mail</div>
+      <a href="mailto:revalida.osce@gmail.com" class="contact-email">revalida.osce@gmail.com</a>
+      <div>
+        <a href="mailto:revalida.osce@gmail.com" class="contact-cta">Enviar e-mail →</a>
+      </div>
+      <div class="contact-note">Respondemos em até 48 horas úteis.</div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h3>Pronto para treinar?</h3>
+    <p>Comece a praticar agora — R$ 97/mês, sem fidelidade.</p>
+    <a href="https://revalidaosce.com.br#preco" class="cta-button">Conhecer o simulador →</a>
+  </div>
+
+</div>
+
+<footer>
+  <nav class="footer-links" aria-label="Links institucionais">
+    <a href="https://revalidaosce.com.br">Home</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="https://simulador.revalidaosce.com.br">Simulador</a>
+    <a href="mailto:revalida.osce@gmail.com">Contato</a>
+  </nav>
+  <p>© 2026 RevalidaOSCE · <a href="https://revalidaosce.com.br">revalidaosce.com.br</a></p>
+</footer>
+
+</body>
+</html>
