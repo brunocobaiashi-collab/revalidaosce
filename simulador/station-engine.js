@@ -16,6 +16,17 @@
        onFallback,                      // ({from,to,response}) => void  (observabilidade do fallback)
        onProgress                       // (stepIndex:int) => void   (UI fica no wrapper)
      }) => { station, audit }           // wrapper decide: preview ou autosave
+
+   ENDURECIMENTO DE RUBRICA (2026-07-09) — normalizacao INEP no proprio gerador:
+     • buildSys2: PEP so pode ter 2 (binario) ou 3 faixas — NUNCA 4/5 ("Insuficiente"/
+       "Totalmente adequado" proibidos); parcial = max/2 por padrao; decompor diagnosticos/
+       condutas independentes em itens separados; itens de exame pontuam SOLICITAR+INTERPRETAR,
+       nunca RECITAR o dado que o impresso ja entregou.
+     • normalizeChecklistItems: colapsa qualquer item com 4+ faixas para 3 niveis [0, max/2, max]
+       (preserva o maximo -> soma do PEP intacta). Rede na origem, mesmo se o modelo desobedecer.
+     • preValidate: novo gate 'banda_invalida' (high) para 4+ faixas que escaparem.
+   Pendente (outros arquivos, chat Index/Adm/Quick-API): few-shot/GEN_DIFF_RUBRIC (admin.html) e
+   a regra de "terapeutica correta" no auditor (index.html).
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -229,8 +240,26 @@
       'FORMATO DE CADA ITEM:',
       '{"id":"1","text":"Titulo curto","subitens":"(1) acao\\n(2) acao","scores":[0,0.5,1.0],"labels":["Inadequado","Parcialmente adequado","Adequado"],"crit_adeq":"...","crit_parc":"... (omitir se 2 niveis)","crit_inad":"..."}',
       '',
-      'Use 3 niveis quando o item tem multiplos subitens. Use 2 niveis quando e binario (ex: "Solicita radiografia").',
-      '⚠️ labels DEVE ter o MESMO numero de itens que scores (mesmas faixas). Se scores tem 4 numeros, labels tem 4 rotulos (ex: ["Inadequado","Insuficiente","Parcialmente adequado","Adequado"]). NUNCA 4 scores com 3 labels.',
+      '⚠️ ESTRUTURA DE FAIXAS — SO BINARIO OU 3 NIVEIS (padrao INEP; NUNCA 4+):',
+      'Cada item tem EXATAMENTE 2 faixas (binario) OU 3 faixas. NUNCA use 4 ou 5 faixas.',
+      '  - BINARIO: scores [0, max], labels ["Inadequado","Adequado"] — para acao unica/objetiva (ex: "Solicita radiografia").',
+      '  - 3 NIVEIS: scores [0, max/2, max], labels ["Inadequado","Parcialmente adequado","Adequado"] — quando ha multiplos subitens.',
+      'PARCIAL = METADE DO MAXIMO por padrao (ex: max 1.0 -> parcial 0.5; max 1.5 -> parcial 0.75; max 2.0 -> parcial 1.0).',
+      'PROIBIDO os niveis "Insuficiente" e "Totalmente adequado" (sao 4a/5a faixa, fora do padrao INEP).',
+      'labels DEVE ter o MESMO numero de itens que scores. NUNCA 4 scores com 3 labels, e NUNCA 4 faixas.',
+      '',
+      '⚠️ DECOMPONHA DIAGNOSTICOS E CONDUTAS INDEPENDENTES EM ITENS SEPARADOS:',
+      'Se o caso tem DOIS diagnosticos/hipoteses independentes, ou DUAS condutas independentes, cada um',
+      'e um item PROPRIO com sua pontuacao — NUNCA agrupe "diagnostico A e B" num item so, nem "conduta',
+      'X e Y" num item so. Um item = uma habilidade avaliavel de forma independente.',
+      '',
+      '⚠️ O PEP AVALIA SOLICITAR + INTERPRETAR, NUNCA RECITAR O IMPRESSO:',
+      'Itens de exame fisico e de exames complementares pontuam o candidato por SOLICITAR o exame e por',
+      'INTERPRETAR/CONCLUIR a partir do achado — NUNCA por repetir em voz alta o dado que o impresso ja',
+      'entregou. NAO crie subitem do tipo "verbaliza que a PA e 90x60" ou "identifica nodulo azulado as 5h"',
+      '(isso e recitar o impresso). Em vez disso: "solicita exame fisico dirigido" e "interpreta o achado',
+      '(reconhece instabilidade / reconhece a trombose e afasta abscesso)". A habilidade avaliada e o',
+      'raciocinio clinico, nao a leitura do dado pronto.',
       'Total das pontuacoes maximas (ultimo score de cada) deve = 10.0',
       '',
       '⚠️ NENHUM ITEM PODE TER PONTUACAO MAXIMA ZERO:',
@@ -439,7 +468,17 @@
                || it.criterio || it['crit\u00e9rio'] || it.item || it.nome || it.name || '';
       var scores = Array.isArray(it.scores) ? it.scores.map(function (x) { return Number(x) || 0; })
                  : (Array.isArray(it.pontuacoes) ? it.pontuacoes.map(function (x) { return Number(x) || 0; }) : []);
-      var labels = labelsForBands(scores.length, it.labels);
+      // NORMALIZACAO DE BANDAS (padrao INEP: so binario ou 3 niveis). Qualquer item com 4+ faixas
+      // ("Insuficiente"/"Totalmente adequado") e colapsado para 3 niveis [0, max/2, max]: preserva o
+      // MAXIMO (a soma do PEP nao muda) e crava parcial = metade do maximo. Rede na origem: estacao
+      // nova de IA nunca entra no acervo com 4 bandas, mesmo que o modelo desobedeca o prompt.
+      var provLabels = it.labels;
+      if (scores.length > 3) {
+        var mxB = Math.max.apply(null, scores.map(function (x) { return Number(x) || 0; }));
+        scores = [0, Math.round((mxB / 2) * 100) / 100, mxB];
+        provLabels = null;
+      }
+      var labels = labelsForBands(scores.length, provLabels);
       return {
         id: String(it.id || (i + 1)),
         text: String(text).trim(),
@@ -574,6 +613,13 @@
       if (it && Array.isArray(it.scores) && it.scores.length) {
         var mxIt = Math.max.apply(null, it.scores.map(function (x) { return Number(x) || 0; }));
         if (!(mxIt > 0)) issues.push({ severity: 'high', category: 'item_morto', message: 'Item "' + (it.text || ('#' + (i + 1))) + '" tem pontuacao maxima 0 — nao pontua nada. Redistribua os pontos.' });
+      }
+    });
+    // Faixa fora do padrao INEP: so 2 (binario) ou 3 niveis. Rede de seguranca — normalizeChecklistItems
+    // ja colapsa 4+/5+ para 3; se algum item chegar aqui com 4+ faixas, sinaliza (high).
+    clCheck.forEach(function (it, i) {
+      if (it && Array.isArray(it.scores) && it.scores.length > 3) {
+        issues.push({ severity: 'high', category: 'banda_invalida', message: 'Item "' + (it.text || ('#' + (i + 1))) + '" tem ' + it.scores.length + ' faixas — padrao INEP admite apenas 2 (binario) ou 3 niveis. Colapse para [0, max/2, max].' });
       }
     });
     // Impresso sem dados (rows vazios e sem imagem) = estacao incompleta (provavel truncamento) -> reprova
