@@ -25,6 +25,24 @@
      • normalizeChecklistItems: colapsa qualquer item com 4+ faixas para 3 niveis [0, max/2, max]
        (preserva o maximo -> soma do PEP intacta). Rede na origem, mesmo se o modelo desobedecer.
      • preValidate: novo gate 'banda_invalida' (high) para 4+ faixas que escaparem.
+   COBERTURA DE PALAVRAS DOS EXAMES (2026-07-10): o gerador passa a produzir e o sistema a VERIFICAR
+   que cada impresso e solicitavel pelo candidato.
+     • buildSys1: trigger_keywords OBRIGATORIA por impresso (4-8 formas naturais de pedir o exame:
+       nome + sinonimos + regiao/modalidade), com exemplos (ginecologico, mamas, abdominal,
+       toracocentese, imagem generica) e o PORQUE (sem cobertura o impresso so responde a "impresso N").
+     • preValidate (BLOQUEIA): 'exame_sem_cobertura' (high) quando um impresso tem <3 keywords usaveis
+       E o titulo nao casa com nenhum exame reconhecido pelo runtime (COVERED_EXAM_RX, espelho das
+       heuristicas/EXAM_FAMILIES do index.html) — i.e., o candidato nao conseguiria pedi-lo.
+     • softWarnings (AVISA): 'cobertura_keywords_fraca' quando as keywords sao poucas mas o titulo e
+       exame padrao (runtime entrega por heuristica) — robustez, nao bloqueia.
+     • Manter COVERED_EXAM_RX em sincronia com o index.html ao adicionar novas familias de exame.
+   QUALIDADE DO crit_adeq (2026-07-10): alinha o PEP gerado ao auditor endurecido do runtime.
+     • buildSys2: crit_adeq deve ser CONTAVEL e alinhado aos subitens; itens de TERAPEUTICA/profilaxia
+       NOMEIAM o agente correto (nao "orienta tratamento" — e "prescreve ceftriaxona+azitromicina..."),
+       encaminhamento nomeia a ESPECIALIDADE correta, conduta pontua a ACAO instituida. Fecha a lacuna
+       que deixava a regra "terapeutica correta" (auditor 1.6.66) sem crit_adeq para cobrar (falsos-
+       positivos amlodipino/fogachos e cipro/gonococo nasciam de crit_adeq vago).
+     • buildSysAudit: novo MEDIUM que sinaliza crit_adeq terapeutico/encaminhamento VAGO.
    Pendente (outros arquivos, chat Index/Adm/Quick-API): few-shot/GEN_DIFF_RUBRIC (admin.html) e
    a regra de "terapeutica correta" no auditor (index.html).
    ════════════════════════════════════════════════════════════════════════════ */
@@ -197,8 +215,23 @@
       '',
       '6) VALIDACOES TECNICAS:',
       '   • complexity: "medium" ou "advanced" (NUNCA simple/easy/intermediate).',
-      '   • Cada exam: title claro, trigger_keywords array com 4-8 strings de 3+ chars',
-      '     (NUNCA "rx"/"tc"/"us"/"pa" — use "raio x"/"tomografia"/"ultrassom"/"pressao arterial").',
+      '   • COBERTURA DE PALAVRAS (trigger_keywords) — OBRIGATORIA em CADA impresso, senao o candidato',
+      '     NAO consegue solicitar o exame e o impresso NUNCA aparece (falha grave de estacao):',
+      '     Cada exam DEVE ter trigger_keywords: array de 4-8 strings (3+ chars, minusculas, SEM acento)',
+      '     cobrindo TODAS as formas naturais de PEDIR aquele exame — o nome do exame + sinonimos +',
+      '     a regiao/modalidade. Pense: "como o candidato falaria para pedir ISTO?".',
+      '     (NUNCA abreviacoes soltas "rx"/"tc"/"us"/"pa" — use "raio x"/"tomografia"/"ultrassom"/"pressao arterial").',
+      '     Exemplos de boa cobertura por tipo de impresso:',
+      '       - "EXAME GINECOLOGICO" -> ["exame ginecologico","exame especular","especulo","toque vaginal","exame pelvico","inspecao vulvar"]',
+      '       - "EXAME DAS MAMAS" -> ["exame das mamas","exame mamario","palpacao das mamas","examinar as mamas","exame clinico das mamas"]',
+      '       - "EXAME ABDOMINAL" -> ["exame abdominal","exame do abdome","palpacao abdominal","examinar o abdome"]',
+      '       - "ANALISE DO LIQUIDO PLEURAL (TORACOCENTESE)" -> ["toracocentese","liquido pleural","analise do liquido pleural","puncao pleural"]',
+      '       - "EXAMES DE IMAGEM (MAMOGRAFIA+US)" -> ["mamografia","ultrassom de mama","ultrassonografia das mamas","exames de imagem"]',
+      '     Regra pratica: se o titulo do impresso NAO for um exame padrao obvio (exame fisico, hemograma,',
+      '     raio x, ecg, ultrassom, tomografia), a cobertura por palavras e AINDA MAIS critica — inclua o',
+      '     nome do procedimento/regiao E os sinonimos falados. Titulos genericos ("IMAGEM","EXAMES") exigem',
+      '     as palavras do que o impresso REALMENTE contem (ex.: se "IMAGEM" e uma TC de abdome, inclua',
+      '     "tomografia de abdome","tc de abdome").',
       '   • Cada exam: rows com texto descritivo BRUTO (ver regra 5), images: [].',
       '   • IMPRESSOS: no MAXIMO 5 impressos, apenas os ESSENCIAIS e pertinentes ao caso. TODO impresso',
       '     DEVE ter os rows PREENCHIDOS com dados brutos — NUNCA crie impresso de titulo sem dados.',
@@ -260,6 +293,23 @@
       '(isso e recitar o impresso). Em vez disso: "solicita exame fisico dirigido" e "interpreta o achado',
       '(reconhece instabilidade / reconhece a trombose e afasta abscesso)". A habilidade avaliada e o',
       'raciocinio clinico, nao a leitura do dado pronto.',
+      '',
+      '⚠️ QUALIDADE DO crit_adeq (o auditor aplica o crit_adeq LITERALMENTE — escreva-o para ser cobravel):',
+      'O crit_adeq/crit_parc/crit_inad e o CRITERIO que o corretor automatico usa. Se for vago, o corretor',
+      'nao consegue distinguir o certo do errado. Regras:',
+      '  1) CONTAVEL E ALINHADO AOS SUBITENS: o crit_adeq diz EXPLICITAMENTE quantos/quais subitens exige',
+      '     (ex.: "realiza os 3", "cita ambos os agentes", "investiga os 4"). Evite vago ("avalia',
+      '     adequadamente", "conduz bem"). O crit_parc (se 3 niveis) diz o limiar parcial (ex.: "realiza 1 de 2").',
+      '  2) TERAPEUTICA/PROFILAXIA/TRATAMENTO — NOMEIE O(S) AGENTE(S) CORRETO(S): o crit_adeq deve NOMEAR o',
+      '     farmaco/classe/terapia CORRETA e vigente para o caso, nao "orientar tratamento" generico.',
+      '     ❌ "orienta opcao nao hormonal para fogachos" (vago — credita ate amlodipino, que e errado)',
+      '     ✅ "prescreve ISRS/venlafaxina ou gabapentina para os fogachos"',
+      '     ❌ "indica profilaxia para ISTs"   ✅ "prescreve ceftriaxona + azitromicina + penicilina benzatina"',
+      '     Assim o corretor rebaixa a escolha ERRADA (a acao existe mas o agente e incorreto).',
+      '  3) ENCAMINHAMENTO — NOMEIE A ESPECIALIDADE CORRETA: ❌ "encaminha ao especialista"',
+      '     ✅ "encaminha a urologia" (para litiase ureteral). Especialidade proxima porem errada NAO conta.',
+      '  4) CONDUTA PONTUA A ACAO INSTITUIDA, nao a mencao: escreva o crit_adeq sobre INSTITUIR a conduta',
+      '     correta (ex.: "inicia anticoagulacao plena"), nao sobre "falar" no assunto.',
       'Total das pontuacoes maximas (ultimo score de cada) deve = 10.0',
       '',
       '⚠️ NENHUM ITEM PODE TER PONTUACAO MAXIMA ZERO:',
@@ -353,6 +403,11 @@
       '  - PEP nao cobre as 4 fases: anamnese, exame fisico, hipotese diagnostica, conduta.',
       '  - PEP cobra exame/dado que nenhum impresso fornece (ex: subitem pede gasometria/coagulograma/',
       '    tipagem mas nao ha esse dado nos impressos), salvo se for claramente resposta verbal do chefe.',
+      '  - crit_adeq TERAPEUTICO VAGO: item de conduta/tratamento/profilaxia/encaminhamento cujo crit_adeq',
+      '    NAO nomeia o agente/terapia/especialidade CORRETA (ex.: "orienta tratamento", "indica profilaxia",',
+      '    "encaminha ao especialista"). Sem nomear, o corretor credita ate a escolha errada. Reporte para',
+      '    que o crit_adeq nomeie o correto (ex.: "prescreve ceftriaxona+azitromicina+penicilina benzatina";',
+      '    "encaminha a urologia").',
       '  - ACHADO DE IMAGEM com gravidade que o quadro nao sustenta (ex: "desvio de mediastino" num',
       '    pneumotorax descrito como simples/estavel, com traqueia centrada e sem turgencia jugular).',
       '  - IMAGEM/FAST com regiao ambigua (afirma e nega o achado na mesma linha) ou lado anatomico trocado.',
@@ -585,6 +640,22 @@
     'Medicina de Família/Comunidade': ['manejo de hipertensao na APS','manejo de diabetes na APS','saude mental (depressao/ansiedade) na APS','pre-natal de baixo risco','puericultura','cessacao do tabagismo','rastreios em adultos','paciente poliqueixoso','planejamento familiar','abordagem do uso de alcool']
   };
 
+  // Espelho CONDENSADO da cobertura do runtime (buildRules heuristicas + EXAM_FAMILIES do index.html).
+  // Um impresso cujo TITULO casa aqui e solicitavel mesmo SEM trigger_keywords (o runtime entrega por
+  // heuristica). MANTER EM SINCRONIA com o index.html quando novas familias de exame forem adicionadas.
+  var COVERED_EXAM_RX = /f[i\u00ed]sic|clinic|abcde|exame.{0,5}(retal|digital)|toque.{0,5}retal|\burina\b|urinari|\beas\b|urocultura|sedimento.{0,10}urin|hemogram|leucogram|hematimetr|(exame.{0,6}(de.{0,4})?)?sangue|bioquimic|laborator|exames?.{0,5}complement|\becg\b|eletrocardiogr|\beletro\b|raio.{0,3}x|radiograf|\brx\b|incidencia|ultrassom|ultrasson|\busg\b|ecograf|tomograf|\btc\b|\btac\b|resson[a\u00e2]nc|\brm\b|glicem|dextro|\bhgt\b|glicose|gasometr|sorolog|\bhiv\b|vdrl|sifilis|hepatite|beta.?hcg|\bhcg\b|ureia|creatinin|funcao.{0,8}renal|\btgo\b|\btgp\b|bilirrubin|transaminas|funcao.{0,8}hepat|sodio|potassio|eletrolit|calcio|troponin|ck.?mb|\bcpk\b|coagulogr|\btap\b|\bttpa?\b|\binr\b|plaqueta|liquor|liquido.{0,5}(cefalo|cerebro)|puncao.{0,5}lombar|\braqui|papanicol|citolog|colpocit|preventivo|colposcop|espiromet|prova.{0,8}(funcao|ventil)|pico.{0,5}fluxo|endoscop|\beda\b|colonoscop|\bpcr\b|proteina.{0,5}c.{0,5}reativ|\bvhs\b|ecocardiogr|eco.{0,4}cardi|fundoscop|fundo.{0,5}(de.{0,5})?olho|oftalmoscop|caderneta|carteira.{0,8}(vacina|gestante)|cart[a\u00e3]o.{0,8}(pre.?natal|crianc|gestante)|cultura|antibiogram|hemocultura|teste.{0,5}rapido|antigeno|\bswab\b|eletroencefal|\beeg\b|otoscop|doppler|duplex|biopsia|anatomopatolog|histopatolog|amilase|lipase|tireoid|\btsh\b|\bt4\b|\bt3\b|hormon|les[a\u00e3]o|lesoes|inspec|ectoscop|ictoscop|\bferida|queimad|ulcera|dermatolog/i;
+  function engNorm(t) { return String(t == null ? '' : t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  // Conta trigger_keywords "usaveis" de um impresso (>=3 chars apos deacentuar, deduplicadas).
+  function usableKw(ex) {
+    var seen = {};
+    (Array.isArray(ex && ex.trigger_keywords) ? ex.trigger_keywords : []).forEach(function (k) {
+      if (typeof k !== 'string') return;
+      var kn = engNorm(k).trim();
+      if (kn.length >= 3) seen[kn] = 1;
+    });
+    return Object.keys(seen).length;
+  }
+
   function preValidate(stObj, pepResult, dificuldade) {
     var issues = [];
     // checklist vazio = estacao inutilizavel no simulador -> reprova SEMPRE (qualquer policy)
@@ -645,6 +716,18 @@
       }
       var rl = rowsTxt.toLowerCase();
       DIAGNOSTICOS.forEach(function (d) { if (rl.indexOf(d) >= 0) issues.push({ severity: 'high', category: 'vazamento_impresso', message: 'Impresso "' + (e.title || '') + '" cita diagnostico: ' + d }); });
+    });
+    // COBERTURA DE PALAVRAS por exame (BLOQUEIA): impresso que o candidato NAO consegue solicitar some
+    // da estacao na pratica (so responde a "impresso N") — exame nao exibido = falha grave de reputacao.
+    // Gap REAL = poucas trigger_keywords usaveis E titulo NAO coberto por heuristica/familia do runtime.
+    examsArr.forEach(function (e) {
+      if (!e || !String(e.title || '').trim()) return;
+      var n = usableKw(e);
+      var coberto = COVERED_EXAM_RX.test(engNorm(e.title));
+      if (n < 3 && !coberto) {
+        issues.push({ severity: 'high', category: 'exame_sem_cobertura',
+          message: 'Impresso "' + (e.title || '') + '" nao tem cobertura de palavras: ' + n + ' trigger_keyword(s) usavel(is) e o titulo nao casa com nenhum exame reconhecido pelo simulador. O candidato NAO conseguiria solicitar este exame (so via "impresso N") e ele nao apareceria. Adicione 4-8 formas naturais de pedir este exame (nome + sinonimos + regiao/modalidade).' });
+      }
     });
     return issues;
   }
@@ -724,6 +807,15 @@
       if (chk.rx.test(pepTxt) && !chk.rx.test(corpus)) {
         warns.push({ severity: 'warn', category: 'pep_exame_ausente',
           message: 'PEP cobra "' + chk.nome + '" mas nenhum impresso fornece esse dado. Adicione ao impresso ou ajuste o subitem (ou confirme que e resposta verbal do chefe).' });
+      }
+    });
+    // COBERTURA DE PALAVRAS fraca, mas titulo e exame padrao (o runtime entrega por heuristica):
+    // nao bloqueia, mas avisa para adicionar trigger_keywords (robustez, e o pedido pode variar).
+    examsArr.forEach(function (e) {
+      if (!e || !String(e.title || '').trim()) return;
+      if (usableKw(e) < 3 && COVERED_EXAM_RX.test(engNorm(e.title))) {
+        warns.push({ severity: 'warn', category: 'cobertura_keywords_fraca',
+          message: 'Impresso "' + (e.title || '') + '" tem poucas trigger_keywords. O titulo e um exame padrao (o simulador entrega por heuristica), mas inclua 4-8 formas naturais de pedir o exame para robustez.' });
       }
     });
     return warns;
