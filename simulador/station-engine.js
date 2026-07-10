@@ -43,6 +43,11 @@
        que deixava a regra "terapeutica correta" (auditor 1.6.66) sem crit_adeq para cobrar (falsos-
        positivos amlodipino/fogachos e cipro/gonococo nasciam de crit_adeq vago).
      • buildSysAudit: novo MEDIUM que sinaliza crit_adeq terapeutico/encaminhamento VAGO.
+   IMAGEM SO VIRA DEFEITO SE COBRAR INTERPRETACAO (2026-07-10): estacao SEM impresso de imagem nao
+   pode ter item de PEP que manda INTERPRETAR imagem. Imagem apenas SOLICITADA/verbalizada e desenho
+   valido. softWarnings: removida a imagem do EXAM_CHECKS amplo (que avisava em solicitacao-so, ruido)
+   e criado 'pep_imagem_sem_laudo' (warn) que so dispara quando IMG_INTERP_RX (verbo de leitura ligado
+   a termo de imagem) casa E nenhum impresso fornece imagem (IMG_TERM_RX).
    Pendente (outros arquivos, chat Index/Adm/Quick-API): few-shot/GEN_DIFF_RUBRIC (admin.html) e
    a regra de "terapeutica correta" no auditor (index.html).
    ════════════════════════════════════════════════════════════════════════════ */
@@ -784,13 +789,15 @@
     { nome: 'urina (EAS)', rx: /\beas\b|sum[a\u00e1]rio de urina|urin[a\u00e1]lise|parcial de urina/i },
     { nome: 'urocultura', rx: /urocultura/i },
     { nome: 'hemocultura', rx: /hemocultura/i },
-    { nome: 'lactato', rx: /lactato/i },
-    { nome: 'radiografia', rx: /radiografia|raio-?x/i },
-    { nome: 'tomografia', rx: /tomografi/i },
-    { nome: 'ultrassom/FAST', rx: /ultrassom|ultrassonografi|ecografi|\bfast\b/i },
-    { nome: 'eletrocardiograma', rx: /eletrocardiogram|\becg\b/i },
-    { nome: 'ecocardiograma', rx: /ecocardiogram/i }
+    { nome: 'lactato', rx: /lactato/i }
+    // Imagem (radiografia/tomografia/USG/ECG/eco) foi REMOVIDA daqui: exame de imagem em item de
+    // SOLICITACAO/verbalizacao e desenho valido e nao deve gerar aviso. Imagem so vira defeito quando
+    // o PEP manda INTERPRETAR e nao ha laudo — tratado por IMG_INTERP_RX (pep_imagem_sem_laudo) abaixo.
   ];
+  // Termos que indicam que um IMPRESSO fornece imagem (laudo).
+  var IMG_TERM_RX = /radiograf|tomograf|angiotomograf|angio-?tc|ultrass|\busg\b|ecograf|\bfast\b|doppler|mamograf|cintilograf|ressonanc|ecocardiogr|\becg\b|eletrocardiogr|\bimagem\b|\blaudo\b|incidencia/i;
+  // Item de PEP que exige INTERPRETAR imagem: verbo de leitura ligado a um termo de imagem (na mesma linha).
+  var IMG_INTERP_RX = /(interpreta|descreve.{0,15}achad|reconhec|identifica|analisa|evidencia|observa|leitura).{0,45}(radiograf|tomograf|ultrass|\busg\b|angio|doppler|mamograf|cintilograf|ressonanc|ecocardiogr|\becg\b|eletrocardiogr|\bimagem\b|\blaudo\b)|(radiograf|tomograf|ultrass|\busg\b|angio|doppler|mamograf|ecocardiogr|\becg\b|\bimagem\b|\blaudo\b).{0,45}(interpreta|mostra|evidencia|revela|com achado|com sinal|apresenta)/i;
 
   // Avisos NAO bloqueantes (portao de qualidade p/ curadoria). Nao gasta retry.
   function softWarnings(stObj) {
@@ -809,6 +816,20 @@
           message: 'PEP cobra "' + chk.nome + '" mas nenhum impresso fornece esse dado. Adicione ao impresso ou ajuste o subitem (ou confirme que e resposta verbal do chefe).' });
       }
     });
+    // IMAGEM SEM LAUDO (principio: estacao SEM exame de imagem NUNCA pode cobrar INTERPRETAR imagem).
+    // So avisa quando um item manda INTERPRETAR/descrever achados de imagem E nenhum impresso fornece
+    // imagem. Item que apenas SOLICITA/verbaliza a imagem e desenho valido e NAO dispara (fim do ruido).
+    if (!IMG_TERM_RX.test(corpus)) {
+      clArr.forEach(function (it) {
+        var linhas = String((it && it.subitens) || '').split('\n');
+        linhas.push(String((it && it.text) || ''));
+        var achou = linhas.some(function (ln) { return IMG_INTERP_RX.test(ln.toLowerCase()); });
+        if (achou) {
+          warns.push({ severity: 'warn', category: 'pep_imagem_sem_laudo',
+            message: 'Item "' + ((it && it.text) || '') + '" pede para INTERPRETAR imagem, mas a estacao nao tem impresso de imagem. Estacao sem exame de imagem nao pode cobrar interpretacao de imagem: adicione o laudo (impresso) OU troque o subitem para apenas SOLICITAR/verbalizar a imagem.' });
+        }
+      });
+    }
     // COBERTURA DE PALAVRAS fraca, mas titulo e exame padrao (o runtime entrega por heuristica):
     // nao bloqueia, mas avisa para adicionar trigger_keywords (robustez, e o pedido pode variar).
     examsArr.forEach(function (e) {
