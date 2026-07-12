@@ -180,6 +180,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 1.5rem;
 /* ── DORES ── */
 #dores{background:var(--bg)}
 .dores-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem}
+.dif-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:3rem}
 .dor-card{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);
   border-radius:12px;padding:1.5rem;display:flex;gap:1rem;align-items:flex-start}
 .dor-icon{flex-shrink:0;margin-top:.15rem}.dor-icon svg{width:26px;height:26px;color:var(--red)}
@@ -292,7 +293,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 @media(max-width:768px){
   h1{font-size:2.5rem}
   h2{font-size:2rem}
-  .hero-grid,.solucao-split,.dores-grid{grid-template-columns:1fr}
+  .hero-grid,.solucao-split,.dores-grid,.dif-grid{grid-template-columns:1fr}
   .hero-mockup{display:none}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .features-grid{grid-template-columns:1fr}
@@ -396,12 +397,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
       <div>
         <div class="hero-tag">Simulador OSCE · Padrão INEP</div>
         <h1>Passe na prova<br>prática do<br><em>Revalida</em></h1>
-        <p class="hero-sub">O único simulador com estações no padrão INEP, ator virtual com IA, avaliação automática pelo Padrão Esperado de Procedimentos (PEP) e feedback imediato — no celular ou computador.</p>
+        <p class="hero-sub"><strong>Converse por voz</strong> com o paciente virtual, como na prova real. Estações no padrão INEP, avaliação automática pelo Padrão Esperado de Procedimentos (PEP) e feedback imediato — no celular ou computador.</p>
         <div class="hero-btns">
-          <a href="#preco" class="btn-primary"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Assinar por R$ 97/mês →</a>
+          <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Testar 3 estações grátis →</a>
           <a href="#solucao" class="btn-secondary">Ver como funciona</a>
         </div>
-        <p style="margin-top:.9rem;font-size:.88rem;color:var(--text3)">🎁 Ou <a href="https://simulador.revalidaosce.com.br?signup=1" style="color:#00c9ff;text-decoration:underline;font-weight:600">crie sua conta grátis</a> e teste 3 estações — sem cartão.</p>
+        <p style="margin-top:.9rem;font-size:.88rem;color:var(--text3)">Sem cartão, sem compromisso · ou <a href="#preco" style="color:#7d96a8;text-decoration:underline">assine o acesso completo por R$ 97/mês</a>.</p>
       </div>
       <!-- ============================================================ -->
       <style>
@@ -741,6 +742,37 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
         <div>
           <div class="dor-title">Feedback inexistente ou tardio</div>
           <div class="dor-text">Cursos presenciais são caros e escassos. Sem feedback imediato, o candidato não sabe o que errou e repete os mesmos erros.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="diferenca">
+  <div class="container">
+    <div class="section-tag">Por que o RevalidaOSCE</div>
+    <h2>O que nos separa<br>dos outros simuladores</h2>
+    <p class="section-sub">Não basta dizer que tem inteligência artificial. O que muda o seu treino são três coisas que só o RevalidaOSCE entrega de verdade.</p>
+    <div class="dif-grid reveal">
+      <div class="dor-card">
+        <div class="dor-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+        <div>
+          <div class="dor-title">Voz real, não chat de texto</div>
+          <div class="dor-text">Você fala e o paciente responde por voz, como na estação real com ator. Treinar digitando não prepara para falar sob a pressão do tempo.</div>
+        </div>
+      </div>
+      <div class="dor-card">
+        <div class="dor-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div>
+          <div class="dor-title">Avaliação pelo PEP oficial de 10 pontos</div>
+          <div class="dor-text">Corrigido no padrão exato do INEP, item a item, na escala real da prova — não em checklist inventado com pontuação que não existe na avaliação.</div>
+        </div>
+      </div>
+      <div class="dor-card">
+        <div class="dor-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+        <div>
+          <div class="dor-title">Treino ilimitado, sem depender de colega</div>
+          <div class="dor-text">Repita quantas vezes quiser, a qualquer hora — sem créditos, sem cota e sem precisar de outra pessoa para ser o ator. Treine sozinho até dominar a estação.</div>
         </div>
       </div>
     </div>
