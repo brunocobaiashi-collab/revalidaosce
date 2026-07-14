@@ -75,7 +75,10 @@
   ]
 }
 </script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -426,6 +429,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
           background:linear-gradient(180deg,#091018 0%,#05090e 100%);
           border:1px solid var(--border2); border-radius:16px; overflow:hidden;
           box-shadow:0 30px 80px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.02) inset;
+        }
+        /* Reserva a altura do widget no desktop antes do JS montar o conteúdo,
+           eliminando o layout shift (CLS) do carregamento. No mobile o widget
+           fica oculto (.hero-mockup{display:none}), então não se aplica. */
+        @media(min-width:769px){
+          .rvd-window{min-height:592px}
         }
       
         .rvd-titlebar{
