@@ -6,7 +6,7 @@
 <title>Gerenciar — RevalidaOSCE</title>
 <!-- ═══ APP VERSION ═══ -->
 <!-- Atualizar SEMPRE que houver mudança no arquivo. Use no console: __appVersion() -->
-<meta name="app-version" content="1.6.17">
+<meta name="app-version" content="1.6.40">
 <meta name="app-deploy-date" content="2026-06-29">
 <meta name="app-notes" content="Geracao em lote (batch) reusando o pipeline do gerador unico; few-shot INEP sanitizado compartilhado (buildInepFewShot).">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -864,6 +864,13 @@ function orientAtorFromTextarea(txt){
       <textarea id="gen-img-desc" class="tinput" rows="2" placeholder="Ex: ECG com onda delta, PR curto, QRS alargado → WPW. Vazio = estação sem imagem." style="margin-bottom:.875rem"></textarea>
       <label class="ilabel">Origem/crédito da imagem (se houver imagem)</label>
       <input type="text" id="gen-img-origem" class="tinput" placeholder="Ex: PTB-XL (CC BY 4.0) / NIH ChestX-ray14 (domínio público)" style="margin-bottom:1.25rem">
+      <!-- v1.6.40: modo AVANÇADA ANCORADA (engine v1.1.0+) -->
+      <label class="ilabel" style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin-bottom:.5rem"><input type="checkbox" id="gen-anchor-chk" onchange="toggleAnchorBox()" style="width:auto">🖼️ Ancorar em imagem aprovada (AVANÇADA ANCORADA)</label>
+      <div id="gen-anchor-wrap" style="display:none">
+        <div id="gen-anchor-engine" class="small" style="margin:0 0 .5rem"></div>
+        <textarea id="gen-anchor-json" class="tinput" rows="6" placeholder='Cole o objeto image_anchor aprovado pela Angélica (JSON): {"image_file":"...","modality":"...","incidence":"...","finding_truth":"...","diagnosis_truth":"...","area":"...","image_credits":{"license":"CC BY 4.0"}}' style="margin-bottom:.5rem;font-family:var(--mono);font-size:.78rem"></textarea>
+        <p class="small muted" style="margin:0 0 1rem;line-height:1.5">A imagem já deve existir no bucket (o import é etapa da busca). O engine força Avançado, <code>complexity=advanced</code> e <code>trial_available=false</code>; a estação nasce <strong>pending</strong> como <strong>ia_curada</strong>. Régua de dificuldade e os campos de imagem legados acima são ignorados neste modo.</p>
+      </div>
       <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="runGenStation()">✨ Gerar estação</button>
       <button class="btn" style="width:100%;justify-content:center;padding:10px;margin-top:.5rem" onclick="openModal('modal-batch-gen')">📚 Gerar em lote</button>
     </div>
@@ -1121,9 +1128,9 @@ function orientAtorFromTextarea(txt){
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.39',
-  date: '2026-07-13',
-  notes: '1.6.39 (deste chat): ordem das colunas do Historico de envios ajustada a pedido — E-mail / Mensagem / Quando / Status (era Quando / E-mail / Mensagem / Status). So render; nenhuma logica ou RPC mudou. | 1.6.38 (deste chat): HISTORICO DE ENVIOS na aba Acessos > Ciclo de vida — extrato do ledger lifecycle_messages. Nova secao "Historico de envios" acima dos segmentos: (a) chips de filtro por tipo com contagem (Ativacao, Conversao, Inativo, Avaliacao, Renovacao, Cancelamento, Oferta 7d antiga, etc — montados dinamicamente do meta.type_counts, entao tipos novos aparecem sozinhos); (b) busca por e-mail com debounce (= extrato individual do usuario); (c) tabela Quando (data+hora BRT) / E-mail / Mensagem (tipo + passo do drip; assunto no tooltip) / Status (enviado verde, pulado ambar — marcador skipped da v4.35 —, falha vermelho); (d) paginacao 50/pg. REQUER o RPC admin_lifecycle_log (SQL a parte, rodar ANTES do deploy; gate admin interno, exclui tipos internos admin_*/api_canary); erro PGRST202 mostra aviso claro. loadLifecycle chama loadLifecycleLog(1) ao abrir a aba. Nao toca estacoes/login/grader/usuarios/segmentos existentes. | 1.6.37 (deste chat): CICLO DE VIDA PACIFICADO (aba Acessos > Ciclo de vida) — acompanha quick-api v4.35 + SQL lifecycle_pacificacao. (1) OFERTA 7 DIAS DESATIVADA: removido o botao "Testar oferta de trial" e o ramo action=trial de lifecycleTest/lifecycleSend (a rota ?trial_offer=1 saiu da quick-api); segmento Nao-pagantes vira informativo (drips automaticos). Links ja enviados valem ate 31/07 (gate no RPC). (2) BOTOES DE TESTE atualizados p/ o sistema novo: ativacao +2/+7/+14 (era +1/+3), renovacao venceu/+2/+7/+14 (era 1 botao), conversao +2/+7/+14 mantida, inativo/avaliacao/cancelamento mantidos. lifecycleTest agora aceita step 0 (typeof step === number, nao if(step) — 0 e falsy). (3) DISPARO EM MASSA de avaliacao passa skip_if_sent:true (quick-api v4.35 pula quem ja recebeu — corrige as 5 duplicatas do legado). (4) LEGENDA do sistema automatizado no topo do painel: ativacao 2/7/14 p/ <3 estacoes; conversao 2/7/14 p/ quem completou as 3 (sem sobreposicao); inativo a cada 7d; avaliacao automatica 1x p/ pagante com >10 estacoes; renovacao 0/2/7/14 so pix; cancelamento imediato no webhook; envios as 19h BRT. REQUER quick-api v4.35 + SQL aplicado + cron novo "Lifecycle 19h" (&jobs=lifecycle) no cron-job.org. Nao toca estacoes/login/grader/usuarios. | 1.6.36 (deste chat; ressalva de colisao de numeracao com outros chats): PAINEL DE USUARIOS = FUNIL COMPLETO. Motivo: handoff 13/07 — dono operou a semana achando "zero conversoes". (1) RPC admin_list_users v2 (SQL a parte, RODAR ANTES do deploy): base muda de profiles para auth.users (nenhum cadastro pode ficar invisivel por falta de profile), join de subscriptions deduplicado (LATERAL + LIMIT 1), novos campos email_confirmed/created_at/stage, contadores por estagio no meta, ACL apertada (sem EXECUTE p/ PUBLIC/anon). (2) FILTROS DE ESTAGIO no painel (chips com contagem): Todos / Nao confirmado / Sem estacao / Treinando / Pagantes — filtro roda no RPC (p_stage), entao funciona com paginacao. (3) COLUNAS novas: Criado em (data do cadastro em auth.users) e Confirmado (email_confirmed_at) — expoe os 2 primeiros degraus do funil (cadastra-sem-confirmar e confirma-sem-treinar). Estacoes movida p/ perto de Confirmado (leitura de funil). (4) PAGANTES DESTACADOS: borda interna verde na linha (box-shadow inset, nao conflita com hover). (5) Erro PGRST202 no RPC mostra aviso claro de rodar o SQL v2 primeiro. Estagios (exclusivos, precedencia): pagante = assinatura ativa nao-invite; nao_confirmado; sem_estacao (0 estacoes); treinando. Validado no banco 13/07: 31 contas = 1 nao confirmado + 15 sem estacao + 7 treinando + 8 pagantes; as 12 contas da semana 07-13/07 aparecem, com os 2 assinantes novos (emily, cris). Nao toca estacoes/login/grader/ciclo de vida. | 1.6.35: CICLO DE VIDA — dois botoes de TESTE do novo e-mail de ATIVACAO DO TRIAL (Testar ativacao +1 e +3) na aba Acessos > Ciclo de vida, ao lado dos de conversao. Chamam lifecycleTest(trial_activation, step) -> ?lifecycle_send=1 (JWT admin), enviando o e-mail de ativacao (perfil: cadastrou mas fez 0 estacoes) para o e-mail de teste do campo. REQUER quick-api v4.34 (dispatch trial_activation em handleLifecycleSend + RPC get_trial_signed_never_started + Job 8). So admin; nao toca estacoes/login/grader. | 1.6.34: LARGURA PADRAO — .app de max-width 960 -> 1140, alinhando o admin ao mesmo padrao das telas largas do index (acervo/dashboard/historico) e aproveitando o espaco lateral no desktop. So o container global; as tabelas largas (Usuarios, Consumo) ja tinham overflow-x:auto, entao ganham mais espaco antes de rolar, sem estourar a pagina. Mobile inalterado (max-width so limita; o celular ja e mais estreito que 1140). | 1.6.33: SEPARACAO DE STATUS na aba Usuarios (Acessos). A coluna unica "Status" virou DUAS: (1) ACESSO = o usuario consegue usar o simulador agora? (espelha subscription_status do profile + vigencia; ativo / sem acesso / trial). (2) ASSINATURA = situacao da recorrencia na Kiwify, independente de ainda ter acesso (ativa=renova / cancelada=nao renova, com carencia em ambar / vencida). renderUserStatus -> renderAccessStatus + renderPaymentStatus (helper _statusBadge com tooltip). Coluna "Pagamento" (que mostrava o METODO) renomeada para "Metodo" p/ nao confundir com status de pagamento; "Plan" -> "Plano". So leitura/render; usa os campos que admin_list_users ja devolve (nenhum RPC mudou). CONTEXTO: motivado por assinante (bruninharaphaella81) que cancelou na Kiwify enquanto o painel mostrava "ativa" — a raiz estava no webhook (corrigido no quick-api v4.33, que lia o cancelamento como pagamento); esta versao do admin deixa o cancelamento VISIVEL assim que o dado chega correto. | 1.6.32: (a) COLUNA STATUS da aba Usuarios em PT e mais precisa — renderUserStatus agora mostra ativa / cancelada / vencida / trial-gratis, usando subscription_status + sub_status + subscription_expires_at (distingue vencida por vigencia, nao so por status). Obs: "renovada" nao e um estado do banco — renovar mantem "ativa". (b) CICLO DE VIDA ganha botoes de TESTE dos e-mails novos (cancelamento, renovacao, conversao +2/+7/+14) via lifecycleTest -> ?lifecycle_send=1 (JWT admin; REQUER quick-api v4.32). lifecycleTest passa body.step na conversao. So admin; nao toca estacoes/login/grader. | 1.6.31: TOGGLE de ESTACAO DEMO (trial) na lista de estacoes. Botao "🎁 Demo" por estacao marca/desmarca trial_available via RPC admin_set_trial_available (SECURITY DEFINER, gate admin, TRAVA maximo de 3 — ao tentar a 4a retorna erro "Maximo de 3 estacoes demo"). Badge "🎁 DEMO (trial)" no card das marcadas; getStations passa a trazer trial_available. Permite curar quais 3 estacoes o trial mostra sem SQL. O trial fica em 3 (nenhuma a mais) pela trava. | 1.6.30: FIX cosmetico no visualizador de bug reports — entregas do Chefe de estacao apareciam como "👤 PACIENTE". A sessao esta CORRETA (falas do chefe gravadas como quem:chief pela 1.6.64); o bug era so na render binaria do bug report (medico|paciente), que nao foi atualizada pela 1.6.64 (essa corrigiu s-hist-detail e PDF no index.html). Agora a render reconhece quem:chief E o formato antigo (quem:paciente + prefixo "Chefe de estacao:", robusto a NFC/NFD) -> rotulo "📋 CHEFE DE ESTACAO", classe/estilo proprios, e remove o prefixo do texto. So o painel de bugs; nenhum outro fluxo afetado. | 1.6.29: FIX coluna "Ultimo acesso" (aba Usuarios) mostrava data velha. Lia last_sign_in_at (auth), que so muda em LOGIN NOVO (senha/magic-link/OAuth) — quem acessa por sessao persistente (Google) nunca atualiza, entao a data ficava presa (ex.: Cris acessou 10/07 mas mostrava 08/07, o ultimo login real dela). Agora usa last_access_at = o mais recente entre login e presenca (last_active_at/last_seen_at), calculado no RPC admin_list_users via GREATEST (ignora nulos; usuario sem presenca cai no login). Coluna renomeada de "Ultimo login" para "Ultimo acesso". Requer o RPC admin_list_users atualizado (aplicado no banco). | 1.6.28: INDICADOR "EM ESTACAO AGORA" na aba Usuarios (semaforo de deploy). renderOnline distingue tres estados quando ativo nos ultimos 120s: verde "agora" (app aberto) vs ambar "em estacao" (in_station=true) vs offline. Presenca agora guarda {last_seen,in_station} por email (admin_presence devolve in_station). Contador global "N em estacao agora - evite deploy" no resumo (conta so quem tem in_station E last_seen<120s, entao sessao morta nao infla). Requer o SQL de presenca (coluna profiles.in_station + touch_presence(boolean) + admin_presence) e o simulador 1.6.60. Degrada gracioso se o SQL nao rodou ainda (in_station undefined -> comporta como antes). | 1.6.27: aba Depoimentos movida do grupo Sistema para Acessos (faz mais sentido junto de Usuarios/Ciclo de vida). | 1.6.26: moderacao de depoimentos ganha botao Excluir (DELETE via JWT admin) + disparo EM MASSA de solicitacao de avaliacao (cola lista de e-mails -> loop review_request via lifecycle_send, com pausa). | 1.6.25: PROVA SOCIAL — botao Testar solicitacao de avaliacao no Ciclo de vida (dispara lifecycle_send message_type=review_request; e-mail Resend pedindo depoimento com deep-link ?depoimento=1). | 1.6.24: PROVA SOCIAL passo 2 — painel Depoimentos no admin (grupo Sistema): lista testimonials por status (pendentes/aprovados/rejeitados/todos) com Aprovar/Rejeitar/Voltar-p-pendente (PATCH status + moderated_at via JWT admin). | 1.6.23: (a) FIX "Sugerir busca a partir do caso" estourava com JSON truncado/vazio do Fable (Unterminated string / Unexpected end of JSON) — parse agora tem fallback por regex que resgata query/it/achado, e max_tokens 350->600 p/ nao truncar. (b) botao "×" para EXCLUIR imagem por impresso (antes nao havia — imagem importada nao dava pra remover); aplicado nos 3 renders (edicao, upload, import Commons); remove do DOM e o save recolhe so o que sobrou. (c) rotulos Open-i->Commons na busca de imagem. | 1.6.22: (a) FIX seletor de dificuldade do editor (f-complexity) faltava a opcao "simple" — so tinha medium/advanced; editar uma estacao simple a rebaixava silenciosamente para medium ao salvar. Agora tem os 3 niveis, alinhados a definicao (simple=sem imagem; advanced=imagem sem diagnostico). (b) seletor de dificuldade padrao do lote (batch-diff) ganhou "Difícil (Avançado)" — antes so Facil/Medio; o parser ja aceitava ":: Dificil" por linha, mas agora da pra setar Dificil como padrao para gerar as difceis em lote. Geracao em lote segue coerente com a regua (Avancado -> advanced, laudo so achados sem dx). | 1.6.21: busca por imagem via Open-i REMOVIDA da UI (WAF da NLM inviabiliza acesso programatico); Commons vira fonte unica e o seletor de fonte fica oculto ate haver 2+ fontes. Codigo Open-i do runImageSearch fica inalcancavel (nao ha mais opcao no seletor). | 1.6.20: analyzeCandidates (ranqueamento de imagens) agora roda em claude-fable-5 (antes caia no default do quick-api = Sonnet 4.5, por nao passar model). Alinha as 3 funcoes de IA de imagem no mesmo modelo. Segue textual (nao ve pixel); validacao final e da Angelica. | 1.6.19: FIX busca Commons — nao anexa mais a modalidade ao termo (o CirrusSearch faz AND e zerava tudo, ex. "pneumoperitoneum radiograph"); busca o termo puro + fallback com as 2 primeiras palavras se zerar; debug de contagem no console. | 1.6.18: busca de imagem ganha SEGUNDA FONTE — Wikimedia Commons (client-side, CORS origin=*, sem edge/WAF), padrao; Open-i vira opcao. Filtro de licenca comercial (CC BY/BY-SA/CC0/PD; exclui NC/ND). Itens Commons no mesmo formato (source:commons, URLs absolutas) -> reusa render/preview. Import de Commons baixa de upload.wikimedia.org via openi-images v1.2. | 1.6.17: botao "Sugerir busca a partir do caso" no modal de imagem (funcao A) — le os campos do editor (f-name/f-caso/f-p-queixa/f-orient-med) + o exame-alvo (via _imgSearchTargetIdx) e pede ao Fable o achado de imagem provavel -> termo EN + tipo, sem depender de digitacao. Resolve a cegueira "nao ha laudo, nao sei o que buscar". Termo e admin-only (nao vaza no laudo). | 1.6.16: (a) FIX "Sessao invalida" na busca/analise de imagem — token admin agora e renovado antes de cada chamada privilegiada (getFreshAdminToken + client persistente autoRefresh), em vez do JWT cru capturado no load (expirava em ~1h). Aplicado a aiClaude e hyperCall. (b) aiClaude aceita model -> geracao de termo de busca roteada p/ claude-fable-5. (c) prompt de busca reescrito: termo mira o ACHADO PATOLOGICO/entidade (ex. pneumoperitoneum free air), nao a modalidade generica (corrige o retorno de raio-x de torax genericos). | 1.6.15: corrige chave da excecao do medio — passa dificuldade (diff) separada do nivel-de-atencao nas duas vias (lote e avulsa). | 1.6.14: seletor de modelo (Opus/Fable/Sonnet) no lote e na geracao avulsa -> modelGen; onFallback loga recusa->fallback. | 1.6.13: GEN_DIFF_RUBRIC normalizado a regua de imagem por nivel (basico sem imagem; medio=laudo achados+dx; dificil=laudo so achados; raio-x cru). | 1.6.12: batch passa o nivel ao engine (nivel: spec.nivel||diff) — habilita a excecao do medio (impressos com achados+diagnostico). | 1.6.11: saveStationDB sanitiza payload (whitelist de colunas) — corrige PGRST204 quando a IA copia checklist_amostra do few-shot para o JSON gerado. | 1.6.10: badge de nivel de dificuldade (Facil/Medio/Dificil) na listagem de estacoes (deriva de complexity; complexity incluido no select). | 1.6.7-9: Geracao em lote (batch): blueprint de temas -> N estacoes via o MESMO pipeline (buildInepFewShot compartilhado + StationEngine Opus + auditor); so aprovadas salvam como ia_generated + status pending (caem na aba Pendentes). Sobre 1.6.6 (busca de imagem assistida por IA B/C).'
+  version: '1.6.40',
+  date: '2026-07-18',
+  notes: '1.6.40 (deste chat — Index/Adm; empilha sobre a 1.6.39 do main; meta app-version reconciliada de 1.6.17): WRAPPER DO MODO AVANCADA ANCORADA + GUARD DE PRE-ATIVACAO (brief do chat Station-engine, engine v1.1.0). REQUER station-engine.js v1.1.0 DEPLOYADO ANTES (o wrapper faz feature-detect por StationEngine.ENGINE_VERSION/normalizeAnchor e BLOQUEIA a geracao ancorada com engine antigo — nunca gera nao-ancorada em silencio). (1) GERADOR AVULSO: toggle "Ancorar em imagem aprovada" abre textarea p/ colar o JSON image_anchor aprovado pela Angelica; validacao rapida no cliente (JSON valido; image_file/modality/finding_truth/diagnosis_truth/image_credits.license presentes; AREA obrigatoria via form ou ancora — o engine segue autoritativo com fail-fast proprio). No modo ancorado o extra vai LIMPO (sem GEN_DIFF_RUBRIC nem fluxo legado gen-img-desc — o engine injeta o gabarito nos 3 prompts e PREVALECE; economiza tokens); imageAnchor passado ao generate. (2) POS-GERACAO ancorada: fonte=ia_curada (decisao do brief original; nao-ancorada segue ia_generated), complexity vem do engine (advanced forcado), trial_available=false preservado (cinto e suspensorio — protecao de IP), status continua nascendo pending via fillFormFromAI (gate humano da Angelica INTOCADO). GABARITO DO GATE 2 exibido no passo 3 (painel verde acima dos avisos do auditor: arquivo/modalidade/achado-verdade/diagnostico-verdade/licenca + checklist de conferencia), tudo via esc() (invariante XSS). (3) PERSISTENCIA (item critico do brief): (a) STATION_COLS do saveStationDB ganha trial_available (antes o sanitizador DESCARTAVA o campo); (b) fillFormFromAI passa a repassar exams[].image_credits ao addExamRow (antes o caminho engine->editor->save PERDIA os creditos — o addExamRow ja sabia renderizar via data-credit e o saveStation ja recolhia); (c) flag __genAnchoredFill (setada no fill, limpa no showForm) faz o saveStation gravar trial_available=false na estacao ancorada. (4) GUARD DE PRE-ATIVACAO (pending->active) nos DOIS caminhos de ativacao: botao Aprovar da fila (approveStation agora LE a estacao completa via GET antes do PATCH e valida) e editor (saveStation valida quando status=active). Bloqueia: G1 item do PEP exigindo interpretar IMAGEM (verbo interpretar/descrever/analisar/identificar/reconhecer + modalidade, EXCETO itens citando laudo — tier medio legitimo) sem nenhuma imagem nos impressos; G2 imagem sem image_credits, desalinhado por indice ou sem license; G3 licenca fora de {CC0, CC BY, autoral, dominio publico} — CC BY-SA BLOQUEADA na ativacao porque o simulador ainda NAO exibe creditos ao usuario final (politica de exibicao nao cobre SA; o IMPORT continua aceitando BY-SA, so a ativacao barra — decisao a validar com Bruno), NC/ND sempre; G4 tier advanced com linha interpretativa (Achado:/Impressao:/Conclusao:/Diagnostico:) nos rows de impresso COM imagem (contradicao de tier). Transicao pending->active com violacao = BLOQUEIO; estacao JA ativa re-salva com violacao = confirm com aviso (nao bricka legado; a transicao continua barrada). NAO REGREDIR verificados: estacao IA nasce pending e SO a Angelica ativa (guard e ADICIONAL ao gate humano, nao substitui); caminho de assinante/trial do index intocado (arquivo nem tocado); toggle demo max-3 via RPC intocado; batch de geracao intocado (whitelist nova so PRESERVA campo antes descartado). | 1.6.39 (deste chat): ordem das colunas do Historico de envios ajustada a pedido — E-mail / Mensagem / Quando / Status (era Quando / E-mail / Mensagem / Status). So render; nenhuma logica ou RPC mudou. | 1.6.38 (deste chat): HISTORICO DE ENVIOS na aba Acessos > Ciclo de vida — extrato do ledger lifecycle_messages. Nova secao "Historico de envios" acima dos segmentos: (a) chips de filtro por tipo com contagem (Ativacao, Conversao, Inativo, Avaliacao, Renovacao, Cancelamento, Oferta 7d antiga, etc — montados dinamicamente do meta.type_counts, entao tipos novos aparecem sozinhos); (b) busca por e-mail com debounce (= extrato individual do usuario); (c) tabela Quando (data+hora BRT) / E-mail / Mensagem (tipo + passo do drip; assunto no tooltip) / Status (enviado verde, pulado ambar — marcador skipped da v4.35 —, falha vermelho); (d) paginacao 50/pg. REQUER o RPC admin_lifecycle_log (SQL a parte, rodar ANTES do deploy; gate admin interno, exclui tipos internos admin_*/api_canary); erro PGRST202 mostra aviso claro. loadLifecycle chama loadLifecycleLog(1) ao abrir a aba. Nao toca estacoes/login/grader/usuarios/segmentos existentes. | 1.6.37 (deste chat): CICLO DE VIDA PACIFICADO (aba Acessos > Ciclo de vida) — acompanha quick-api v4.35 + SQL lifecycle_pacificacao. (1) OFERTA 7 DIAS DESATIVADA: removido o botao "Testar oferta de trial" e o ramo action=trial de lifecycleTest/lifecycleSend (a rota ?trial_offer=1 saiu da quick-api); segmento Nao-pagantes vira informativo (drips automaticos). Links ja enviados valem ate 31/07 (gate no RPC). (2) BOTOES DE TESTE atualizados p/ o sistema novo: ativacao +2/+7/+14 (era +1/+3), renovacao venceu/+2/+7/+14 (era 1 botao), conversao +2/+7/+14 mantida, inativo/avaliacao/cancelamento mantidos. lifecycleTest agora aceita step 0 (typeof step === number, nao if(step) — 0 e falsy). (3) DISPARO EM MASSA de avaliacao passa skip_if_sent:true (quick-api v4.35 pula quem ja recebeu — corrige as 5 duplicatas do legado). (4) LEGENDA do sistema automatizado no topo do painel: ativacao 2/7/14 p/ <3 estacoes; conversao 2/7/14 p/ quem completou as 3 (sem sobreposicao); inativo a cada 7d; avaliacao automatica 1x p/ pagante com >10 estacoes; renovacao 0/2/7/14 so pix; cancelamento imediato no webhook; envios as 19h BRT. REQUER quick-api v4.35 + SQL aplicado + cron novo "Lifecycle 19h" (&jobs=lifecycle) no cron-job.org. Nao toca estacoes/login/grader/usuarios. | 1.6.36 (deste chat; ressalva de colisao de numeracao com outros chats): PAINEL DE USUARIOS = FUNIL COMPLETO. Motivo: handoff 13/07 — dono operou a semana achando "zero conversoes". (1) RPC admin_list_users v2 (SQL a parte, RODAR ANTES do deploy): base muda de profiles para auth.users (nenhum cadastro pode ficar invisivel por falta de profile), join de subscriptions deduplicado (LATERAL + LIMIT 1), novos campos email_confirmed/created_at/stage, contadores por estagio no meta, ACL apertada (sem EXECUTE p/ PUBLIC/anon). (2) FILTROS DE ESTAGIO no painel (chips com contagem): Todos / Nao confirmado / Sem estacao / Treinando / Pagantes — filtro roda no RPC (p_stage), entao funciona com paginacao. (3) COLUNAS novas: Criado em (data do cadastro em auth.users) e Confirmado (email_confirmed_at) — expoe os 2 primeiros degraus do funil (cadastra-sem-confirmar e confirma-sem-treinar). Estacoes movida p/ perto de Confirmado (leitura de funil). (4) PAGANTES DESTACADOS: borda interna verde na linha (box-shadow inset, nao conflita com hover). (5) Erro PGRST202 no RPC mostra aviso claro de rodar o SQL v2 primeiro. Estagios (exclusivos, precedencia): pagante = assinatura ativa nao-invite; nao_confirmado; sem_estacao (0 estacoes); treinando. Validado no banco 13/07: 31 contas = 1 nao confirmado + 15 sem estacao + 7 treinando + 8 pagantes; as 12 contas da semana 07-13/07 aparecem, com os 2 assinantes novos (emily, cris). Nao toca estacoes/login/grader/ciclo de vida. | 1.6.35: CICLO DE VIDA — dois botoes de TESTE do novo e-mail de ATIVACAO DO TRIAL (Testar ativacao +1 e +3) na aba Acessos > Ciclo de vida, ao lado dos de conversao. Chamam lifecycleTest(trial_activation, step) -> ?lifecycle_send=1 (JWT admin), enviando o e-mail de ativacao (perfil: cadastrou mas fez 0 estacoes) para o e-mail de teste do campo. REQUER quick-api v4.34 (dispatch trial_activation em handleLifecycleSend + RPC get_trial_signed_never_started + Job 8). So admin; nao toca estacoes/login/grader. | 1.6.34: LARGURA PADRAO — .app de max-width 960 -> 1140, alinhando o admin ao mesmo padrao das telas largas do index (acervo/dashboard/historico) e aproveitando o espaco lateral no desktop. So o container global; as tabelas largas (Usuarios, Consumo) ja tinham overflow-x:auto, entao ganham mais espaco antes de rolar, sem estourar a pagina. Mobile inalterado (max-width so limita; o celular ja e mais estreito que 1140). | 1.6.33: SEPARACAO DE STATUS na aba Usuarios (Acessos). A coluna unica "Status" virou DUAS: (1) ACESSO = o usuario consegue usar o simulador agora? (espelha subscription_status do profile + vigencia; ativo / sem acesso / trial). (2) ASSINATURA = situacao da recorrencia na Kiwify, independente de ainda ter acesso (ativa=renova / cancelada=nao renova, com carencia em ambar / vencida). renderUserStatus -> renderAccessStatus + renderPaymentStatus (helper _statusBadge com tooltip). Coluna "Pagamento" (que mostrava o METODO) renomeada para "Metodo" p/ nao confundir com status de pagamento; "Plan" -> "Plano". So leitura/render; usa os campos que admin_list_users ja devolve (nenhum RPC mudou). CONTEXTO: motivado por assinante (bruninharaphaella81) que cancelou na Kiwify enquanto o painel mostrava "ativa" — a raiz estava no webhook (corrigido no quick-api v4.33, que lia o cancelamento como pagamento); esta versao do admin deixa o cancelamento VISIVEL assim que o dado chega correto. | 1.6.32: (a) COLUNA STATUS da aba Usuarios em PT e mais precisa — renderUserStatus agora mostra ativa / cancelada / vencida / trial-gratis, usando subscription_status + sub_status + subscription_expires_at (distingue vencida por vigencia, nao so por status). Obs: "renovada" nao e um estado do banco — renovar mantem "ativa". (b) CICLO DE VIDA ganha botoes de TESTE dos e-mails novos (cancelamento, renovacao, conversao +2/+7/+14) via lifecycleTest -> ?lifecycle_send=1 (JWT admin; REQUER quick-api v4.32). lifecycleTest passa body.step na conversao. So admin; nao toca estacoes/login/grader. | 1.6.31: TOGGLE de ESTACAO DEMO (trial) na lista de estacoes. Botao "🎁 Demo" por estacao marca/desmarca trial_available via RPC admin_set_trial_available (SECURITY DEFINER, gate admin, TRAVA maximo de 3 — ao tentar a 4a retorna erro "Maximo de 3 estacoes demo"). Badge "🎁 DEMO (trial)" no card das marcadas; getStations passa a trazer trial_available. Permite curar quais 3 estacoes o trial mostra sem SQL. O trial fica em 3 (nenhuma a mais) pela trava. | 1.6.30: FIX cosmetico no visualizador de bug reports — entregas do Chefe de estacao apareciam como "👤 PACIENTE". A sessao esta CORRETA (falas do chefe gravadas como quem:chief pela 1.6.64); o bug era so na render binaria do bug report (medico|paciente), que nao foi atualizada pela 1.6.64 (essa corrigiu s-hist-detail e PDF no index.html). Agora a render reconhece quem:chief E o formato antigo (quem:paciente + prefixo "Chefe de estacao:", robusto a NFC/NFD) -> rotulo "📋 CHEFE DE ESTACAO", classe/estilo proprios, e remove o prefixo do texto. So o painel de bugs; nenhum outro fluxo afetado. | 1.6.29: FIX coluna "Ultimo acesso" (aba Usuarios) mostrava data velha. Lia last_sign_in_at (auth), que so muda em LOGIN NOVO (senha/magic-link/OAuth) — quem acessa por sessao persistente (Google) nunca atualiza, entao a data ficava presa (ex.: Cris acessou 10/07 mas mostrava 08/07, o ultimo login real dela). Agora usa last_access_at = o mais recente entre login e presenca (last_active_at/last_seen_at), calculado no RPC admin_list_users via GREATEST (ignora nulos; usuario sem presenca cai no login). Coluna renomeada de "Ultimo login" para "Ultimo acesso". Requer o RPC admin_list_users atualizado (aplicado no banco). | 1.6.28: INDICADOR "EM ESTACAO AGORA" na aba Usuarios (semaforo de deploy). renderOnline distingue tres estados quando ativo nos ultimos 120s: verde "agora" (app aberto) vs ambar "em estacao" (in_station=true) vs offline. Presenca agora guarda {last_seen,in_station} por email (admin_presence devolve in_station). Contador global "N em estacao agora - evite deploy" no resumo (conta so quem tem in_station E last_seen<120s, entao sessao morta nao infla). Requer o SQL de presenca (coluna profiles.in_station + touch_presence(boolean) + admin_presence) e o simulador 1.6.60. Degrada gracioso se o SQL nao rodou ainda (in_station undefined -> comporta como antes). | 1.6.27: aba Depoimentos movida do grupo Sistema para Acessos (faz mais sentido junto de Usuarios/Ciclo de vida). | 1.6.26: moderacao de depoimentos ganha botao Excluir (DELETE via JWT admin) + disparo EM MASSA de solicitacao de avaliacao (cola lista de e-mails -> loop review_request via lifecycle_send, com pausa). | 1.6.25: PROVA SOCIAL — botao Testar solicitacao de avaliacao no Ciclo de vida (dispara lifecycle_send message_type=review_request; e-mail Resend pedindo depoimento com deep-link ?depoimento=1). | 1.6.24: PROVA SOCIAL passo 2 — painel Depoimentos no admin (grupo Sistema): lista testimonials por status (pendentes/aprovados/rejeitados/todos) com Aprovar/Rejeitar/Voltar-p-pendente (PATCH status + moderated_at via JWT admin). | 1.6.23: (a) FIX "Sugerir busca a partir do caso" estourava com JSON truncado/vazio do Fable (Unterminated string / Unexpected end of JSON) — parse agora tem fallback por regex que resgata query/it/achado, e max_tokens 350->600 p/ nao truncar. (b) botao "×" para EXCLUIR imagem por impresso (antes nao havia — imagem importada nao dava pra remover); aplicado nos 3 renders (edicao, upload, import Commons); remove do DOM e o save recolhe so o que sobrou. (c) rotulos Open-i->Commons na busca de imagem. | 1.6.22: (a) FIX seletor de dificuldade do editor (f-complexity) faltava a opcao "simple" — so tinha medium/advanced; editar uma estacao simple a rebaixava silenciosamente para medium ao salvar. Agora tem os 3 niveis, alinhados a definicao (simple=sem imagem; advanced=imagem sem diagnostico). (b) seletor de dificuldade padrao do lote (batch-diff) ganhou "Difícil (Avançado)" — antes so Facil/Medio; o parser ja aceitava ":: Dificil" por linha, mas agora da pra setar Dificil como padrao para gerar as difceis em lote. Geracao em lote segue coerente com a regua (Avancado -> advanced, laudo so achados sem dx). | 1.6.21: busca por imagem via Open-i REMOVIDA da UI (WAF da NLM inviabiliza acesso programatico); Commons vira fonte unica e o seletor de fonte fica oculto ate haver 2+ fontes. Codigo Open-i do runImageSearch fica inalcancavel (nao ha mais opcao no seletor). | 1.6.20: analyzeCandidates (ranqueamento de imagens) agora roda em claude-fable-5 (antes caia no default do quick-api = Sonnet 4.5, por nao passar model). Alinha as 3 funcoes de IA de imagem no mesmo modelo. Segue textual (nao ve pixel); validacao final e da Angelica. | 1.6.19: FIX busca Commons — nao anexa mais a modalidade ao termo (o CirrusSearch faz AND e zerava tudo, ex. "pneumoperitoneum radiograph"); busca o termo puro + fallback com as 2 primeiras palavras se zerar; debug de contagem no console. | 1.6.18: busca de imagem ganha SEGUNDA FONTE — Wikimedia Commons (client-side, CORS origin=*, sem edge/WAF), padrao; Open-i vira opcao. Filtro de licenca comercial (CC BY/BY-SA/CC0/PD; exclui NC/ND). Itens Commons no mesmo formato (source:commons, URLs absolutas) -> reusa render/preview. Import de Commons baixa de upload.wikimedia.org via openi-images v1.2. | 1.6.17: botao "Sugerir busca a partir do caso" no modal de imagem (funcao A) — le os campos do editor (f-name/f-caso/f-p-queixa/f-orient-med) + o exame-alvo (via _imgSearchTargetIdx) e pede ao Fable o achado de imagem provavel -> termo EN + tipo, sem depender de digitacao. Resolve a cegueira "nao ha laudo, nao sei o que buscar". Termo e admin-only (nao vaza no laudo). | 1.6.16: (a) FIX "Sessao invalida" na busca/analise de imagem — token admin agora e renovado antes de cada chamada privilegiada (getFreshAdminToken + client persistente autoRefresh), em vez do JWT cru capturado no load (expirava em ~1h). Aplicado a aiClaude e hyperCall. (b) aiClaude aceita model -> geracao de termo de busca roteada p/ claude-fable-5. (c) prompt de busca reescrito: termo mira o ACHADO PATOLOGICO/entidade (ex. pneumoperitoneum free air), nao a modalidade generica (corrige o retorno de raio-x de torax genericos). | 1.6.15: corrige chave da excecao do medio — passa dificuldade (diff) separada do nivel-de-atencao nas duas vias (lote e avulsa). | 1.6.14: seletor de modelo (Opus/Fable/Sonnet) no lote e na geracao avulsa -> modelGen; onFallback loga recusa->fallback. | 1.6.13: GEN_DIFF_RUBRIC normalizado a regua de imagem por nivel (basico sem imagem; medio=laudo achados+dx; dificil=laudo so achados; raio-x cru). | 1.6.12: batch passa o nivel ao engine (nivel: spec.nivel||diff) — habilita a excecao do medio (impressos com achados+diagnostico). | 1.6.11: saveStationDB sanitiza payload (whitelist de colunas) — corrige PGRST204 quando a IA copia checklist_amostra do few-shot para o JSON gerado. | 1.6.10: badge de nivel de dificuldade (Facil/Medio/Dificil) na listagem de estacoes (deriva de complexity; complexity incluido no select). | 1.6.7-9: Geracao em lote (batch): blueprint de temas -> N estacoes via o MESMO pipeline (buildInepFewShot compartilhado + StationEngine Opus + auditor); so aprovadas salvam como ia_generated + status pending (caem na aba Pendentes). Sobre 1.6.6 (busca de imagem assistida por IA B/C).'
 };
 
 window.__appVersion = function(){
@@ -1193,8 +1200,97 @@ async function loadPending(){
   }
 }
 
+// ── v1.6.40: MODO ANCORADO — UI + feature-detect do engine ───────────────────
+function toggleAnchorBox(){
+  var chk = document.getElementById('gen-anchor-chk');
+  var wrap = document.getElementById('gen-anchor-wrap');
+  if(wrap) wrap.style.display = (chk && chk.checked) ? 'block' : 'none';
+  var eng = document.getElementById('gen-anchor-engine');
+  if(eng && chk && chk.checked){
+    var v = (typeof StationEngine !== 'undefined') && StationEngine.ENGINE_VERSION;
+    eng.innerHTML = v
+      ? '<span style="color:var(--green,#4ade80)">✓ station-engine v' + esc(String(v)) + ' com suporte a âncora.</span>'
+      : '<span style="color:var(--red)">⚠️ O station-engine.js carregado NÃO tem o modo ancorado (v1.1.0+). Deploy do engine ANTES de gerar — a geração ancorada será bloqueada.</span>';
+  }
+}
+
+// ── v1.6.40: GUARD DE PRÉ-ATIVAÇÃO (§9 do brief ancorado) ────────────────────
+// Roda em TODO pending→active (botão Aprovar E editor). O engine valida na
+// GERAÇÃO; o guard cobre também estação editada manualmente depois.
+function _licenseOk(lic){
+  if(!lic) return { ok:false, reason:'sem licença' };
+  var L = String(lic).toUpperCase();
+  if(/NC|ND/.test(L)) return { ok:false, reason:'licença não-comercial/sem-derivados (NC/ND) não permite uso comercial' };
+  if(/CC[\s-]?BY[\s-]?SA/.test(L)) return { ok:false, reason:'CC BY-SA — a política de exibição de créditos do simulador ainda não cobre ShareAlike' };
+  if(/CC0|PUBLIC\s?DOMAIN|DOM[ÍI]NIO\s?P[ÚU]BLICO|\bPD\b|AUTORAL|PR[ÓO]PRI/.test(L)) return { ok:true };
+  if(/CC[\s-]?BY/.test(L)) return { ok:true };
+  return { ok:false, reason:'licença fora da allowlist (CC0, CC BY, autoral, domínio público)' };
+}
+function preActivationGuard(s){
+  var v = [];
+  if(!s) return ['estação vazia'];
+  var exams = Array.isArray(s.exams) ? s.exams : [];
+  var totalImgs = 0;
+  exams.forEach(function(ex){ if(ex && Array.isArray(ex.images)) totalImgs += ex.images.filter(Boolean).length; });
+  // G1: PEP exige interpretar IMAGEM (não laudo) e nenhum impresso tem imagem
+  var checklist = s.checklist;
+  if(typeof checklist === 'string'){ try{ checklist = JSON.parse(checklist); }catch(e){ checklist = []; } }
+  if(Array.isArray(checklist) && totalImgs === 0){
+    var MOD = /(radiografia|raio[\s-]?x|\brx\b|tomografia|ultrassom|ultrassonografia|resson[âa]ncia|ecg|eletrocardiograma|mamografia|imagem)/i;
+    var ACT = /(interpret|descrev|analis|identific|reconhec)/i;
+    checklist.forEach(function(it, i){
+      if(!it) return;
+      var t = [it.text, it.crit_adeq, it.subitens].filter(Boolean).join(' | ');
+      if(ACT.test(t) && MOD.test(t) && !/laudo/i.test(t)){
+        v.push('item ' + (it.id || (i+1)) + ' do PEP exige interpretar imagem, mas nenhum impresso tem imagem (exams[].images vazio)');
+      }
+    });
+  }
+  // G2/G3: imagem presente exige image_credits completo, alinhado por índice, licença permitida
+  exams.forEach(function(ex, xi){
+    if(!ex || !Array.isArray(ex.images)) return;
+    var imgs = ex.images;
+    if(!imgs.filter(Boolean).length) return;
+    var tt = ex.title || ('Impresso ' + (xi+1));
+    var creds = ex.image_credits;
+    if(!Array.isArray(creds)){ v.push('"' + tt + '" tem imagem sem image_credits'); return; }
+    if(creds.length !== imgs.length){ v.push('"' + tt + '": image_credits desalinhado por índice (' + creds.length + ' crédito(s) para ' + imgs.length + ' imagem(ns))'); return; }
+    imgs.forEach(function(im, i){
+      if(!im) return;
+      var c = creds[i];
+      if(!c || !c.license){ v.push('"' + tt + '": imagem ' + (i+1) + ' sem crédito/licença no índice correspondente'); return; }
+      var lr = _licenseOk(c.license);
+      if(!lr.ok) v.push('"' + tt + '": imagem ' + (i+1) + ' — ' + lr.reason + ' (' + String(c.license) + ')');
+    });
+  });
+  // G4: tier advanced com linha interpretativa nos rows de impresso COM imagem
+  if(String(s.complexity||'') === 'advanced'){
+    var INTERP = /^\s*(achados?|impress[ãa]o( diagn[óo]stica)?|conclus[ãa]o|diagn[óo]stico)\s*:/i;
+    exams.forEach(function(ex, xi){
+      if(!ex || !Array.isArray(ex.images) || !ex.images.filter(Boolean).length) return;
+      (Array.isArray(ex.rows) ? ex.rows : []).forEach(function(r){
+        if(typeof r === 'string' && INTERP.test(r)){
+          v.push('tier Avançado com linha interpretativa ("' + r.slice(0,40) + '…") no impresso de imagem "' + (ex.title||('Impresso '+(xi+1))) + '" — contradição de tier');
+        }
+      });
+    });
+  }
+  return v;
+}
+
 async function approveStation(id){
   try{
+    // v1.6.40: GUARD DE PRÉ-ATIVAÇÃO — lê a estação completa e valida ANTES do pending→active
+    var gres = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id)+'&select=*', { method:'GET' });
+    if(!gres.ok){ alert('Erro ao ler a estação para validação: ' + await gres.text()); return; }
+    var grows = await gres.json();
+    var st = Array.isArray(grows) ? grows[0] : grows;
+    if(!st){ alert('Estação não encontrada.'); return; }
+    var viol = preActivationGuard(st);
+    if(viol.length){
+      alert('ATIVAÇÃO BLOQUEADA pelo guard de pré-ativação:\n\n' + viol.map(function(x){ return '• ' + x; }).join('\n') + '\n\nAbra em ✏ Editar para corrigir (ou ajuste a imagem/créditos).');
+      return;
+    }
     var res = await supaFetch('/rest/v1/stations?id=eq.'+encodeURIComponent(id), {
       method: 'PATCH',
       headers: {'Prefer':'return=minimal','Content-Type':'application/json'},
@@ -1797,7 +1893,7 @@ async function saveStationDB(obj){
       delete sendObj._editId;
       // Sanitiza payload: envia SOMENTE colunas reais de 'stations'. Evita PGRST204
       // quando a IA inventa chave extra (ex.: 'checklist_amostra' copiado do few-shot).
-      var STATION_COLS = {id:1,area:1,caso:1,name:1,exams:1,fonte:1,infra:1,local:1,nivel:1,pNome:1,pProf:1,edicao:1,images:1,pCivil:1,pIdade:1,status:1,pGenero:1,pQueixa:1,user_id:1,acompNome:1,checklist:1,orientMed:1,complexity:1,created_at:1,created_by:1,orientAtor:1,updated_at:1,acompGenero:1,notificacao:1,acompRelacao:1,informante_tipo:1,created_by_deleted:1,impressos_automaticos:1};
+      var STATION_COLS = {id:1,area:1,caso:1,name:1,exams:1,fonte:1,infra:1,local:1,nivel:1,pNome:1,pProf:1,edicao:1,images:1,pCivil:1,pIdade:1,status:1,pGenero:1,pQueixa:1,user_id:1,acompNome:1,checklist:1,orientMed:1,complexity:1,created_at:1,created_by:1,orientAtor:1,updated_at:1,acompGenero:1,notificacao:1,acompRelacao:1,informante_tipo:1,created_by_deleted:1,impressos_automaticos:1,trial_available:1};
       var _stripped = Object.keys(sendObj).filter(function(k){ return !STATION_COLS[k]; });
       if(_stripped.length){ console.warn('[Admin] Campos ignorados no save (não são colunas de stations):', _stripped.join(',')); _stripped.forEach(function(k){ delete sendObj[k]; }); }
       var isNew = !eid2;
@@ -1993,6 +2089,7 @@ async function showForm(id){
   window.scrollTo(0, 0);
   editImages=[];
   editOriginalStation = null; // limpa estação anterior
+  window.__genAnchoredFill = false; // v1.6.40: flag da geração ancorada não vaza p/ outras edições
   var _ecr=document.getElementById('exam-rows')||document.getElementById('exams-container'); if(_ecr) _ecr.innerHTML='';
   var _ccr=document.getElementById('cl-rows')||document.getElementById('cl-container'); if(_ccr) _ccr.innerHTML='';
 
@@ -2767,6 +2864,8 @@ async function saveStation(){
     checklist:checklist,
     images:editImages
   };
+  // v1.6.40: geração ancorada — persiste a proteção de IP exatamente como veio do engine
+  if(window.__genAnchoredFill){ formObj.trial_available = false; }
 
   // Se editando, fazer MERGE preservando campos não editáveis (acompGenero,
   // informante_tipo, complexity, fonte, edicao, status, user_id, created_by, etc)
@@ -2786,6 +2885,19 @@ async function saveStation(){
 
   obj._editId = eid || null;
   if(eid) obj.id = eid;
+  // ── v1.6.40 GUARD DE PRÉ-ATIVAÇÃO (também cobre estação editada manualmente) ──
+  if(obj.status === 'active'){
+    var _viol = preActivationGuard(obj);
+    if(_viol.length){
+      var _wasActive = !!(eid && editOriginalStation && editOriginalStation.status === 'active');
+      var _vtxt = _viol.map(function(x){ return '• ' + x; }).join('\n');
+      if(!_wasActive){
+        alert('ATIVAÇÃO BLOQUEADA pelo guard de pré-ativação:\n\n' + _vtxt + '\n\nCorrija (ou salve como pending) antes de ativar.');
+        return;
+      }
+      if(!confirm('Esta estação JÁ ESTAVA ativa, mas viola o guard de pré-ativação:\n\n' + _vtxt + '\n\nSalvar mesmo assim (mantém ativa)?')) return;
+    }
+  }
   try{
     var _bsv=document.getElementById('btn-save-station'); if(_bsv){ _bsv.disabled=true; _bsv.textContent='Salvando...'; }
     var _savedRes = await saveStationDB(obj);
@@ -4568,10 +4680,29 @@ async function runGenStation(){
     'Intermediário': 'NÍVEL MÉDIO: urgência/emergência ou tema de especialista. Exame físico e laboratório SEMPRE brutos. SE o caso tiver exame de imagem com laudo (US/TC/RM/eco/doppler/mamografia), o laudo traz os achados + o DIAGNÓSTICO ("compatível com..."). Raio-X/ECG/foto = imagem crua, sem laudo. Sem imagem: físico+laboratório bastam e o candidato diagnostica.',
     'Avançado':      'NÍVEL DIFÍCIL: exame de imagem com laudo contendo APENAS os achados, SEM o diagnóstico (o candidato deduz). Exame físico e laboratório BRUTOS. Raio-X/ECG/foto = imagem crua sem laudo.'
   };
+  // ── v1.6.40 MODO AVANÇADA ANCORADA: âncora estruturada aprovada pela Angélica ──
+  var anchorObj = null;
+  var _anchorChk = document.getElementById('gen-anchor-chk');
+  if(_anchorChk && _anchorChk.checked){
+    var _anchorRaw = ((document.getElementById('gen-anchor-json')||{}).value||'').trim();
+    if(!_anchorRaw){ alert('Modo ancorado ligado, mas o JSON da âncora está vazio. Cole o image_anchor aprovado ou desligue o toggle.'); return; }
+    try{ anchorObj = JSON.parse(_anchorRaw); }
+    catch(e){ alert('JSON da âncora inválido: ' + e.message); return; }
+    var _missA = ['image_file','modality','finding_truth','diagnosis_truth'].filter(function(k){ return !String((anchorObj||{})[k]||'').trim(); });
+    if(!anchorObj.image_credits || !String(anchorObj.image_credits.license||'').trim()) _missA.push('image_credits.license');
+    if(_missA.length){ alert('Âncora incompleta — faltam: ' + _missA.join(', ') + '. (O engine também bloquearia: fail-fast antes da Call 1.)'); return; }
+    if(!(area || String(anchorObj.area||'').trim())){ alert('Modo ancorado exige ÁREA definida (selecione no formulário ou inclua "area" na âncora) — sem sorteio de área.'); return; }
+    if(typeof StationEngine === 'undefined' || !StationEngine.ENGINE_VERSION || typeof StationEngine.normalizeAnchor !== 'function'){
+      alert('O station-engine.js carregado não tem o modo ancorado (v1.1.0+). Faça o deploy do engine novo antes de gerar ancorada.'); return;
+    }
+  }
   // ── FLUXO COM IMAGEM: a imagem real é a verdade ancorada; a IA monta o caso em torno dela ──
   var imgDesc   = ((document.getElementById('gen-img-desc')||{}).value||'').trim();
   var imgOrigem = ((document.getElementById('gen-img-origem')||{}).value||'').trim();
-  if(imgDesc){
+  if(anchorObj){
+    // Modo ancorado: extra fica SÓ com as instruções do admin — o engine injeta o gabarito
+    // nos 3 prompts e PREVALECE sobre a régua legada (sem GEN_DIFF_RUBRIC, sem gen-img-desc).
+  } else if(imgDesc){
     // No DIFÍCIL (Avançado) o laudo mostra só dados técnicos; no MÉDIO mostra achados + diagnóstico.
     var laudoRule = (diff === 'Avançado')
       ? 'No laudo do exame de imagem, mostre APENAS os dados técnicos mínimos (tipo de exame, derivações/incidência, e parâmetros básicos como FC). NÃO escreva os achados interpretativos nem o diagnóstico no laudo — eles são o GABARITO do PEP, e o candidato deve descrevê-los olhando a imagem.'
@@ -4600,6 +4731,7 @@ async function runGenStation(){
     // ── ENGINE: 3 prompts canonicos + Call1/Call2 + PEP(reject) + auditor fail-closed ──
     var result = await StationEngine.generate({
       area: area, tema: tema, nivel: nivel, dificuldade: diff, extra: extra,
+      imageAnchor: anchorObj || undefined,
       modelGen: ((document.getElementById('gen-model')||{}).value)||'claude-opus-4-8',
       fewShotExamples: fewShotExamples,
       aiCall: function(payload){ return supaFetch('/functions/v1/quick-api', { method:'POST', body: JSON.stringify(payload) }); },
@@ -4609,8 +4741,8 @@ async function runGenStation(){
     });
 
     var parsed = Object.assign({}, result.station, {
-      fonte: 'ia_generated',
-      complexity: diffToComplexity(diff),
+      fonte: anchorObj ? 'ia_curada' : 'ia_generated',
+      complexity: anchorObj ? ((result.station && result.station.complexity) || 'advanced') : diffToComplexity(diff),
       area: area || normGenArea([
         (result.station && result.station.area) || '',
         (result.station && result.station.name) || '',
@@ -4619,6 +4751,11 @@ async function runGenStation(){
       ].join(' '))
     });
     var auditOK = result.audit;
+    if(anchorObj){
+      parsed.__anchored = true;
+      parsed.trial_available = false; // engine já força; cinto e suspensório (proteção de IP)
+      window.__lastAnchorResult = result.imageAnchor || anchorObj;
+    } else { window.__lastAnchorResult = null; }
 
     if(!auditOK.passed){
       if(_genRetryCount < 1){
@@ -4643,13 +4780,30 @@ async function runGenStation(){
     var gw = document.getElementById('gen-warnings');
     if(gw){
       var warns = auditOK.warnings || [];
+      // v1.6.40: GABARITO DA ÂNCORA (gate 2 — conferência da Angélica), sempre via esc()
+      var _gab = '';
+      if(anchorObj && window.__lastAnchorResult){
+        var _ga = window.__lastAnchorResult;
+        var _gaLic = (_ga.image_credits && _ga.image_credits.license) || (anchorObj.image_credits && anchorObj.image_credits.license) || '';
+        _gab = '<div style="background:#0d2a20;border:1px solid #1f6f4f;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:.85rem;color:#7fe0b5;text-align:left">'
+          + '⚓ <strong>GABARITO DA ÂNCORA (gate 2 — conferência da Angélica)</strong>'
+          + '<ul style="margin:.5rem 0 0;padding-left:1.2rem">'
+          + '<li>Arquivo: <code>' + esc(String(_ga.image_file||'')) + '</code> (deve já existir no bucket)</li>'
+          + '<li>Modalidade/incidência: ' + esc(String(_ga.modality||'')) + (_ga.incidence ? (' — ' + esc(String(_ga.incidence))) : '') + '</li>'
+          + '<li>Achado (verdade): ' + esc(String(_ga.finding_truth||'')) + '</li>'
+          + '<li>Diagnóstico (verdade): ' + esc(String(_ga.diagnosis_truth||'')) + '</li>'
+          + '<li>Licença: ' + esc(String(_gaLic)) + '</li>'
+          + '</ul>'
+          + '<div style="margin-top:.5rem">Conferir: PEP soma 10.0? Item de interpretação bate com o achado-verdade? Nenhuma linha "Achado:" nos rows do impresso-âncora?</div>'
+          + '</div>';
+      }
       if(warns.length){
-        gw.innerHTML = '<div style="background:#3a2f00;border:1px solid #8a6d00;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:.85rem;color:#ffd84d">'
+        gw.innerHTML = _gab + '<div style="background:#3a2f00;border:1px solid #8a6d00;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:.85rem;color:#ffd84d">'
           + '\u26a0\ufe0f <strong>' + warns.length + ' aviso(s) de qualidade</strong> \u2014 revise antes de publicar:'
           + '<ul style="margin:.5rem 0 0;padding-left:1.2rem">'
           + warns.map(function(w){ return '<li>' + (w.message || w.category) + '</li>'; }).join('')
           + '</ul></div>';
-      } else { gw.innerHTML = ''; }
+      } else { gw.innerHTML = _gab; }
     }
     genStationData = parsed;
     renderGenPreview(genStationData);
@@ -4750,7 +4904,9 @@ function fillFormFromAI(d){
     // Toda estação gerada por IA começa como ia_generated + pending.
     // Quando admin revisar e aprovar, troca para ia_curada + active.
     var fonteEl  = document.getElementById('f-fonte');
-    if(fonteEl) fonteEl.value = 'ia_generated';
+    // v1.6.40: ancorada nasce ia_curada (decisão do brief); demais seguem ia_generated
+    if(fonteEl) fonteEl.value = (d.fonte === 'ia_curada') ? 'ia_curada' : 'ia_generated';
+    window.__genAnchoredFill = !!d.__anchored; // p/ o saveStation gravar trial_available=false
     var statusEl = document.getElementById('f-status');
     if(statusEl) statusEl.value = 'pending';
     // Exams
@@ -4768,7 +4924,9 @@ function fillFormFromAI(d){
             var resultText = ex.result || ex.text || ex.rows || '';
             rows = String(resultText).split(/[;\n]/).map(function(r){ return r.trim(); }).filter(Boolean);
           }
-          addExamRow({ title:title, rows:rows, images: Array.isArray(ex.images)?ex.images:[] });
+          var _exObj = { title:title, rows:rows, images: Array.isArray(ex.images)?ex.images:[] };
+          if(Array.isArray(ex.image_credits)) _exObj.image_credits = ex.image_credits; // v1.6.40: crédito não se perde no engine→editor
+          addExamRow(_exObj);
         });
     }
     // Checklist
