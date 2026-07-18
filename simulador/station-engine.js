@@ -50,11 +50,36 @@
    a termo de imagem) casa E nenhum impresso fornece imagem (IMG_TERM_RX).
    Pendente (outros arquivos, chat Index/Adm/Quick-API): few-shot/GEN_DIFF_RUBRIC (admin.html) e
    a regra de "terapeutica correta" no auditor (index.html).
+   AVANCADA ANCORADA EM IMAGEM (2026-07-18) — brief "geracao-estacao-avancada-imagem" v1.0:
+     • Novo opt em generate(): imageAnchor {image_file, modality, incidence, finding_truth,
+       diagnosis_truth, area, image_credits}. A imagem APROVADA (gate 1 da Angelica) e a ANCORA:
+       o gerador escreve a estacao EM TORNO dela (ordem invertida — nunca o texto antes da imagem).
+     • normalizeAnchor: fail-fast ANTES de gastar tokens (exige image_file, modality,
+       finding_truth, diagnosis_truth e image_credits com license).
+     • buildSys1/buildSys2/buildSysAudit ganham o gabarito da imagem: vinheta coerente com o
+       diagnosis_truth; item de interpretacao anti-Type-B (cobra SO o que esta no finding_truth,
+       sem medida quantitativa nao suportada); auditor sabe que cobrar interpretacao AQUI e
+       CORRETO (a imagem existe) e valida contra o gabarito.
+     • enforceAnchorImpresso (deterministico, pos-Call 1): rows do impresso-ancora = SO
+       tecnica/incidencia (a AUSENCIA de "Achado:" define o tier — nao se confia no modelo p/
+       isso), images=[image_file] exato, image_credits alinhado por indice (bug de producao:
+       credit null — nao repetir), trigger_keywords solicitaveis por familia de modalidade;
+       imagens inventadas nos DEMAIS impressos sao removidas (placeholder = imagem morta).
+     • preValidate (modo ancorado, todos HIGH/fail-closed): ancora_sem_imagem,
+       credito_desalinhado, achado_no_tier_avancado, segundo_impresso_imagem,
+       pep_sem_interpretacao.
+     • Ancorado forca: complexity='advanced', dificuldade tratada como 'Avancado' (impressos
+       estritos; prevalece sobre GEN_DIFF_RUBRIC do wrapper), trial_available=false (protecao
+       de IP), area obrigatoria (opts.area ou anchor.area), SEM sorteio de tema/area.
+     • SEM ancora: comportamento 100% identico ao anterior (prompts byte-a-byte iguais).
+     • ENGINE_VERSION exportado (1.1.0; 1.0.0 = estado anterior, sem versionamento).
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
+  // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
+  var ENGINE_VERSION = '1.1.0'; // 2026-07-18 — modo AVANCADA ANCORADA EM IMAGEM
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -66,14 +91,16 @@
   // (o candidato CONDUZ, nao diagnostica). Facil/Dificil seguem estritos (dados brutos).
   function nivelPermiteDx(n) { return /intermedi|m[\u00e9e]dio|medium/i.test(n || ''); }
 
-  function buildSys1(area, nivel, fewShotExamples, dificuldade) {
-    return [
+  function buildSys1(area, nivel, fewShotExamples, dificuldade, anchor) {
+    var head = [
       'Voce e especialista em criar estacoes OSCE no padrao INEP/Revalida brasileiro.',
       'Gere UMA estacao seguindo o padrao dos exemplos. Responda SOMENTE JSON valido (sem markdown).',
       'IMPORTANTE: seja CONCISO. Cada string do JSON deve ser curta (max 2-3 frases). Cada array com max 5 itens. NAO escreva textos longos.',
       '',
       '═══ REGRAS CRITICAS ═══',
-      '',
+      ''
+    ];
+    var corpo = [
       '1) ANTI-VAZAMENTO NO BRIEFING (CRITICO — sera auditado por outra IA):',
       '',
       '   ╔═══ orientMed: USE EXATAMENTE ESTE TEMPLATE FIXO ═══╗',
@@ -249,12 +276,14 @@
       '{"name":"","area":"","nivel":"","local":"","infra":"","caso":"","orientMed":"","complexity":"medium","pNome":"","pIdade":0,"pGenero":"","pProf":"","pCivil":"","pQueixa":"","informante_tipo":"paciente","acompNome":"","acompRelacao":"","acompGenero":"","orientAtor":{"regra_fundamental":"","fala_inicial_espontanea":"","tom_emocional":"","se_perguntado_sobre":{},"nao_falar_espontaneamente":[],"se_perguntado_sobre_exame_fisico":""},"exams":[{"title":"","trigger_keywords":[],"rows":[],"images":[]}]}',
       '',
       'Area: ' + (area || '') + ' | Nivel: ' + (nivel || '')
-    ].join(NL);
+    ];
+    return head.concat(anchor ? anchorSys1Block(anchor) : [], corpo).join(NL);
   }
 
   // sys2 — PEP. Canônico: Simulador (superset, com distribuição sugerida).
-  function buildSys2() {
-    return [
+  // anchor (opcional): estacao AVANCADA ancorada em imagem — anexa a regra do item de interpretacao.
+  function buildSys2(anchor) {
+    var linhas = [
       'Voce e especialista em criar PEP (Padrao Esperado de Procedimentos) no formato INEP/Revalida.',
       'Responda SOMENTE JSON valido sem markdown.',
       '',
@@ -342,19 +371,23 @@
       '  {"id":"1","text":"Apresentação","subitens":"(1) identifica-se\\n(2) cumprimenta o paciente","scores":[0,0.25,0.5],"labels":["Inadequado","Parcialmente adequado","Adequado"],"crit_adeq":"realiza as duas ações","crit_parc":"realiza apenas uma","crit_inad":"não realiza nenhuma"},',
       '  {"id":"6","text":"Solicita radiografia","scores":[0,2.0],"labels":["Inadequado","Adequado"],"crit_adeq":"solicita radiografia","crit_inad":"não solicita"}',
       ']'
-    ].join(NL);
+    ];
+    return linhas.concat(anchor ? anchorSys2Block(anchor) : []).join(NL);
   }
 
   // sysAudit — auditor IA. Canônico: Simulador (anti-falso-positivo, anti-over-rigor).
-  function buildSysAudit(dificuldade) {
-    return [
+  // anchor (opcional): estacao ancorada — auditor recebe o gabarito da imagem e regras do tier.
+  function buildSysAudit(dificuldade, anchor) {
+    var head = [
       'Voce e auditor clinico do INEP/Revalida que valida estacoes OSCE.',
       'Sua tarefa: analisar a estacao e identificar APENAS problemas REAIS e CLAROS.',
       'NAO invente problemas. NAO seja over-rigoroso. Reporte so o que e DEFEITO OBJETIVO.',
       (nivelPermiteDx(dificuldade)
         ? 'NIVEL MEDIO: o LAUDO DE IMAGEM (US/TC/RM/eco/doppler/mamografia) PODE/DEVE conter achados + diagnostico ("compativel com..."). Laboratorio, exame fisico e raio-x seguem BRUTOS. So reporte vazamento se o dx aparecer em laboratorio/fisico/raio-x — NUNCA por dx no laudo de imagem.'
         : 'Impressos com dados brutos; a imagem (se houver) traz SO achados, sem diagnostico. Reporte VAZAMENTO se entregarem interpretacao/diagnostico pronto (inclusive laudo de imagem citando o dx no nivel dificil).'),
-      '',
+      ''
+    ];
+    var corpo = [
       'IMPORTANTE — O payload e um RESUMO (otimizado p/ tokens). Voce ve "orientAtor_resumo" com',
       'metadados ja validados (fala_inicial_chars, se_perguntado_sobre_chaves, nao_falar_count,',
       'regra_fundamental_presente) E TAMBEM o conteudo de "se_perguntado_sobre" (as respostas da',
@@ -430,7 +463,8 @@
       '⚠️ FORMATO — REGRA ABSOLUTA: responda EXCLUSIVAMENTE um JSON valido, comecando com { e',
       'terminando com }. NADA antes nem depois. Sem markdown, sem explicacao. O parser e estrito.',
       '{"status":"OK"|"WARN"|"FAIL","score":0-10,"issues":[{"severity":"high"|"medium","category":"vazamento"|"coerencia"|"alinhamento"|"demografia"|"estrutura"|"pep","message":"..."}]}'
-    ].join(NL);
+    ];
+    return head.concat(anchor ? anchorSysAuditBlock(anchor) : [], corpo).join(NL);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -661,7 +695,195 @@
     return Object.keys(seen).length;
   }
 
-  function preValidate(stObj, pepResult, dificuldade) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // MODO AVANCADA ANCORADA EM IMAGEM (2026-07-18)
+  // A imagem aprovada pela Angelica e a ANCORA da estacao — o gerador recebe o
+  // gabarito (finding_truth/diagnosis_truth) e escreve a estacao EM TORNO dela.
+  // O tier avancado e definido pela AUSENCIA de linha "Achado:" no impresso de
+  // imagem; por isso o impresso-ancora e reescrito DETERMINISTICAMENTE (nao se
+  // confia no modelo para o que define o tier).
+  // ─────────────────────────────────────────────────────────────────────────
+  // Titulo/corpo com "cara" de exame de imagem (p/ localizar o impresso-ancora e
+  // vetar um SEGUNDO impresso de imagem na estacao ancorada). Opera sobre engNorm().
+  var ANCHOR_IMG_TITLE_RX = /radiograf|raio.{0,3}x|\brx\b|tomograf|angiotomograf|ultrass|\busg\b|ecograf|doppler|mamograf|cintilograf|ressonanc|\brm\b|ecocardiogr|\becg\b|eletrocardiogr|\bfast\b|\bimagem\b/;
+  // Linha de achado/laudo/diagnostico no impresso-ancora = contradicao de tier (rede pos-enforce).
+  var ANCHOR_ACHADO_RX = /^\s*(achados?|laudo|conclus[a\u00e3]o|impress[a\u00e3]o(\s+diagn[o\u00f3]stica)?|diagn[o\u00f3]stico)\s*[:\-]|compat[i\u00ed]vel\s+com|sugestiv[oa]\s+de/i;
+
+  // Linha de tecnica/incidencia do impresso-ancora (conteudo visto pelo candidato).
+  function buildAnchorTechLine(anchor) {
+    var m = String((anchor && anchor.modality) || '').trim();
+    var line = m ? (m.charAt(0).toUpperCase() + m.slice(1)) : 'Exame de imagem';
+    var inc = String((anchor && anchor.incidence) || '').trim();
+    if (inc) line += ', incid\u00eancia ' + inc;
+    return line + '.';
+  }
+
+  // Keywords deterministicas p/ o impresso-ancora ser SOLICITAVEL pelo candidato:
+  // mescla as do modelo com defaults por familia de modalidade (dedup por engNorm, teto 8).
+  function anchorKeywords(anchor, provided) {
+    var m = engNorm((anchor && anchor.modality) || '');
+    var base = ['exame de imagem', 'imagem'];
+    if (/radiograf|raio/.test(m)) base = base.concat(['radiografia', 'raio x']);
+    else if (/tomograf/.test(m)) base = base.concat(['tomografia', 'tomografia computadorizada']);
+    else if (/ultrass|ecograf/.test(m)) base = base.concat(['ultrassom', 'ultrassonografia']);
+    else if (/ressonanc/.test(m)) base = base.concat(['ressonancia', 'ressonancia magnetica']);
+    else if (/ecocardiogr/.test(m)) base = base.concat(['ecocardiograma']);
+    else if (/eletrocardiogr/.test(m)) base = ['eletrocardiograma', 'eletro'];
+    else if (/mamograf/.test(m)) base = base.concat(['mamografia']);
+    else if (/\bfast\b/.test(m)) base = base.concat(['fast', 'ultrassom fast']);
+    if (m.length >= 3) base.push(m); // ex.: 'radiografia de torax' (modalidade completa, ja sem acento)
+    var out = [], seen = {};
+    (Array.isArray(provided) ? provided : []).concat(base).forEach(function (k) {
+      if (typeof k !== 'string') return;
+      var kn = engNorm(k).trim();
+      if (kn.length < 3 || seen[kn]) return;
+      seen[kn] = 1; out.push(kn);
+    });
+    return out.slice(0, 8);
+  }
+
+  // Valida e normaliza opts.imageAnchor. Retorna null se ausente. Lanca Error se
+  // incompleta — fail-fast ANTES da Call 1 (nenhum token gasto com ancora invalida).
+  // image_credits: bloco de credito emitido pelo pipeline de busca (objeto unico;
+  // tolera array de 1 elemento).
+  function normalizeAnchor(a) {
+    if (a == null || a === false || a === '') return null;
+    if (typeof a !== 'object') throw new Error('imageAnchor deve ser um objeto (modo avancada ancorada em imagem).');
+    var cred = a.image_credits;
+    if (Array.isArray(cred)) cred = cred[0];
+    var falta = [];
+    if (!String(a.image_file || '').trim()) falta.push('image_file');
+    if (!String(a.modality || '').trim()) falta.push('modality');
+    if (!String(a.finding_truth || '').trim()) falta.push('finding_truth');
+    if (!String(a.diagnosis_truth || '').trim()) falta.push('diagnosis_truth');
+    if (!cred || typeof cred !== 'object' || !String(cred.license || '').trim()) falta.push('image_credits (objeto com license)');
+    if (falta.length) throw new Error('imageAnchor incompleto — campos obrigatorios ausentes: ' + falta.join(', ') + '. Nada foi gerado (fail-fast).');
+    return {
+      image_file: String(a.image_file).trim(),
+      modality: String(a.modality).trim(),
+      incidence: String(a.incidence || '').trim(),
+      finding_truth: String(a.finding_truth).trim(),
+      diagnosis_truth: String(a.diagnosis_truth).trim(),
+      area: String(a.area || '').trim(),
+      image_credits: cred
+    };
+  }
+
+  // Pos-Call 1 (deterministico): garante o impresso-ancora exatamente como o tier
+  // exige — rows = SO tecnica/incidencia (nenhum "Achado:"), images=[image_file],
+  // image_credits alinhado por indice (bug conhecido de producao: credit null),
+  // trigger_keywords solicitaveis — e remove imagens INVENTADAS dos demais
+  // impressos (placeholder sem arquivo real no bucket = imagem morta).
+  function enforceAnchorImpresso(base, anchor) {
+    if (!base || typeof base !== 'object') return base;
+    var exams = Array.isArray(base.exams) ? base.exams : [];
+    var idx = -1, i;
+    // 1) quem ja referencia o arquivo da ancora (modelo obedeceu o sys1)
+    for (i = 0; i < exams.length; i++) {
+      var e0 = exams[i];
+      if (e0 && Array.isArray(e0.images) && e0.images.indexOf(anchor.image_file) >= 0) { idx = i; break; }
+    }
+    // 2) senao, 1o impresso com TITULO de exame de imagem
+    if (idx < 0) for (i = 0; i < exams.length; i++) {
+      if (exams[i] && ANCHOR_IMG_TITLE_RX.test(engNorm(exams[i].title || ''))) { idx = i; break; }
+    }
+    // 3) senao, 1o impresso cujos rows mencionam modalidade de imagem
+    if (idx < 0) for (i = 0; i < exams.length; i++) {
+      var rws = (exams[i] && Array.isArray(exams[i].rows)) ? exams[i].rows.join(' ') : '';
+      if (rws && ANCHOR_IMG_TITLE_RX.test(engNorm(rws))) { idx = i; break; }
+    }
+    // 4) senao, cria (o modelo omitiu — a ancora e obrigatoria)
+    var ex;
+    if (idx < 0) { ex = {}; exams.push(ex); idx = exams.length - 1; }
+    else { ex = exams[idx] || (exams[idx] = {}); }
+    ex.title = String(ex.title || anchor.modality || 'EXAME DE IMAGEM').toUpperCase();
+    ex.rows = [buildAnchorTechLine(anchor)];
+    ex.images = [anchor.image_file];
+    ex.image_credits = [anchor.image_credits];
+    ex.trigger_keywords = anchorKeywords(anchor, ex.trigger_keywords);
+    for (i = 0; i < exams.length; i++) {
+      if (i === idx || !exams[i]) continue;
+      if (Array.isArray(exams[i].images) && exams[i].images.length) exams[i].images = [];
+      if (Array.isArray(exams[i].image_credits) && exams[i].image_credits.length) exams[i].image_credits = [];
+    }
+    base.exams = exams;
+    return base;
+  }
+
+  // Bloco do sys1 (geracao do caso) — o gabarito da imagem guia a vinheta.
+  function anchorSys1Block(anchor) {
+    return [
+      '0) MODO AVANCADA ANCORADA EM IMAGEM (PREVALECE sobre QUALQUER instrucao de nivel/dificuldade):',
+      '   Esta estacao e construida EM TORNO de uma imagem medica REAL, ja aprovada por revisao clinica.',
+      '   GABARITO DA IMAGEM (uso interno SEU — NUNCA vaza para name/caso/orientMed/impressos):',
+      '   • Modalidade: ' + anchor.modality + (anchor.incidence ? ' | Incidencia/tecnica: ' + anchor.incidence : ''),
+      '   • Achado real (finding_truth): ' + anchor.finding_truth,
+      '   • Diagnostico real (diagnosis_truth): ' + anchor.diagnosis_truth,
+      '   REGRAS DO MODO ANCORADO:',
+      '   a) Construa vinheta, orientAtor, sinais vitais e exame fisico COERENTES com esse diagnostico e',
+      '      com a MESMA gravidade clinica que o achado mostra — sem citar o diagnostico (o anti-vazamento',
+      '      da regra 1 continua valendo integralmente).',
+      '   b) IMPRESSO-ANCORA OBRIGATORIO (o UNICO impresso de exame de imagem da estacao):',
+      '      • title: nome do exame (ex.: "' + anchor.modality.toUpperCase() + '")',
+      '      • rows: UMA unica linha com APENAS a tecnica/incidencia (ex.: "' + buildAnchorTechLine(anchor) + '")',
+      '        PROIBIDO linha "Achado:", laudo, descricao de achados ou diagnostico — a imagem e CRUA e o',
+      '        candidato interpreta sozinho (a AUSENCIA do achado e o que define o tier avancado).',
+      '      • images: ["' + anchor.image_file + '"] (copie o nome do arquivo EXATAMENTE)',
+      '      • trigger_keywords: 4-8 formas naturais de PEDIR este exame',
+      '   c) NENHUM outro impresso pode ser exame de imagem nem conter achados de imagem. Exame fisico e',
+      '      laboratorio (se pertinentes) seguem BRUTOS e coerentes com o mesmo quadro.',
+      '   d) complexity: "advanced". Os exemplos INEP adiante ilustram o FORMATO — o tier desta estacao e',
+      '      AVANCADO ancorado, mesmo que os exemplos sejam de outro tier.',
+      ''
+    ];
+  }
+
+  // Bloco do sys2 (PEP) — item de interpretacao anti-Type-B, colado ao gabarito.
+  function anchorSys2Block(anchor) {
+    return [
+      '',
+      '⚠️ ITEM DE INTERPRETACAO DA IMAGEM (OBRIGATORIO — estacao AVANCADA ancorada em imagem REAL):',
+      'A estacao entrega ao candidato uma imagem CRUA (so tecnica/incidencia, sem laudo). GABARITO DA',
+      'IMAGEM (uso interno — o corretor cobra exatamente isto):',
+      '  • achado real (finding_truth): ' + anchor.finding_truth,
+      '  • diagnostico real (diagnosis_truth): ' + anchor.diagnosis_truth,
+      'Crie EXATAMENTE UM item de interpretacao, com 3 niveis [0, X/2, X] (peso sugerido 1.5-2.5):',
+      '  text: "Interpreta a ' + anchor.modality + ' e reconhece o achado"',
+      '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pela hipotese/',
+      '             diagnostico compativel',
+      '  crit_parc: descreve o achado OU cita a alteracao correta sem concluir a interpretacao',
+      '  crit_inad: nao interpreta ou descreve achado incompativel com a imagem',
+      'PROIBICOES ABSOLUTAS neste item:',
+      '  • NAO cobrar achado que NAO esta no gabarito acima (nao inventar patologia extra)',
+      '  • NAO exigir medida quantitativa que a imagem nao permite (ex.: indice cardiotoracico sem regua/',
+      '    calibracao, percentual de colapso, medida em cm)',
+      '  • NAO criar subitem que recite dado pronto (nao ha dado pronto — a imagem e crua)',
+      'PODE existir tambem um item binario de SOLICITAR o exame de imagem (desenho valido).',
+      'A hipotese diagnostica premiada pelo PEP deve ser coerente com o diagnosis_truth acima.'
+    ];
+  }
+
+  // Bloco do sysAudit — auditor conhece o gabarito e as regras do tier ancorado.
+  function anchorSysAuditBlock(anchor) {
+    return [
+      'ESTACAO ANCORADA EM IMAGEM (tier AVANCADO): existe imagem REAL aprovada, entregue CRUA ao candidato.',
+      'GABARITO DA IMAGEM (fonte de verdade): achado="' + anchor.finding_truth + '" | diagnostico="' + anchor.diagnosis_truth + '".',
+      'Regras ADICIONAIS para esta estacao:',
+      '  - Cobrar INTERPRETACAO da imagem no PEP e CORRETO e esperado (a imagem EXISTE e e a competencia',
+      '    central do tier). NAO reporte "PEP cobra interpretar imagem sem laudo" — aqui isso NAO e defeito.',
+      '  - HIGH: o impresso-ancora (exam com ancora=true) contem linha de achado/laudo/diagnostico nos',
+      '    achados — contradiz o tier (imagem crua: apenas tecnica/incidencia).',
+      '  - HIGH: item de interpretacao cobrando achado que NAO esta no gabarito acima, ou exigindo medida',
+      '    quantitativa que a imagem nao permite.',
+      '  - HIGH: hipotese diagnostica premiada pelo PEP incompativel com o diagnostico do gabarito.',
+      '  - MEDIUM: se_perguntado_sobre_exame_fisico sem instrucao de QUANDO entregar o impresso-ancora.',
+      '  - A vinheta (sinais vitais, exame fisico, labs) deve sustentar a MESMA gravidade do diagnostico do',
+      '    gabarito (ex.: pneumotorax hipertensivo exige paciente instavel; achado incidental exige estavel).',
+      ''
+    ];
+  }
+
+  function preValidate(stObj, pepResult, dificuldade, anchor) {
     var issues = [];
     // checklist vazio = estacao inutilizavel no simulador -> reprova SEMPRE (qualquer policy)
     var clCheck = Array.isArray(stObj.checklist) ? stObj.checklist : [];
@@ -734,10 +956,48 @@
           message: 'Impresso "' + (e.title || '') + '" nao tem cobertura de palavras: ' + n + ' trigger_keyword(s) usavel(is) e o titulo nao casa com nenhum exame reconhecido pelo simulador. O candidato NAO conseguiria solicitar este exame (so via "impresso N") e ele nao apareceria. Adicione 4-8 formas naturais de pedir este exame (nome + sinonimos + regiao/modalidade).' });
       }
     });
+    // ── MODO ANCORADO (avancada ancorada em imagem): redes deterministicas do tier ──
+    if (anchor) {
+      var ancEx = null;
+      examsArr.forEach(function (e) {
+        if (!ancEx && e && Array.isArray(e.images) && e.images.indexOf(anchor.image_file) >= 0) ancEx = e;
+      });
+      if (!ancEx) {
+        issues.push({ severity: 'high', category: 'ancora_sem_imagem',
+          message: 'Nenhum impresso contem a imagem-ancora "' + anchor.image_file + '". A estacao avancada ancorada exige o impresso de imagem crua com esse arquivo.' });
+      } else {
+        var _imgsA = ancEx.images;
+        var _credsA = Array.isArray(ancEx.image_credits) ? ancEx.image_credits : [];
+        if (_credsA.length !== _imgsA.length || _credsA.some(function (c) { return !c || typeof c !== 'object'; })) {
+          issues.push({ severity: 'high', category: 'credito_desalinhado',
+            message: 'Impresso-ancora "' + (ancEx.title || '') + '": images[] e image_credits[] devem estar alinhados por indice e sem nulos (bug conhecido de producao — nao repetir).' });
+        }
+        var _rowsA = Array.isArray(ancEx.rows) ? ancEx.rows : [];
+        if (_rowsA.some(function (r) { return ANCHOR_ACHADO_RX.test(String(r == null ? '' : r)); })) {
+          issues.push({ severity: 'high', category: 'achado_no_tier_avancado',
+            message: 'Impresso-ancora "' + (ancEx.title || '') + '" contem linha de achado/laudo — contradiz o tier avancado (imagem CRUA: apenas tecnica/incidencia; a ausencia do achado e o que define o tier).' });
+        }
+      }
+      examsArr.forEach(function (e) {
+        if (!e || e === ancEx) return;
+        if (ANCHOR_IMG_TITLE_RX.test(engNorm(e.title || '')) || (Array.isArray(e.images) && e.images.length)) {
+          issues.push({ severity: 'high', category: 'segundo_impresso_imagem',
+            message: 'Impresso "' + (e.title || '') + '" e um segundo exame de imagem — na estacao ancorada a imagem-ancora e o UNICO impresso de imagem (outro laudo/imagem entregaria o diagnostico por fora).' });
+        }
+      });
+      var _temInterp = clCheck.some(function (it) {
+        var c = (((it && it.text) || '') + ' ' + ((it && it.subitens) || '') + ' ' + ((it && it.crit_adeq) || '')).toLowerCase();
+        return IMG_INTERP_RX.test(c);
+      });
+      if (!_temInterp) {
+        issues.push({ severity: 'high', category: 'pep_sem_interpretacao',
+          message: 'PEP sem item de INTERPRETACAO da imagem — numa estacao avancada ancorada, interpretar a imagem e a competencia central. Inclua o item (3 niveis) cobrando o achado do gabarito.' });
+      }
+    }
     return issues;
   }
 
-  function auditPayload(stObj) {
+  function auditPayload(stObj, anchor) {
     var oa = stObj.orientAtor || {};
     var spsKeys = oa.se_perguntado_sobre ? Object.keys(oa.se_perguntado_sobre) : [];
     return {
@@ -766,12 +1026,16 @@
       },
       exams: (stObj.exams || []).map(function (e) {
         var rows = Array.isArray(e.rows) ? e.rows.join(' | ') : '';
-        return { title: e.title, achados: rows.length > 240 ? rows.substring(0, 240) + '...' : rows, tem_imagem: !!(e.images && e.images.length) };
+        var o = { title: e.title, achados: rows.length > 240 ? rows.substring(0, 240) + '...' : rows, tem_imagem: !!(e.images && e.images.length) };
+        if (anchor) o.ancora = !!(e.images && e.images.indexOf && e.images.indexOf(anchor.image_file) >= 0);
+        return o;
       }),
       checklist_resumo: (function () {
         var raw = (typeof stObj.checklist === 'string') ? stObj.checklist : JSON.stringify(stObj.checklist);
         return raw.length <= 3000 ? raw : raw.substring(0, 3000) + '...[truncado]';
-      })()
+      })(),
+      // Gabarito da imagem (modo ancorado) — undefined some no JSON.stringify quando ausente.
+      image_anchor: anchor ? { modality: anchor.modality, incidence: anchor.incidence, finding_truth: anchor.finding_truth, diagnosis_truth: anchor.diagnosis_truth } : undefined
     };
   }
 
@@ -842,13 +1106,13 @@
     return warns;
   }
 
-  async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade) {
-    var local = preValidate(stObj, pepResult, dificuldade);
+  async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade, anchor) {
+    var local = preValidate(stObj, pepResult, dificuldade, anchor);
     var warnings = softWarnings(stObj);
     if (local.length > 0) return { passed: false, status: 'FAIL', score: 0, issues: local, warnings: warnings };
     try {
-      var r = await aiCall({ model: modelAudit, max_tokens: 1500, system: buildSysAudit(dificuldade),
-        messages: [{ role: 'user', content: 'Audite esta estacao OSCE:\n' + JSON.stringify(auditPayload(stObj), null, 2) }] });
+      var r = await aiCall({ model: modelAudit, max_tokens: 1500, system: buildSysAudit(dificuldade, anchor),
+        messages: [{ role: 'user', content: 'Audite esta estacao OSCE:\n' + JSON.stringify(auditPayload(stObj, anchor), null, 2) }] });
       if (!r.ok) return { passed: false, status: 'AUDIT_ERROR', score: 0,
         issues: [{ severity: 'high', category: 'auditor_indisponivel', message: 'Auditor nao respondeu (HTTP ' + r.status + ').' }] };
       var parsed;
@@ -914,25 +1178,42 @@
     var modelGen = opts.modelGen || 'claude-opus-4-8';
     var modelAudit = opts.modelAudit || 'claude-opus-4-8';
     var pepPolicy = opts.pepPolicy || 'normalize';
+    // ── MODO AVANCADA ANCORADA: valida a ancora (fail-fast ANTES da Call 1) ──
+    var anchor = normalizeAnchor(opts.imageAnchor); // null se ausente; Error se incompleta
+    // Ancorado => impressos ESTRITOS (sem a exce\u00e7\u00e3o de laudo-com-dx do nivel medio),
+    // prevalecendo sobre qualquer rubrica de dificuldade que o wrapper injete via extra.
+    var difUse = anchor ? 'Avan\u00e7ado' : (opts.dificuldade || opts.nivel || '');
 
     // ── Call 1: caso base ──
     onProgress(1);
-    // Diversidade: sorteia area (se vazia) e eixo tematico (se tema vazio) p/ evitar convergir no mesmo caso
-    var areaUse = opts.area || '';
-    if (!areaUse) { var _aks = Object.keys(TEMA_EIXOS); areaUse = _aks[Math.floor(Math.random() * _aks.length)]; }
+    // Diversidade: sorteia area (se vazia) e eixo tematico (se tema vazio) p/ evitar convergir no mesmo caso.
+    // MODO ANCORADO: NUNCA sorteia — area vem da ancora/opts e o tema E a imagem aprovada
+    // (um eixo sorteado poderia contradizer o gabarito, ex.: eixo "cefaleia" com RX de pneumotorax).
+    var areaUse = opts.area || (anchor && anchor.area) || '';
+    if (!areaUse) {
+      if (anchor) throw new Error('Modo ancorado: informe a area (opts.area ou imageAnchor.area).');
+      var _aks = Object.keys(TEMA_EIXOS); areaUse = _aks[Math.floor(Math.random() * _aks.length)];
+    }
     var temaUse = (opts.tema || '').trim();
     var temaSorteado = false;
-    if (!temaUse) {
+    if (!temaUse && !anchor) {
       var _eixos = TEMA_EIXOS[areaUse] || [];
       if (_eixos.length) { temaUse = _eixos[Math.floor(Math.random() * _eixos.length)]; temaSorteado = true; }
     }
-    var sys1 = buildSys1(areaUse, opts.nivel, opts.fewShotExamples, (opts.dificuldade || opts.nivel || ''));
+    var sys1 = buildSys1(areaUse, opts.nivel, opts.fewShotExamples, difUse, anchor);
+    var temaClause;
+    if (anchor) {
+      temaClause = 'MODO AVANCADA ANCORADA: construa o caso EM TORNO da imagem ja aprovada (gabarito interno no sistema) — NAO invente tema desconexo do gabarito. '
+        + (temaUse ? 'Contexto/tema sugerido: ' + temaUse + '. ' : '');
+    } else if (temaUse) {
+      temaClause = (temaSorteado
+          ? 'Eixo tematico sorteado (use como PONTO DE PARTIDA e crie um caso ORIGINAL e ESPECIFICO dentro dele, com perfil de paciente variado — idade, paridade, contexto): '
+          : 'Tema-alvo (sugestao): ') + temaUse + '. ';
+    } else {
+      temaClause = 'Escolha tema relevante para Revalida. ';
+    }
     var msg1 = 'Crie uma NOVA estacao OSCE no padrao INEP. Area: ' + areaUse + '. '
-      + (temaUse
-          ? (temaSorteado
-              ? 'Eixo tematico sorteado (use como PONTO DE PARTIDA e crie um caso ORIGINAL e ESPECIFICO dentro dele, com perfil de paciente variado — idade, paridade, contexto): '
-              : 'Tema-alvo (sugestao): ') + temaUse + '. '
-          : 'Escolha tema relevante para Revalida. ')
+      + temaClause
       + 'Nivel: ' + (opts.nivel || 'medium') + '. '
       + (opts.extra ? 'Instrucoes extras: ' + opts.extra + '. ' : '')
       + 'Responda APENAS o JSON, no formato dos exemplos. NAO copie os exemplos — crie estacao original e DIFERENTE dos exemplos.';
@@ -943,6 +1224,8 @@
     var _txt1 = extractText(data1);
     if (!_txt1 || !String(_txt1).trim()) throw new Error('Modelo retornou conteudo vazio na Call 1 (possivel recusa). Tente outro modelo ou ajuste o tema.');
     var base = parseLoose(_txt1);
+    // MODO ANCORADO: reescrita deterministica do impresso-ancora (o tier depende disso).
+    if (anchor) base = enforceAnchorImpresso(base, anchor);
 
     // ── Call 2: PEP ──
     onProgress(2);
@@ -953,7 +1236,7 @@
       orientAtor_resumo: (typeof oa === 'object') ? Object.keys(oa.se_perguntado_sobre || {}).slice(0, 15).join(', ') : '',
       exams: (base.exams || []).map(function (e) { return { title: e.title || e.name, rows: Array.isArray(e.rows) ? e.rows : [] }; })
     });
-    var r2 = await aiCall({ model: modelGen, max_tokens: 8000, system: buildSys2(),
+    var r2 = await aiCall({ model: modelGen, max_tokens: 8000, system: buildSys2(anchor),
       messages: [{ role: 'user', content: 'Estacao: ' + resumo + '. Gere o PEP completo (10 pts total). Responda APENAS o array JSON dos itens.' }] });
     if (!r2.ok) throw new Error('HTTP ' + r2.status + ' na geracao do PEP (Call 2).');
     var data2 = await r2.json();
@@ -964,15 +1247,17 @@
     // ── PEP: política do wrapper ──
     var pep = processPEP(clArr, pepPolicy);
 
-    // sanitizar complexity
+    // sanitizar complexity (ancorado: SEMPRE advanced — e a definicao do modo)
     var compFromAI = (base.complexity || '').toLowerCase().trim();
-    var complexity = (['medium', 'advanced'].indexOf(compFromAI) >= 0) ? compFromAI : 'medium';
+    var complexity = anchor ? 'advanced' : ((['medium', 'advanced'].indexOf(compFromAI) >= 0) ? compFromAI : 'medium');
 
     var station = Object.assign({}, base, { checklist: pep.checklist, complexity: complexity });
+    // Avancada ancorada NUNCA e estacao demo do trial (protecao de IP do acervo).
+    if (anchor) station.trial_available = false;
 
     // ── Auditoria (fail-closed) ──
     onProgress(3);
-    var auditResult = await audit(station, aiCall, modelAudit, pep, (opts.dificuldade || opts.nivel || ''));
+    var auditResult = await audit(station, aiCall, modelAudit, pep, difUse, anchor);
 
     // ── Truncamento (max_tokens) força reprovacao -> retry no wrapper ──
     if (trunc1 || trunc2) {
@@ -983,14 +1268,18 @@
     }
 
     onProgress(4);
-    return { station: station, audit: auditResult };
+    // imageAnchor no retorno: o wrapper pode exibir o gabarito p/ o gate 2 da Angelica
+    // (comparar item de interpretacao vs. finding_truth). undefined quando nao ancorado.
+    return { station: station, audit: auditResult, imageAnchor: anchor || undefined };
   }
 
   global.StationEngine = {
+    ENGINE_VERSION: ENGINE_VERSION,
     generate: generate,
     buildSys1: buildSys1, buildSys2: buildSys2, buildSysAudit: buildSysAudit,
     processPEP: processPEP, preValidate: preValidate, softWarnings: softWarnings, audit: audit, parseLoose: parseLoose,
     extractChecklistArray: extractChecklistArray, normalizeChecklistItems: normalizeChecklistItems,
-    extractText: extractText, pepTotal: pepTotal
+    extractText: extractText, pepTotal: pepTotal,
+    normalizeAnchor: normalizeAnchor, enforceAnchorImpresso: enforceAnchorImpresso
   };
 })(typeof window !== 'undefined' ? window : this);
