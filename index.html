@@ -265,9 +265,25 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 1.5rem;
   letter-spacing:.02em}
 .preco-btn:hover{background:#33d4ff;transform:translateY(-2px)}
 .preco-note{font-size:.78rem;color:var(--text3);margin-top:1rem;text-align:center}
+/* grade de 3 planos (grátis / mensal / semestral) */
+.preco-wide{max-width:1080px;margin:0 auto;text-align:center}
+.preco-grid{display:grid;grid-template-columns:1fr;gap:1.4rem;margin-top:2.5rem;align-items:stretch;text-align:center}
+@media(min-width:900px){.preco-grid{grid-template-columns:repeat(3,1fr)}}
+.preco-grid .preco-card{margin-top:0;display:flex;flex-direction:column;padding:2rem 1.6rem}
+.preco-card.plain{border-color:var(--border);box-shadow:none}
+.preco-card.plain::before{background:rgba(0,201,255,.25)}
+.preco-grid .preco-features{margin-bottom:1.5rem}
+.preco-grid .preco-btn{margin-top:auto}
+.preco-btn.ghost{background:transparent;border:1px solid rgba(0,201,255,.55);color:var(--accent)}
+.preco-btn.ghost:hover{background:rgba(0,201,255,.08);transform:translateY(-2px)}
+.preco-equiv{font-size:.92rem;color:var(--text2);margin-bottom:.9rem}
+.preco-equiv b{color:var(--accent);font-size:1.05rem}
+.preco-save{display:inline-block;background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.3);color:var(--gold);font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.05em;padding:4px 14px;border-radius:20px;margin-bottom:1.5rem}
+.preco-badge.free{background:rgba(0,201,255,.15);border:1px solid rgba(0,201,255,.4);color:var(--accent)}
 .garantia{display:flex;align-items:center;justify-content:center;gap:.75rem;
   margin-top:2rem;font-size:.85rem;color:var(--text2)}
-.garantia-icon{font-size:1.5rem}
+.garantia-icon{display:inline-flex;color:var(--accent)}
+.garantia-icon svg{width:22px;height:22px}
 
 /* ── FAQ ── */
 #faq{background:var(--bg)}
@@ -307,9 +323,14 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 /* ── ANIMATIONS ── */
 .reveal{opacity:0;transform:translateY(24px);transition:.7s ease}
 .reveal.visible{opacity:1;transform:none}
-.cta-mid{text-align:center;margin:3.5rem auto 0;max-width:520px}
+.cta-mid{text-align:center;margin:3.5rem auto 0;width:min(720px,calc(100% - 2.5rem));padding:2.2rem 1.5rem;
+  background:linear-gradient(180deg,rgba(0,201,255,.055),rgba(0,201,255,.015));
+  border:1px solid rgba(0,201,255,.22);border-radius:18px}
 .cta-mid-line{font-family:var(--serif);font-size:1.35rem;color:var(--text);margin-bottom:1.25rem;line-height:1.3}
-@media(max-width:768px){.cta-mid-line{font-size:1.15rem}}
+.cta-mid-sub{font-size:.82rem;color:var(--text3);margin-top:.9rem}
+.cta-mid-alt{display:inline-block;margin-top:1rem;font-size:.88rem;color:var(--text2);text-decoration:underline;text-underline-offset:3px;transition:.2s}
+.cta-mid-alt:hover{color:var(--accent)}
+@media(max-width:768px){.cta-mid-line{font-size:1.15rem}.cta-mid{padding:1.8rem 1.1rem}}
 
 /* ── DESEMPENHO ── */
 .perf-wrap, .perf-wrap *{box-sizing:border-box;}
@@ -782,7 +803,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 
 <div class="cta-mid">
   <p class="cta-mid-line">Treinar a etapa que mais reprova não precisa ser caro nem presencial.</p>
-  <a href="#preco" class="btn-primary"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Assinar por R$ 97/mês →</a>
+  <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Testar 3 estações grátis →</a>
+  <div class="cta-mid-sub">Sem cartão · leva menos de 1 minuto</div>
 </div>
 
 <!-- SOLUÇÃO -->
@@ -881,7 +903,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 
 <div class="cta-mid">
   <p class="cta-mid-line">É assim que você treina — quantas vezes quiser, no seu ritmo.</p>
-  <a href="#preco" class="btn-primary"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Assinar por R$ 97/mês →</a>
+  <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Começar grátis agora →</a>
+  <div><a href="#preco" class="cta-mid-alt">ou veja os planos</a></div>
 </div>
 
 <!-- FEATURES -->
@@ -925,8 +948,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 </section>
 
 <div class="cta-mid">
-  <p class="cta-mid-line">Tudo isso por R$ 97/mês, com 7 dias de garantia.</p>
-  <a href="#preco" class="btn-primary"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Assinar por R$ 97/mês →</a>
+  <p class="cta-mid-line">Tudo isso a partir de R$ 66/mês, com 7 dias de garantia.</p>
+  <a href="#preco" class="btn-primary">Ver planos →</a>
+  <div class="cta-mid-sub">Grátis para testar · Mensal R$ 97 · Semestral R$ 396 (equivale a R$ 66/mês)</div>
 </div>
 
 <!-- DEPOIMENTOS (prova social — preenchido via endpoint público) -->
@@ -941,48 +965,78 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 <!-- PREÇO -->
 <section id="preco">
   <div class="container">
-    <div class="preco-center">
+    <div class="preco-wide">
       <div class="section-tag" style="text-align:center">Planos</div>
       <h2 style="text-align:center">Comece grátis.<br>Assine quando quiser.</h2>
 
-      <!-- Teste grátis — 3 estações -->
-      <div class="reveal" style="max-width:520px;margin:0 auto 1.5rem;padding:1.4rem 1.5rem;background:rgba(0,201,255,.05);border:1px solid rgba(0,201,255,.28);border-radius:16px;text-align:center">
-        <div style="display:inline-block;background:rgba(0,201,255,.15);border:1px solid rgba(0,201,255,.4);color:#00c9ff;font-size:.7rem;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:999px;margin-bottom:.6rem">🎁 TESTE GRÁTIS</div>
-        <div style="font-size:1.6rem;font-weight:700;color:var(--text);margin-bottom:.1rem">3 estações grátis</div>
-        <p style="font-size:.9rem;color:var(--text2);line-height:1.55;margin:.4rem 0 1rem">Crie sua conta e experimente <strong>3 estações completas</strong> — ator com IA, interação por voz e avaliação pelo PEP. Sem cartão, sem compromisso.</p>
-        <a href="https://simulador.revalidaosce.com.br?signup=1" style="display:inline-block;padding:12px 28px;border-radius:10px;background:transparent;border:1px solid rgba(0,201,255,.55);color:#00c9ff;font-weight:600;font-size:.95rem;text-decoration:none">Criar conta grátis →</a>
-      </div>
+      <div class="preco-grid">
 
-      <div class="preco-card reveal">
-        <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.25rem">
-          <div class="preco-badge">✦ ACESSO COMPLETO</div>
-          <div class="preco-badge" style="background:var(--gold);color:#000">LANÇAMENTO</div>
-        </div>
-        <div style="font-size:.85rem;color:var(--text3);text-decoration:line-through;margin-bottom:.25rem">de R$ 197/mês</div>
-        <div class="preco-valor">
-          <sup>R$</sup>97<span>/mês</span>
-        </div>
-        <div style="color:var(--gold);font-weight:500;font-size:.9rem;margin-bottom:.75rem"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Oferta de lançamento</div>
-        <div class="preco-features">
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Acesso ilimitado a todas as estações</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Banco completo Revalida 2020-2025 (oficiais INEP)</div>
+        <!-- PLANO GRÁTIS -->
+        <div class="preco-card plain reveal">
+          <div><div class="preco-badge free">TESTE GRÁTIS</div></div>
+          <div style="font-size:.85rem;color:var(--text3);margin-bottom:.25rem">&nbsp;</div>
+          <div class="preco-valor"><sup>R$</sup>0<span>&nbsp;· sem cartão</span></div>
+          <div class="preco-equiv">Experimente antes de assinar</div>
+          <div class="preco-features">
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> <strong>3 estações completas</strong> para testar o sistema</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Ator virtual com IA + voz natural em português</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Interação por voz (microfone) como na prova real</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Avaliação automática pelo Padrão Esperado de Procedimentos (PEP)</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Modo Maratona com múltiplas estações em sequência</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Avaliação automática pelo PEP + devolutiva</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Sem cartão, sem compromisso</div>
+          </div>
+          <a href="https://simulador.revalidaosce.com.br?signup=1" class="preco-btn ghost">Criar conta grátis →</a>
+          <div class="preco-note">Leva menos de 1 minuto</div>
+        </div>
+
+        <!-- PLANO MENSAL -->
+        <div class="preco-card plain reveal">
+          <div><div class="preco-badge">✦ MENSAL</div></div>
+          <div style="font-size:.85rem;color:var(--text3);text-decoration:line-through;margin-bottom:.25rem">de R$ 197/mês</div>
+          <div class="preco-valor"><sup>R$</sup>97<span>/mês</span></div>
+          <div class="preco-equiv">Acesso completo, sem fidelidade</div>
+          <div class="preco-features">
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Acesso ilimitado a todas as estações</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Banco completo Revalida 2020-2025 (oficiais INEP)</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Mais de 150 estações curadas pela Equipe RevalidaOSCE</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Histórico completo de simulações</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Acesso pelo celular e computador</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Modo Maratona com múltiplas estações em sequência</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Avaliação pelo PEP + devolutiva do examinador</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Cancele quando quiser</div>
+          </div>
+          <a href="https://pay.kiwify.com.br/nL4sRJD" class="preco-btn">Assinar mensal →</a>
+          <div class="preco-note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
         </div>
-        <a href="https://pay.kiwify.com.br/nL4sRJD" class="preco-btn">Assinar agora →</a>
-        <div class="preco-note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
-        <div style="margin-top:.75rem;padding:.75rem;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:8px;font-size:.8rem;color:var(--gold);text-align:center">
-          ⚠ Preço de lançamento por tempo limitado.<br>Depois, o valor sobe para R$ 197/mês. Quem entrar agora mantém R$ 97 para sempre.
+
+        <!-- PLANO SEMESTRAL -->
+        <div class="preco-card reveal">
+          <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem">
+            <div class="preco-badge" style="margin-bottom:0">★ MAIS VANTAJOSO</div>
+            <div class="preco-badge" style="margin-bottom:0;background:var(--gold);color:#000">ECONOMIZE R$ 186</div>
+          </div>
+          <div style="font-size:.85rem;color:var(--text3);text-decoration:line-through;margin-bottom:.25rem">de R$ 582 (6× R$ 97)</div>
+          <div class="preco-valor"><sup>R$</sup>396<span>/semestre</span></div>
+          <div class="preco-equiv">equivale a <b>R$ 66/mês</b> — 32% de desconto</div>
+          <div class="preco-features">
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> <strong>Tudo do plano mensal</strong>, sem limites</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 6 meses de acesso — preparação completa até a prova</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Pagamento único, sem mensalidades</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Economia de R$ 186 em relação ao mensal</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Garantia de 7 dias</div>
+          </div>
+          <!-- ⚠⚠⚠ TODO ANTES DO DEPLOY: trocar pelo link REAL do checkout SEMESTRAL da Kiwify.
+               Este placeholder NÃO é um checkout válido. Criar a oferta semestral (R$ 396,
+               pagamento único ou recorrência semestral) na Kiwify e colar a URL aqui. ⚠⚠⚠ -->
+          <a href="https://pay.kiwify.com.br/TROCAR_PELO_LINK_SEMESTRAL" class="preco-btn">Assinar semestral →</a>
+          <div class="preco-note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
         </div>
+
+      </div>
+
+      <div class="reveal" style="max-width:640px;margin:1.5rem auto 0;padding:.75rem;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:8px;font-size:.8rem;color:var(--gold);text-align:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Preços de lançamento por tempo limitado. Depois, a mensalidade sobe para R$ 197/mês.<br>Quem entrar agora mantém o valor para sempre.
       </div>
       <div class="garantia">
-        <span class="garantia-icon">🛡️</span>
-        <span>Garantia de 7 dias — se não gostar, devolvemos 100% do valor</span>
+        <span class="garantia-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span>Garantia de 7 dias nos planos pagos — se não gostar, devolvemos 100% do valor</span>
       </div>
     </div>
   </div>
