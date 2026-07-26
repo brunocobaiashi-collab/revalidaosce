@@ -85,13 +85,23 @@
        audit cortado no meio de "issues" podia parsear com status OK e issues faltando —
        aprovacao indevida. Agora truncamento reprova SEMPRE, com diagnostico claro.
      • ENGINE_VERSION 1.2.0.
+   AREA CANONICA (2026-07-26) — briefing "area-canonica-engine" v1.0 (ACOPLADO ao fix do admin):
+     • TEMA_EIXOS: chaves renomeadas p/ as 5 areas CANONICAS (Clínica Médica, Cirurgia Geral,
+       Ginecologia e Obstetrícia, Pediatria, Medicina de Família e Comunidade). Arrays intactos.
+     • eixosDaArea (lookup TOLERANTE): resolve grafia canonica OU legada — o engine nunca mais
+       depende da grafia que o wrapper mandar. Fecha o modo de falha silenciosa do acoplamento
+       (chave errada -> [] -> sorteio de eixo morre sem erro -> estacoes convergentes).
+     • canonArea no generate: areaUse e canonicalizada antes de ir ao prompt — a IA ecoa o nome
+       canonico em station.area e o sorteio "Aleatoria" so produz areas canonicas.
+     • Ordem de deploy segura: ESTE arquivo pode (e deve) sair ANTES do fix do admin.
+     • ENGINE_VERSION 1.3.0. Exports novos: canonArea, eixosDaArea.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.2.0'; // 2026-07-26 — orcamento configuravel do auditor (maxTokensAudit) + deteccao de truncamento na auditoria
+  var ENGINE_VERSION = '1.3.0'; // 2026-07-26 — areas canonicas no TEMA_EIXOS + lookup tolerante eixosDaArea + canonArea no generate
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -682,14 +692,44 @@
   var DIAGNOSTICOS = ['apendicite','colecistite','pancreatite','diverticulite','pneumonia','tuberculose','asma','dpoc','dengue','zika','chikungunya','covid','sarampo','rubeola','caxumba','avc','iam','infarto','tep','tvp','hipertireoidismo','hipotireoidismo','lupus','cancer','neoplasia','meningite','sepse','cetoacidose','aborto','eclampsia','pre-eclampsia'];
   var ESPECIALIDADES = ['ginecologista','obstetra','cardiologista','pediatra','pneumologista','gastroenterologista','endocrinologista','neurologista','psiquiatra','urologista','nefrologista','oncologista','hematologista','reumatologista','dermatologista','ortopedista','oftalmologista','otorrinolaringologista','cirurgiao','cirurgião','infectologista','mastologista'];
 
-  // Eixos tematicos por area — sorteados quando o tema vem vazio (garante diversidade da geracao)
+  // Eixos tematicos por area — sorteados quando o tema vem vazio (garante diversidade da geracao).
+  // Chaves = as 5 AREAS CANONICAS do acervo (2026-07-26; antes eram grafias legadas 'Cirurgia',
+  // 'Clínica', 'Ginecologia', 'Medicina de Família/Comunidade' — ver canonAreaKey abaixo).
   var TEMA_EIXOS = {
-    'Ginecologia': ['sangramento uterino anormal','corrimento vaginal e vaginites','climaterio e menopausa','contracepcao e planejamento familiar','dor pelvica','doenca inflamatoria pelvica','pre-natal de baixo risco','intercorrencias hipertensivas na gestacao','diabetes gestacional','hemorragia da primeira metade da gestacao','puerperio e amamentacao','rastreio de cancer de colo (citologia alterada)','nodulo mamario e mastalgia','amenorreia','infeccoes sexualmente transmissiveis','violencia sexual'],
+    'Ginecologia e Obstetrícia': ['sangramento uterino anormal','corrimento vaginal e vaginites','climaterio e menopausa','contracepcao e planejamento familiar','dor pelvica','doenca inflamatoria pelvica','pre-natal de baixo risco','intercorrencias hipertensivas na gestacao','diabetes gestacional','hemorragia da primeira metade da gestacao','puerperio e amamentacao','rastreio de cancer de colo (citologia alterada)','nodulo mamario e mastalgia','amenorreia','infeccoes sexualmente transmissiveis','violencia sexual'],
     'Pediatria': ['febre sem sinais localizatorios','diarreia aguda e desidratacao','infeccao respiratoria aguda','exantemas da infancia','sibilancia e asma','dor abdominal na crianca','ictericia neonatal','crescimento e desenvolvimento','calendario vacinal','suspeita de maus-tratos','cefaleia na infancia','infeccao do trato urinario'],
-    'Cirurgia': ['abdome agudo inflamatorio','abdome agudo obstrutivo','trauma abdominal','trauma toracico','atendimento ao politraumatizado (ABCDE)','hernias da parede abdominal','colelitiase e complicacoes','doencas anorretais','urolitiase','retencao urinaria aguda','feridas e drenagem de abscesso','queimaduras'],
-    'Clínica': ['dor toracica','dispneia aguda','dor abdominal no adulto','cefaleia','febre no adulto','sindrome consumptiva','descompensacao de diabetes','crise hipertensiva','sincope','lombalgia','diarreia no adulto','ictericia no adulto','disturbios da tireoide','anemia'],
-    'Medicina de Família/Comunidade': ['manejo de hipertensao na APS','manejo de diabetes na APS','saude mental (depressao/ansiedade) na APS','pre-natal de baixo risco','puericultura','cessacao do tabagismo','rastreios em adultos','paciente poliqueixoso','planejamento familiar','abordagem do uso de alcool']
+    'Cirurgia Geral': ['abdome agudo inflamatorio','abdome agudo obstrutivo','trauma abdominal','trauma toracico','atendimento ao politraumatizado (ABCDE)','hernias da parede abdominal','colelitiase e complicacoes','doencas anorretais','urolitiase','retencao urinaria aguda','feridas e drenagem de abscesso','queimaduras'],
+    'Clínica Médica': ['dor toracica','dispneia aguda','dor abdominal no adulto','cefaleia','febre no adulto','sindrome consumptiva','descompensacao de diabetes','crise hipertensiva','sincope','lombalgia','diarreia no adulto','ictericia no adulto','disturbios da tireoide','anemia'],
+    'Medicina de Família e Comunidade': ['manejo de hipertensao na APS','manejo de diabetes na APS','saude mental (depressao/ansiedade) na APS','pre-natal de baixo risco','puericultura','cessacao do tabagismo','rastreios em adultos','paciente poliqueixoso','planejamento familiar','abordagem do uso de alcool']
   };
+
+  // ── AREA CANONICA (2026-07-26) ─────────────────────────────────────────────
+  // canonAreaKey: resolve QUALQUER grafia (canonica, legada 'Cirurgia'/'Clínica'/
+  // 'Ginecologia'/'Medicina de Família/Comunidade', abreviacoes) para a chave
+  // canonica de TEMA_EIXOS. '' quando nao reconhece. Opera sobre engNorm (ja
+  // deacentuado), entao os padroes dispensam variantes acentuadas.
+  function canonAreaKey(area) {
+    if (area && TEMA_EIXOS[area]) return area; // ja canonica
+    var a = engNorm(area || '');
+    if (!a) return '';
+    if (/ginec|obstet/.test(a)) return 'Ginecologia e Obstetrícia';
+    if (/pediatr/.test(a)) return 'Pediatria';
+    if (/cirurg/.test(a)) return 'Cirurgia Geral';
+    if (/familia|comunidade|\bmfc\b/.test(a)) return 'Medicina de Família e Comunidade';
+    if (/clinic/.test(a)) return 'Clínica Médica';
+    return '';
+  }
+  // canonArea: nome canonico p/ usar em prompts/saida; se nao reconhecer, devolve
+  // o que veio (nao inventa — o wrapper/admin decide o que fazer com area exotica).
+  function canonArea(area) { return canonAreaKey(area) || area || ''; }
+  // eixosDaArea: lookup TOLERANTE dos eixos tematicos — o engine NUNCA depende da
+  // grafia que o wrapper mandar (fecha o modo de falha silenciosa do acoplamento
+  // engine<->admin: chave errada -> [] -> sorteio de eixo morre sem erro e a
+  // diversidade da geracao cai sem sintoma que aponte a causa).
+  function eixosDaArea(area) {
+    var k = canonAreaKey(area);
+    return k ? (TEMA_EIXOS[k] || []) : [];
+  }
 
   // Espelho CONDENSADO da cobertura do runtime (buildRules heuristicas + EXAM_FAMILIES do index.html).
   // Um impresso cujo TITULO casa aqui e solicitavel mesmo SEM trigger_keywords (o runtime entrega por
@@ -1216,7 +1256,9 @@
     // Diversidade: sorteia area (se vazia) e eixo tematico (se tema vazio) p/ evitar convergir no mesmo caso.
     // MODO ANCORADO: NUNCA sorteia — area vem da ancora/opts e o tema E a imagem aprovada
     // (um eixo sorteado poderia contradizer o gabarito, ex.: eixo "cefaleia" com RX de pneumotorax).
-    var areaUse = opts.area || (anchor && anchor.area) || '';
+    // Area: canonicaliza QUALQUER grafia recebida (legada/abreviada) p/ o nome canonico —
+    // o prompt recebe o nome certo e a IA ecoa o certo em station.area (§4.3 do briefing).
+    var areaUse = canonArea(opts.area || (anchor && anchor.area) || '');
     if (!areaUse) {
       if (anchor) throw new Error('Modo ancorado: informe a area (opts.area ou imageAnchor.area).');
       var _aks = Object.keys(TEMA_EIXOS); areaUse = _aks[Math.floor(Math.random() * _aks.length)];
@@ -1224,7 +1266,7 @@
     var temaUse = (opts.tema || '').trim();
     var temaSorteado = false;
     if (!temaUse && !anchor) {
-      var _eixos = TEMA_EIXOS[areaUse] || [];
+      var _eixos = eixosDaArea(areaUse); // lookup TOLERANTE — nunca morre por grafia da area
       if (_eixos.length) { temaUse = _eixos[Math.floor(Math.random() * _eixos.length)]; temaSorteado = true; }
     }
     var sys1 = buildSys1(areaUse, opts.nivel, opts.fewShotExamples, difUse, anchor);
@@ -1307,6 +1349,7 @@
     processPEP: processPEP, preValidate: preValidate, softWarnings: softWarnings, audit: audit, parseLoose: parseLoose,
     extractChecklistArray: extractChecklistArray, normalizeChecklistItems: normalizeChecklistItems,
     extractText: extractText, pepTotal: pepTotal,
-    normalizeAnchor: normalizeAnchor, enforceAnchorImpresso: enforceAnchorImpresso
+    normalizeAnchor: normalizeAnchor, enforceAnchorImpresso: enforceAnchorImpresso,
+    canonArea: canonArea, eixosDaArea: eixosDaArea
   };
 })(typeof window !== 'undefined' ? window : this);
