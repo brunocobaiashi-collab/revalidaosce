@@ -13,6 +13,8 @@
        pepPolicy,                       // 'normalize' (Maratona) | 'reject' (Admin)
        modelGen,  modelAudit,           // default: claude-opus-4-8
        modelFallback,                   // default: claude-opus-4-8 (retry p/ Fable refusal)
+       maxTokensAudit,                  // default: 4000 — orcamento de SAIDA da auditoria (Fable 5
+                                        // emite thinking no MESMO orcamento; 1500 truncava o JSON)
        onFallback,                      // ({from,to,response}) => void  (observabilidade do fallback)
        onProgress                       // (stepIndex:int) => void   (UI fica no wrapper)
      }) => { station, audit }           // wrapper decide: preview ou autosave
@@ -73,13 +75,23 @@
        de IP), area obrigatoria (opts.area ou anchor.area), SEM sorteio de tema/area.
      • SEM ancora: comportamento 100% identico ao anterior (prompts byte-a-byte iguais).
      • ENGINE_VERSION exportado (1.1.0; 1.0.0 = estado anterior, sem versionamento).
+   ORCAMENTO DO AUDITOR + TRUNCAMENTO (2026-07-26) — briefing "modelos-geracao-lote" v1.0 §2:
+     • max_tokens da auditoria: 1500 (hardcoded) -> opts.maxTokensAudit || 4000. O Fable 5 emite
+       blocos de thinking no MESMO orcamento (media real de 1.860 tokens no eval) — com 1500 o
+       JSON da auditoria truncava e a estacao era reprovada com "resposta ilegivel" (falso FAIL).
+     • Deteccao de truncamento NA AUDITORIA (espelha trunc1/trunc2 da geracao): stop_reason
+       'max_tokens' -> AUDIT_ERROR categoria 'auditor_truncado' com a causa explicita. Isso
+       fecha tambem um fail-open real: parseLoose REPARA JSON truncado (fecha chaves), entao um
+       audit cortado no meio de "issues" podia parsear com status OK e issues faltando —
+       aprovacao indevida. Agora truncamento reprova SEMPRE, com diagnostico claro.
+     • ENGINE_VERSION 1.2.0.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.1.0'; // 2026-07-18 — modo AVANCADA ANCORADA EM IMAGEM
+  var ENGINE_VERSION = '1.2.0'; // 2026-07-26 — orcamento configuravel do auditor (maxTokensAudit) + deteccao de truncamento na auditoria
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -1106,17 +1118,32 @@
     return warns;
   }
 
-  async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade, anchor) {
+  async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade, anchor, maxTokensAudit) {
     var local = preValidate(stObj, pepResult, dificuldade, anchor);
     var warnings = softWarnings(stObj);
     if (local.length > 0) return { passed: false, status: 'FAIL', score: 0, issues: local, warnings: warnings };
+    var mtAudit = maxTokensAudit || 4000; // Fable 5 gasta thinking no mesmo orcamento (media 1.860); 1500 truncava
     try {
-      var r = await aiCall({ model: modelAudit, max_tokens: 1500, system: buildSysAudit(dificuldade, anchor),
+      var r = await aiCall({ model: modelAudit, max_tokens: mtAudit, system: buildSysAudit(dificuldade, anchor),
         messages: [{ role: 'user', content: 'Audite esta estacao OSCE:\n' + JSON.stringify(auditPayload(stObj, anchor), null, 2) }] });
       if (!r.ok) return { passed: false, status: 'AUDIT_ERROR', score: 0,
         issues: [{ severity: 'high', category: 'auditor_indisponivel', message: 'Auditor nao respondeu (HTTP ' + r.status + ').' }] };
+      var dataAudit;
+      try { dataAudit = await r.json(); }
+      catch (_e0) {
+        return { passed: false, status: 'AUDIT_ERROR', score: 0,
+          issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor retornou resposta ilegivel.' }] };
+      }
+      // TRUNCAMENTO NA AUDITORIA (espelha trunc1/trunc2 da geracao). Checar ANTES do parseLoose:
+      // o parseLoose REPARA JSON truncado (fecha chaves) — um audit cortado no meio de "issues"
+      // podia parsear com status OK e issues faltando (fail-open). Truncou -> reprova SEMPRE.
+      if (dataAudit && dataAudit.stop_reason === 'max_tokens') {
+        return { passed: false, status: 'AUDIT_ERROR', score: 0,
+          issues: [{ severity: 'high', category: 'auditor_truncado',
+            message: 'Auditoria truncada por max_tokens (orcamento atual: ' + mtAudit + ') — aumente opts.maxTokensAudit.' }] };
+      }
       var parsed;
-      try { parsed = parseLoose(extractText(await r.json())); }
+      try { parsed = parseLoose(extractText(dataAudit)); }
       catch (_) {
         return { passed: false, status: 'AUDIT_ERROR', score: 0,
           issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor retornou resposta ilegivel.' }] };
@@ -1257,7 +1284,7 @@
 
     // ── Auditoria (fail-closed) ──
     onProgress(3);
-    var auditResult = await audit(station, aiCall, modelAudit, pep, difUse, anchor);
+    var auditResult = await audit(station, aiCall, modelAudit, pep, difUse, anchor, opts.maxTokensAudit);
 
     // ── Truncamento (max_tokens) força reprovacao -> retry no wrapper ──
     if (trunc1 || trunc2) {
