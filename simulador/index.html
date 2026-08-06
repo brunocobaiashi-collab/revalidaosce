@@ -380,6 +380,11 @@ body.has-top-nav .dash-header-row{display:none}
   .etable td,.etable th{color:#000;border-color:#ccc}
   .badge{border:1px solid #ccc;color:#000!important;background:#f5f5f5!important}
   .clabel{color:#555}
+  /* v1.6.148: Ctrl+P nao pode perder o que esta recolhido na tela */
+  .pep-wrap tr.pep-ok{display:table-row!important}
+  .pep-wrap.pep-vazia{display:block!important}
+  .rblk>summary{display:none!important}
+  .rblk>.rblk-body{display:block!important}
   .muted{color:#555}
   h1,h2{color:#000}
 }
@@ -468,6 +473,33 @@ body.light .badge{color:var(--text)}
 .tema-prog{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin:.5rem 0}
 .tema-prog>i{display:block;height:100%;background:var(--accent);border-radius:99px}
 @media(max-width:560px){.rd table{min-width:460px}.rescta-nm{font-size:1.08rem}}
+/* ── v1.6.148: RESULTADO ENXUTO (s-eval e s-hist-detail) ─────────────────── */
+.sc-perda{font-family:var(--mono);font-size:.72rem;color:var(--text2);margin-top:.75rem;letter-spacing:.02em}
+.sc-perda b{color:var(--text);font-weight:600}
+.rblk{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin:1.25rem 0}
+.rblk>summary{list-style:none;cursor:pointer;padding:1rem 1.25rem;display:flex;align-items:center;gap:.55rem;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);
+  -webkit-user-select:none;user-select:none;border-radius:14px}
+.rblk>summary::-webkit-details-marker{display:none}
+.rblk>summary::marker{content:''}
+.rblk>summary::before{content:'';flex:none;width:0;height:0;border-left:5px solid currentColor;
+  border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .18s}
+.rblk[open]>summary::before{transform:rotate(90deg)}
+.rblk>summary:hover{color:var(--text)}
+.rblk-n{margin-left:auto;font-family:var(--sans);font-size:.76rem;color:var(--text3);letter-spacing:0;text-transform:none}
+.rblk-body{padding:0 1.25rem 1.25rem}
+/* PEP: por padrão só as linhas com perda de ponto. As 100% corretas — em média
+   6 das 11 — entram com o "ver PEP completo", em vez de empurrar a tela. */
+.pep-wrap tr.pep-ok{display:none}
+.pep-wrap.pep-all tr.pep-ok{display:table-row}
+/* sessao sem perda: a tabela sairia so com o cabecalho — some ate pedirem o PEP completo */
+.pep-wrap.pep-vazia:not(.pep-all){display:none}
+.pep-vazio{display:none;align-items:center;gap:.55rem;font-size:.88rem;color:var(--text2);
+  background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28);border-radius:10px;padding:.8rem 1rem}
+.pep-toggle{margin-top:.9rem;background:transparent;border:0;padding:.3rem 0;cursor:pointer;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.pep-toggle:hover{text-decoration:underline}
+@media(max-width:600px){.rblk>summary{padding:.9rem 1rem}.rblk-body{padding:0 1rem 1rem}}
 </style>
 <!-- build:20260428_filters_badges_ux -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js'"></script>
@@ -1085,6 +1117,7 @@ body.light .badge{color:var(--text)}
       <span style="font-family:var(--mono);font-size:1.1rem;color:var(--text2)" id="sc-den"></span>
     </div>
     <div class="sbar-t"><div class="sbar-f" id="sc-bar"></div></div>
+    <div class="sc-perda" id="sc-perda"></div>
   </div>
   <!-- v1.6.50: devolutiva pedagógica do examinador -->
   <div id="eval-comentario" style="display:none;margin:1.25rem 0;background:linear-gradient(135deg,rgba(79,107,237,.10),rgba(79,107,237,.03));border:1px solid rgba(79,107,237,.35);border-left:3px solid var(--accent);border-radius:12px;padding:1.1rem 1.25rem">
@@ -1094,25 +1127,37 @@ body.light .badge{color:var(--text)}
     </div>
     <div id="eval-comentario-body" style="font-size:.92rem;line-height:1.65;color:var(--text)"></div>
   </div>
-  <table class="etable">
-    <thead><tr>
-      <th style="width:32%">Critério</th><th style="width:16%">Desempenho</th>
-      <th style="width:36%">Trecho considerado</th>
-      <th style="width:8%;text-align:right">Pts</th><th style="width:8%;text-align:right">Máx</th>
-    </tr></thead>
-    <tbody id="eval-body"></tbody>
-  </table>
-  <!-- Transcript of doctor's speech -->
-  <div style="margin-top:1.5rem">
-    <div style="margin-bottom:.75rem">
-      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase">Transcrição da consulta</div>
+  <!-- v1.6.148: "O que faltou" — abre só com as linhas onde houve perda de ponto -->
+  <div class="card" style="margin:1.25rem 0">
+    <h2 style="margin-bottom:.25rem;font-size:1rem">O que faltou</h2>
+    <p class="small muted" id="eval-pep-sub" style="margin-bottom:.875rem"></p>
+    <div class="pep-vazio" id="eval-pep-vazio">Nenhum ponto perdido — todos os itens do PEP foram cumpridos.</div>
+    <div class="pep-wrap" id="eval-pep-wrap">
+      <div style="overflow-x:auto">
+        <table class="etable">
+          <thead><tr>
+            <th style="width:32%">Critério</th><th style="width:16%">Desempenho</th>
+            <th style="width:36%">Trecho considerado</th>
+            <th style="width:8%;text-align:right">Pts</th><th style="width:8%;text-align:right">Máx</th>
+          </tr></thead>
+          <tbody id="eval-body"></tbody>
+        </table>
+      </div>
     </div>
-    <div id="eval-transcript" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem;max-height:400px;overflow-y:auto">
-      <div id="eval-transcript-content" style="font-size:.82rem;line-height:1.8;color:var(--text2)"></div>
-    </div>
+    <button type="button" class="pep-toggle" id="eval-pep-toggle" style="display:none"></button>
   </div>
 
   <div id="eval-resumo-cta" style="display:none"></div>
+
+  <!-- v1.6.148: transcrição recolhida — 32 turnos em média, material de conferência -->
+  <details class="rblk" id="eval-transcript-blk">
+    <summary>Transcrição da consulta<span class="rblk-n" id="eval-transcript-n"></span></summary>
+    <div class="rblk-body">
+      <div id="eval-transcript" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1rem;max-height:400px;overflow-y:auto">
+        <div id="eval-transcript-content" style="font-size:.82rem;line-height:1.8;color:var(--text2)"></div>
+      </div>
+    </div>
+  </details>
 
   <div id="eval-action-btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem;align-items:center">
     <button class="btn btn-p" id="btn-restart"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3H21M21 3v5h-5"/><path d="M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3H3M3 21v-5h5"/></svg>Recomeçar</button>
@@ -1430,39 +1475,47 @@ body.light .badge{color:var(--text)}
     <div id="hd-comentario-body" style="font-size:.92rem;line-height:1.65;color:var(--text)"></div>
   </div>
 
+  <!-- v1.6.148: "O que faltou" primeiro (diagnóstico), depois o resumo (a ação),
+       e só então o material de conferência recolhido. -->
+  <div class="card" style="margin:1.25rem 0">
+  <h2 style="margin-bottom:.25rem;font-size:1rem">O que faltou</h2>
+  <p class="small muted" id="hd-pep-sub" style="margin-bottom:.35rem"></p>
+  <p class="small muted" style="margin-bottom:.875rem">A coluna <strong>"Trecho considerado"</strong> mostra a fala do médico que foi usada para pontuar o item.</p>
+  <div class="pep-vazio" id="hd-pep-vazio">Nenhum ponto perdido — todos os itens do PEP foram cumpridos.</div>
+  <div class="pep-wrap" id="hd-pep-wrap">
+    <div style="overflow-x:auto">
+      <table class="etable" id="hd-cl-table">
+        <thead><tr>
+          <th style="width:28%">Critério</th>
+          <th style="width:14%">Resultado</th>
+          <th style="width:8%;text-align:right">Pts</th>
+          <th style="width:8%;text-align:right">Máx</th>
+          <th style="width:42%">Trecho considerado</th>
+        </tr></thead>
+        <tbody id="hd-cl-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <button type="button" class="pep-toggle" id="hd-pep-toggle" style="display:none"></button>
+  </div>
+
   <!-- v1.6.147: resumo do tema — o aluno volta aqui para reler -->
   <div id="hd-resumo-cta" style="display:none"></div>
 
-  <!-- Checklist comparison table -->
-  <div class="card" style="margin:1.25rem 0">
-  <h2 style="margin-bottom:.875rem;font-size:1rem">Comparativo — Padrão Esperado de Procedimentos (PEP)</h2>
-  <p class="small muted" style="margin-bottom:.875rem">A coluna <strong>"Trecho considerado"</strong> mostra a fala do médico que foi usada para pontuar o item.</p>
-  <div style="overflow-x:auto">
-    <table class="etable" id="hd-cl-table">
-      <thead><tr>
-        <th style="width:28%">Critério</th>
-        <th style="width:14%">Resultado</th>
-        <th style="width:8%;text-align:right">Pts</th>
-        <th style="width:8%;text-align:right">Máx</th>
-        <th style="width:42%">Trecho considerado</th>
-      </tr></thead>
-      <tbody id="hd-cl-body"></tbody>
-    </table>
-  </div>
-  </div>
-
-  <!-- Transcrição da consulta (médico + paciente, fundida) — v1.2.3 -->
-  <div class="card" style="margin:1.25rem 0">
-  <h2 style="margin-bottom:.875rem;font-size:1rem">Transcrição da consulta</h2>
-  <div id="hd-log"></div>
-  </div>
+  <!-- Transcrição da consulta (médico + paciente, fundida) — v1.2.3; recolhida na v1.6.148 -->
+  <details class="rblk" id="hd-log-blk">
+    <summary>Transcrição da consulta<span class="rblk-n" id="hd-log-n"></span></summary>
+    <div class="rblk-body"><div id="hd-log"></div></div>
+  </details>
 
   <!-- Exames solicitados na sessão (clicáveis p/ rever o impresso) -->
-  <div id="hd-exams-wrap" class="card" style="display:none;margin:1.25rem 0">
-    <h2 style="margin-bottom:.4rem;font-size:1rem">Exames solicitados</h2>
-    <p class="small muted" style="margin-bottom:.875rem">Toque em um exame para rever o impresso que foi entregue.</p>
-    <div id="hd-exams"></div>
-  </div>
+  <details class="rblk" id="hd-exams-wrap" style="display:none">
+    <summary>Exames solicitados<span class="rblk-n" id="hd-exams-n"></span></summary>
+    <div class="rblk-body">
+      <p class="small muted" style="margin:0 0 .875rem">Toque em um exame para rever o impresso que foi entregue.</p>
+      <div id="hd-exams"></div>
+    </div>
+  </details>
 </div>
 
 <!-- CONTA -->
@@ -1546,9 +1599,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.147',
+  version: '1.6.148',
   date: '2026-08-06',
-  notes: '1.6.147 (base: 1.6.146): o resumo do tema passa a ser consultavel pelo historico. (1) carregarResumoCTA parametrizada — (stationId, boxId, voltarPara) — com os mesmos padroes de antes, entao a chamada da s-eval segue identica. (2) Novo slot #hd-resumo-cta na revisao da sessao (s-hist-detail), logo abaixo da devolutiva do examinador; sair do resumo volta para o historico, nao para a s-eval. (3) A RPC get_resumo_da_estacao passou a devolver o campo lido (de user_tema_progresso) e o rotulo do card vira "Rever o resumo do tema" quando o aluno ja leu. Regras de acesso inalteradas: servidor continua autoritativo, trial/gratis nao recebem nada e qualquer falha e silenciosa. Sem mudanca no mic, cronometro, grader, comentador ou fluxo de acesso.'
+  notes: '1.6.148 (base: 1.6.147): resultado enxuto na s-eval e na revisao do historico (s-hist-detail), mesmo layout nas duas. Ordem: nota (com a linha “perdeu X pts em N itens”) > devolutiva do examinador > “O que faltou” > resumo do tema > blocos recolhidos. (1) A tabela do PEP nasce mostrando SO as linhas com perda de ponto; as 100%% corretas ficam atras de “Ver PEP completo (N itens)”. Medido em 370 sessoes validas de 60 dias: PEP medio de 10,9 itens, 2,4 zerados + 2,3 parciais, ou seja ~6 linhas de puro Adequado que nao ensinavam nada e empurravam a tela. Nenhum dado saiu — mudou o que abre por padrao. (2) Transcricao (32 turnos em media) e Exames solicitados viraram blocos <details> recolhidos, com contagem no cabecalho. (3) Sessao sem perda mostra um estado proprio em vez de tabela vazia. (4) beforeprint/afterprint abrem tudo para o Ctrl+P; o botao Gerar PDF nao e afetado — ele monta um HTML proprio num iframe a partir dos dados. Listeners com guarda if(el) (§8). Sem mudanca no grader, no comentador, no mic, no cronometro ou no fluxo de acesso.'
 };
 
 // Função global pra inspeção via console
@@ -6033,6 +6086,86 @@ $('vol-slider').addEventListener('input',function(){ vVol=+this.value; $('vol-lb
 $('rate-slider').addEventListener('input',function(){ vRate=+this.value; $('rate-lbl').textContent=(+this.value).toFixed(1)+'\u00d7'; if(_curAudio){ try{ _curAudio.playbackRate=vRate; }catch(e){} } });
 $('tts-chk').addEventListener('change',function(){ ttsOn=this.checked; });
 
+// ── v1.6.148: PEP ENXUTO ────────────────────────────────────────────────────
+// A tabela do PEP nasce mostrando só as linhas onde houve perda de ponto.
+// Medido nas 370 sessões válidas dos últimos 60 dias: PEP médio de 10,9 itens,
+// dos quais 2,4 zerados e 2,3 parciais — ou seja, ~6 linhas de puro "Adequado"
+// que não ensinam nada. Elas continuam disponíveis atrás do "ver PEP completo".
+function pepSync(wrapId, subId, vazioId, toggleId){
+  var wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+  wrap.classList.remove('pep-all');                       // cada render nasce recolhido
+  var linhas = wrap.querySelectorAll('tbody tr.pep-loss, tbody tr.pep-ok');
+  var total = linhas.length, perda = 0;
+  for(var i=0;i<total;i++){ if(linhas[i].className.indexOf('pep-loss') >= 0) perda++; }
+  var ocultas = total - perda;
+
+  var sub = document.getElementById(subId);
+  if(sub){
+    sub.textContent = !total ? ''
+      : perda ? (perda === 1 ? '1 item do PEP com perda de pontos, de ' + total
+                             : perda + ' itens do PEP com perda de pontos, de ' + total)
+              : 'Nenhum item perdeu ponto — ' + total + ' de ' + total + ' corretos';
+  }
+  var semPerda = (total > 0 && perda === 0);
+  var vazio = document.getElementById(vazioId);
+  if(vazio) vazio.style.display = semPerda ? 'flex' : 'none';
+  // tabela so com thead nao ajuda ninguem: recolhe ate pedirem o PEP completo
+  if(semPerda) wrap.classList.add('pep-vazia'); else wrap.classList.remove('pep-vazia');
+
+  var tg = document.getElementById(toggleId);
+  if(tg){
+    var rotulo = 'Ver PEP completo (' + total + (total === 1 ? ' item)' : ' itens)');
+    tg.setAttribute('data-fechado', rotulo);
+    tg.textContent = rotulo;
+    tg.style.display = ocultas > 0 ? '' : 'none';         // nada oculto = nada a revelar
+  }
+}
+
+function pepToggle(wrapId, toggleId){
+  var w = document.getElementById(wrapId), t = document.getElementById(toggleId);
+  if(!w || !t) return;
+  var aberto = w.classList.toggle('pep-all');
+  t.textContent = aberto ? 'Mostrar só o que faltou' : (t.getAttribute('data-fechado') || 'Ver PEP completo');
+}
+
+// Linha de perda no cabeçalho da nota ("perdeu 3,60 pts em 5 itens").
+function pepPerdaTexto(itens){
+  var n = 0, pts = 0;
+  (itens || []).forEach(function(it){
+    var mx = Number(it.max) || 0, sc = Number(it.score) || 0;
+    if(sc < mx){ n++; pts += (mx - sc); }
+  });
+  if(!n) return 'Nenhum ponto perdido nesta sessão.';
+  return 'Perdeu <b>' + pts.toFixed(2).replace('.', ',') + ' pts</b> em <b>' + n
+       + (n === 1 ? ' item</b> do PEP.' : ' itens</b> do PEP.');
+}
+
+// Guardas obrigatórias: um $() nulo aborta o script inteiro daqui para baixo (§8).
+(function(){ var b = document.getElementById('eval-pep-toggle');
+  if(b) b.addEventListener('click', function(){ pepToggle('eval-pep-wrap','eval-pep-toggle'); }); })();
+(function(){ var b = document.getElementById('hd-pep-toggle');
+  if(b) b.addEventListener('click', function(){ pepToggle('hd-pep-wrap','hd-pep-toggle'); }); })();
+
+// Ctrl+P na própria página: nada recolhido pode sumir do papel. (O botão "Gerar PDF"
+// não passa por aqui — ele monta um HTML próprio num iframe, a partir dos dados.)
+(function(){
+  var _rb = [], _rp = [];
+  function abrir(){
+    _rb = []; _rp = [];
+    var ds = document.querySelectorAll('details.rblk');
+    for(var i=0;i<ds.length;i++){ if(!ds[i].open){ ds[i].open = true; _rb.push(ds[i]); } }
+    var ws = document.querySelectorAll('.pep-wrap');
+    for(var j=0;j<ws.length;j++){ if(ws[j].className.indexOf('pep-all') < 0){ ws[j].classList.add('pep-all'); _rp.push(ws[j]); } }
+  }
+  function fechar(){
+    _rb.forEach(function(d){ d.open = false; }); _rb = [];
+    _rp.forEach(function(w){ w.classList.remove('pep-all'); }); _rp = [];
+  }
+  window.addEventListener('beforeprint', abrir);
+  window.addEventListener('afterprint', fechar);
+})();
+
 // ── v1.6.146: RESUMO DE TEMA ────────────────────────────────────────────────
 // O resumo vive no banco e só é servido por RPC (§12). Regras de acesso — assinante
 // ou admin, e >=1 sessão válida no tema — são impostas no servidor; aqui é só UX.
@@ -6701,6 +6834,9 @@ function renderEvalTranscript(){
     if(/aguarda em silencio/i.test(c)) return false;
     return true;
   });
+  // v1.6.148: contagem no cabecalho do bloco recolhido
+  var _etn = $('eval-transcript-n');
+  if(_etn) _etn.textContent = conv.length ? (conv.length + (conv.length===1?' fala':' falas')) : 'sem falas';
 
   if(conv.length){
     var dlogPool = (doctorLog || []).slice();
@@ -7386,6 +7522,8 @@ async function runEval(isReeval){
       +'<td style="font-size:.82rem;vertical-align:top">'+snipHtml+'</td>'
       +'<td style="text-align:right;font-family:var(--mono);font-size:.82rem;vertical-align:top">'+ei.score.toFixed(2)+'</td>'
       +'<td style="text-align:right;font-family:var(--mono);font-size:.82rem;color:var(--text2);vertical-align:top">'+ei.max.toFixed(2)+'</td>';
+    // v1.6.148: quem perdeu ponto fica visivel; quem acertou vai para o "PEP completo"
+    tr.className = (ei.score < ei.max) ? 'pep-loss' : 'pep-ok';
     tbody.appendChild(tr);
   });
 
@@ -7393,6 +7531,9 @@ async function runEval(isReeval){
   var pct = Math.min(100, Math.round(total/maxTotal*100));
   $('sc-val').textContent = total.toFixed(2);
   $('sc-den').textContent = '/ '+maxTotal.toFixed(1);
+  // v1.6.148
+  pepSync('eval-pep-wrap','eval-pep-sub','eval-pep-vazio','eval-pep-toggle');
+  var _scp = $('sc-perda'); if(_scp) _scp.innerHTML = pepPerdaTexto(evalItems);
   var bar = $('sc-bar');
   bar.style.background = pct>=60?'#22c55e':pct>=40?'#f5c842':'#ef4444';
   setTimeout(function(){ bar.style.width=pct+'%'; }, 200);
@@ -8186,7 +8327,8 @@ function renderHistDetail(data){
     +'</div>'
     +'<div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:1rem">'
     +'<div style="height:100%;border-radius:3px;width:'+pct+'%;background:'+col+';transition:width 1.2s cubic-bezier(.4,0,.2,1)"></div>'
-    +'</div>';
+    +'</div>'
+    +'<div class="sc-perda">'+pepPerdaTexto(data.eval_items||[])+'</div>';
 
   // v1.6.50: devolutiva salva (estações antigas não têm — box fica oculto)
   renderComentario('hd-comentario','hd-comentario-body', data.comentario_ia || null, false);
@@ -8218,13 +8360,19 @@ function renderHistDetail(data){
       +'<td style="text-align:right;font-family:var(--mono);font-size:.82rem;vertical-align:top;padding:10px 8px">'+item.score.toFixed(2)+'</td>'
       +'<td style="text-align:right;font-family:var(--mono);font-size:.82rem;color:var(--text2);vertical-align:top;padding:10px 8px">'+item.max.toFixed(2)+'</td>'
       +'<td style="vertical-align:top;padding:10px 8px">'+snippetHtml+'</td>';
+    // v1.6.148: mesma regra da s-eval
+    tr.className = (item.score < item.max) ? 'pep-loss' : 'pep-ok';
     tbody.appendChild(tr);
   });
+  pepSync('hd-pep-wrap','hd-pep-sub','hd-pep-vazio','hd-pep-toggle');   // v1.6.148
 
   // ── Transcrição da consulta (fundida: médico c/ timestamp + paciente) — v1.2.3 ──
   var logEl = $('hd-log');
   var conv = (data.transcript && Array.isArray(data.transcript.conversation)) ? data.transcript.conversation : [];
   var dlog = data.doctor_log || [];
+  // v1.6.148: contagem no cabecalho do bloco recolhido
+  var _hln = $('hd-log-n'), _nfalas = conv.length || dlog.length;
+  if(_hln) _hln.textContent = _nfalas ? (_nfalas + (_nfalas===1?' fala':' falas')) : 'sem falas';
 
   if(conv.length){
     // Caso ideal: temos a conversa completa. Casamos timestamps do doctor_log
@@ -8291,6 +8439,8 @@ function renderHistDetail(data){
   _reqs.forEach(function(e){ var t = (e && e.title || '').trim(); if(t && !_seen[t.toLowerCase()]){ _seen[t.toLowerCase()] = 1; reqList.push(t); } });
   if(reqList.length){
     examWrap.style.display = 'block';
+    var _hen = $('hd-exams-n');   // v1.6.148
+    if(_hen) _hen.textContent = reqList.length + (reqList.length===1 ? ' exame' : ' exames');
     examEl.innerHTML = reqList.map(function(t,i){
       return '<button type="button" class="hd-exam-item" data-idx="'+i+'" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:.6rem .8rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin:.3rem 0;cursor:pointer;color:var(--text);font-family:var(--sans);font-size:.85rem;transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
         + '<span style="display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M10 2v6.5L4.6 18a2 2 0 001.8 3h11.2a2 2 0 001.8-3L14 8.5V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/></svg>'+esc(t)+'</span><span style="font-size:.72rem;color:var(--accent);white-space:nowrap">ver exame &rarr;</span></button>';
