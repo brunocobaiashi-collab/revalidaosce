@@ -434,6 +434,40 @@ body.light .badge{color:var(--text)}
 @media (display-mode: standalone){
   body{padding-top:env(safe-area-inset-top) !important;padding-bottom:env(safe-area-inset-bottom) !important}
 }
+/* ── v1.6.146: RESUMO DE TEMA ──────────────────────────────────────────────── */
+.rescta{background:linear-gradient(135deg,rgba(0,119,204,.14),rgba(0,201,255,.06));border:1px solid rgba(0,201,255,.28);
+  border-radius:14px;padding:1.15rem;margin-top:1.5rem;cursor:pointer;transition:border-color .2s,transform .12s;text-align:left;width:100%;font-family:var(--sans);color:var(--text)}
+.rescta:hover{border-color:var(--accent)}
+.rescta:active{transform:scale(.995)}
+.rescta-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.rescta-lbl{font-family:var(--mono);font-size:.68rem;color:var(--accent);opacity:.85;text-transform:uppercase;letter-spacing:.16em;margin-bottom:.35rem}
+.rescta-nm{font-family:var(--serif);font-size:1.2rem;line-height:1.25;margin-bottom:.35rem}
+.rescta-ch{font-size:1.5rem;color:var(--accent);flex-shrink:0;line-height:1}
+.rd{font-size:.94rem;line-height:1.8;color:var(--text)}
+.rd h2{font-family:var(--serif);font-size:1.18rem;font-weight:400;margin:1.9rem 0 .55rem;padding-top:1.1rem;border-top:1px solid var(--border);color:var(--text)}
+.rd h2:first-child{margin-top:0;padding-top:0;border-top:0}
+.rd h3{font-size:1rem;font-weight:700;margin:1.1rem 0 .35rem;color:var(--text);font-family:var(--sans)}
+.rd p{margin:.6rem 0}
+.rd b{color:#fff;font-weight:700}
+.rd code{font-family:var(--mono);font-size:.85em;background:rgba(0,201,255,.1);color:var(--accent);padding:1px 5px;border-radius:4px}
+.rd ul,.rd ol{margin:.6rem 0 .8rem 1.15rem;padding:0}
+.rd li{margin:.3rem 0}
+.rd blockquote{border-left:3px solid rgba(0,201,255,.4);background:rgba(0,119,204,.07);padding:.7rem .95rem;margin:.9rem 0;border-radius:0 8px 8px 0;font-size:.9rem;color:var(--text2)}
+.rd blockquote b{color:var(--text)}
+.rd hr{border:0;border-top:1px solid var(--border);margin:1.5rem 0}
+/* tabela discriminadora: scroll horizontal no mobile (decisão de 06/08) */
+.rd .tw{overflow-x:auto;margin:1rem 0;border:1px solid var(--border);border-radius:10px;-webkit-overflow-scrolling:touch}
+.rd table{width:100%;border-collapse:collapse;min-width:520px}
+.rd th{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);
+  text-align:left;padding:.65rem .8rem;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border2);white-space:nowrap}
+.rd td{padding:.65rem .8rem;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:top;line-height:1.6}
+.rd tr:last-child td{border-bottom:0}
+.rd td:first-child{color:#fff;font-weight:500}
+.tema-stn{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.85rem 0;border-bottom:1px solid var(--border)}
+.tema-stn:last-child{border-bottom:0}
+.tema-prog{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin:.5rem 0}
+.tema-prog>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+@media(max-width:560px){.rd table{min-width:460px}.rescta-nm{font-size:1.08rem}}
 </style>
 <!-- build:20260428_filters_badges_ux -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js'"></script>
@@ -1078,11 +1112,33 @@ body.light .badge{color:var(--text)}
     </div>
   </div>
 
+  <div id="eval-resumo-cta" style="display:none"></div>
+
   <div id="eval-action-btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem;align-items:center">
     <button class="btn btn-p" id="btn-restart"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3H21M21 3v5h-5"/><path d="M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3H3M3 21v-5h5"/></svg>Recomeçar</button>
     <button class="btn" id="btn-eval-another"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Outra estação</button>
     <button class="btn" id="btn-eval-home"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M10 21v-6h4v6"/></svg>Início</button>
     <button class="btn" id="btn-report-bug" style="background:transparent;border:none;color:var(--text3);font-size:.8rem;opacity:.7;text-decoration:underline;margin-left:auto"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M8 2l1.5 2.5M16 2l-1.5 2.5M12 8a4 4 0 014 4v3a4 4 0 01-8 0v-3a4 4 0 014-4zM8 12H4M8 16H5M8 8L5.5 6M16 12h4M16 16h3M16 8l2.5-2"/></svg>Reportar bug</button>
+  </div>
+</div>
+
+<!-- ── TELA: RESUMO DE TEMA (v1.6.146) ─────────────────────────────── -->
+<div id="s-tema" class="screen">
+  <button type="button" class="btn" style="margin-bottom:1.25rem;padding:.45rem .9rem;font-size:.82rem" onclick="voltarDoTema()">&larr; Voltar</button>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem">Resumo do tema</div>
+    <h1 id="tema-nome"></h1>
+    <div id="tema-meta" style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap"></div>
+  </div>
+  <div id="tema-corpo" class="rd"></div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-top:2rem">
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.5rem">Seu progresso no tema</div>
+    <div class="tema-prog"><i id="tema-prog-bar" style="width:0%"></i></div>
+    <div id="tema-prog-txt" style="color:var(--text2);font-size:.82rem"></div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-top:.875rem">
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.5rem">Agora aplique</div>
+    <div id="tema-estacoes"></div>
   </div>
 </div>
 
@@ -1487,9 +1543,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.145',
-  date: '2026-08-04',
-  notes: '1.6.145 (base: main 1.6.144): (1) parseAIResponse varre content ate o 1o bloco type=text — blocos thinking do Fable 5 no content[0] devolviam vazio e disparavam o fallback pago Fable+Opus em TODA avaliacao (medido: 0 fallbacks 27/07-01/08, 3/3 em 02/08, 5/6 em 03/08); espelha extractText do station-engine.js. (2) parseChecklist atribui id 1-based quando o item nao tem id — checklist sem id fazia o grader inventar ids que nunca casavam no results.find e TODOS os itens zeravam com aiReviewed:true (P0 04/08: sessao zerada na estacao a320812b Dor lombar e febre em gestante, unica das 169 com checklist JSON sem ids; dado ja corrigido via SQL, snapshot_checklist_a320812b_20260804). (3) Guarda anti-zero-silencioso no runEval: 0 ids casando = falha de avaliacao (lanca e retenta), nao nota 0.00 valida. Sem mudanca de UI, prompt, modelos ou fluxo de acesso.'
+  version: '1.6.146',
+  date: '2026-08-06',
+  notes: '1.6.146 (base: 1.6.145): resumo de tema. (1) Card “Estude este tema” na tela de resultado (s-eval), alimentado pela RPC get_resumo_da_estacao — so renderiza para assinante/admin com >=1 sessao valida no tema e resumo com status=active; qualquer falha e silenciosa e a s-eval segue intacta. (2) Nova tela s-tema: corpo do resumo renderizado de markdown no cliente (titulos, tabelas com scroll horizontal, listas, citacao), barra de progresso do tema e lista de estacoes do tema com botao Treinar que chama loadStation direto (entra no atendimento, mantem o gesto do usuario que o iOS exige para o audio). (3) RPCs get_tema_resumo e marcar_resumo_lido. Servidor e autoritativo: acesso, desbloqueio e publicacao sao decididos no banco (§12) — trial/gratis nao recebem nada (§2). abrirTema, voltarDoTema e treinarDoTema exportadas em window por causa dos onclick inline (a IIFE de use-strict nao vaza). Sem mudanca no mic, no cronometro, no grader, no comentador ou no fluxo de acesso.'
 };
 
 // Função global pra inspeção via console
@@ -5974,6 +6030,172 @@ $('vol-slider').addEventListener('input',function(){ vVol=+this.value; $('vol-lb
 $('rate-slider').addEventListener('input',function(){ vRate=+this.value; $('rate-lbl').textContent=(+this.value).toFixed(1)+'\u00d7'; if(_curAudio){ try{ _curAudio.playbackRate=vRate; }catch(e){} } });
 $('tts-chk').addEventListener('change',function(){ ttsOn=this.checked; });
 
+// ── v1.6.146: RESUMO DE TEMA ────────────────────────────────────────────────
+// O resumo vive no banco e só é servido por RPC (§12). Regras de acesso — assinante
+// ou admin, e >=1 sessão válida no tema — são impostas no servidor; aqui é só UX.
+var _temaAtual = null;
+var _temaVoltarPara = 's-eval';
+
+function _temaEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function _temaInline(s){
+  s = _temaEsc(s);
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<i>$2</i>');
+  return s;
+}
+
+// Markdown mínimo: títulos, tabelas, listas, citação, código, regra horizontal.
+function _temaMd(md){
+  var L = String(md||'').replace(/\r/g,'').split('\n'), o = [], i = 0;
+  while(i < L.length){
+    var l = L[i];
+    if(/^\s*$/.test(l)){ i++; continue; }
+    if(/^---+\s*$/.test(l)){ o.push('<hr>'); i++; continue; }
+    var m = l.match(/^(#{1,6})\s+(.*)$/);
+    if(m){ var n = m[1].length > 3 ? 3 : m[1].length; o.push('<h'+n+'>'+_temaInline(m[2])+'</h'+n+'>'); i++; continue; }
+    if(/^\s*\|/.test(l) && i+1 < L.length && /^\s*\|[\s:|-]+\|?\s*$/.test(L[i+1])){
+      var cel = function(r){ return r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(function(c){ return c.trim(); }); };
+      var hd = cel(l); i += 2; var bd = [];
+      while(i < L.length && /^\s*\|/.test(L[i])){ bd.push(cel(L[i])); i++; }
+      o.push('<div class="tw"><table><thead><tr>'
+        + hd.map(function(c){ return '<th>'+_temaInline(c)+'</th>'; }).join('')
+        + '</tr></thead><tbody>'
+        + bd.map(function(r){ return '<tr>'+r.map(function(c){ return '<td>'+_temaInline(c)+'</td>'; }).join('')+'</tr>'; }).join('')
+        + '</tbody></table></div>');
+      continue;
+    }
+    if(/^\s*>/.test(l)){
+      var q = [];
+      while(i < L.length && /^\s*>/.test(L[i])){ q.push(L[i].replace(/^\s*>\s?/,'')); i++; }
+      o.push('<blockquote>'+q.map(_temaInline).join('<br>')+'</blockquote>'); continue;
+    }
+    if(/^\s*[-*]\s+/.test(l)){
+      var u = [];
+      while(i < L.length && /^\s*[-*]\s+/.test(L[i])){ u.push(L[i].replace(/^\s*[-*]\s+/,'')); i++; }
+      o.push('<ul>'+u.map(function(x){ return '<li>'+_temaInline(x)+'</li>'; }).join('')+'</ul>'); continue;
+    }
+    if(/^\s*\d+\.\s+/.test(l)){
+      var ol = [];
+      while(i < L.length && /^\s*\d+\.\s+/.test(L[i])){ ol.push(L[i].replace(/^\s*\d+\.\s+/,'')); i++; }
+      o.push('<ol>'+ol.map(function(x){ return '<li>'+_temaInline(x)+'</li>'; }).join('')+'</ol>'); continue;
+    }
+    var p = [];
+    while(i < L.length && !/^\s*$/.test(L[i]) && !/^\s*[|>#-]/.test(L[i])){ p.push(L[i]); i++; }
+    o.push('<p>'+p.map(_temaInline).join(' ')+'</p>');
+  }
+  return o.join('');
+}
+
+// Card na tela de resultado. Silencioso em qualquer falha — nunca atrapalha a s-eval.
+async function carregarResumoCTA(){
+  var box = document.getElementById('eval-resumo-cta');
+  if(!box) return;
+  box.style.display = 'none';
+  box.innerHTML = '';
+  try{
+    if(!supabaseClient || !station || !station.id) return;
+    var r = await supabaseClient.rpc('get_resumo_da_estacao', { p_station_id: station.id });
+    if(r.error) return;
+    var d = r.data;
+    if(!d || !d.acesso || !d.tema_id) return;          // trial/grátis: não renderiza nada (§2)
+    if(!d.resumo_disponivel || !d.desbloqueado) return;
+    var cob = (d.cobertura && d.cobertura.length)
+      ? d.cobertura.slice(0,3).join(' · ')
+      : (d.escopo || '');
+    var restam = Math.max(0, (d.estacoes||0) - (d.feitas||0));
+    box.innerHTML =
+      '<button type="button" class="rescta" onclick="abrirTema(&quot;'+_temaEsc(d.tema_id)+'&quot;,&quot;s-eval&quot;)">'
+      + '<div class="rescta-top"><div style="flex:1;min-width:0">'
+      + '<div class="rescta-lbl">Estude este tema</div>'
+      + '<div class="rescta-nm">'+_temaEsc(d.nome)+'</div>'
+      + '<div style="color:var(--text2);font-size:.86rem;line-height:1.6">'+_temaEsc(cob)+'</div>'
+      + '<div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap">'
+      + '<span class="badge bb">'+(d.leitura_min||5)+' min de leitura</span>'
+      + (restam > 0 ? '<span class="badge bb">'+restam+' estação'+(restam>1?'ões':'')+' para aplicar</span>' : '')
+      + '</div></div><div class="rescta-ch">&rsaquo;</div></div></button>';
+    box.style.display = 'block';
+  }catch(e){ /* silencioso: o resumo nunca pode quebrar a avaliação */ }
+}
+
+async function abrirTema(temaId, voltarPara){
+  if(!supabaseClient || !temaId) return;
+  _temaVoltarPara = voltarPara || 's-eval';
+  var corpo = document.getElementById('tema-corpo');
+  var nm = document.getElementById('tema-nome');
+  var mt = document.getElementById('tema-meta');
+  if(nm) nm.textContent = 'Carregando...';
+  if(mt) mt.innerHTML = '';
+  if(corpo) corpo.innerHTML = '';
+  var lst = document.getElementById('tema-estacoes');
+  if(lst) lst.innerHTML = '';
+  show('s-tema');
+  window.scrollTo(0,0);
+  try{
+    var r = await supabaseClient.rpc('get_tema_resumo', { p_tema_id: temaId });
+    if(r.error) throw r.error;
+    var d = r.data || {};
+    if(d.erro){
+      if(nm) nm.textContent = 'Resumo indisponível';
+      if(corpo) corpo.innerHTML = '<p style="color:var(--text2)">'
+        + (d.erro === 'bloqueado' ? 'Faça uma estação deste tema para liberar o resumo.'
+           : d.erro === 'sem_acesso' ? 'Recurso disponível para assinantes.'
+           : 'Este resumo ainda não está publicado.') + '</p>';
+      return;
+    }
+    _temaAtual = d;
+    if(nm) nm.textContent = d.nome || '';
+    var feitas = 0, total = (d.estacoes||[]).length;
+    (d.estacoes||[]).forEach(function(s){ if(s.feita) feitas++; });
+    if(mt){
+      mt.innerHTML = '<span class="badge bb">'+(d.leitura_min||5)+' min</span> '
+        + '<span class="badge '+(feitas>=total?'bg':'bb')+'">'+feitas+' de '+total+' estações feitas</span>';
+    }
+    if(corpo) corpo.innerHTML = _temaMd(d.corpo_md || '');
+    if(lst){
+      lst.innerHTML = (d.estacoes||[]).map(function(s){
+        return '<div class="tema-stn"><div style="flex:1;min-width:0">'
+          + '<div style="font-size:.92rem;margin-bottom:.15rem">'+_temaEsc(s.nome)+'</div>'
+          + '<div style="color:var(--text2);font-size:.76rem">'+_temaEsc(s.area)+'</div></div>'
+          + (s.feita
+              ? '<span class="badge bg" style="flex-shrink:0">feita</span>'
+              : '<button type="button" class="btn" style="padding:.45rem .9rem;font-size:.82rem;flex-shrink:0" onclick="treinarDoTema(&quot;'+s.id+'&quot;)">Treinar</button>')
+          + '</div>';
+      }).join('') || '<div style="color:var(--text2);font-size:.85rem">Nenhuma estação ativa neste tema.</div>';
+    }
+    var prog = document.getElementById('tema-prog-bar');
+    if(prog) prog.style.width = (total ? Math.round(feitas*100/total) : 0) + '%';
+    var pt = document.getElementById('tema-prog-txt');
+    if(pt) pt.textContent = feitas + ' de ' + total + ' feitas';
+    try{ await supabaseClient.rpc('marcar_resumo_lido', { p_tema_id: temaId }); }catch(_){}
+  }catch(e){
+    if(nm) nm.textContent = 'Erro ao carregar';
+    if(corpo) corpo.innerHTML = '<p style="color:var(--text2)">Não foi possível carregar o resumo. Tente de novo.</p>';
+  }
+}
+
+function voltarDoTema(){
+  show(_temaVoltarPara || 's-eval');
+  window.scrollTo(0,0);
+}
+
+// Entra direto no atendimento, como o clique no acervo (§4 do contrato).
+// Chamado de dentro do onclick — mantém o gesto do usuário, que o iOS exige p/ o áudio.
+function treinarDoTema(stationId){
+  if(!stationId) return;
+  if(typeof loadStation === 'function'){ loadStation(stationId, false, true); return; }
+  show('s-select');
+  if(typeof renderStations === 'function') renderStations();
+}
+
+// A IIFE de 'use strict' não vaza nada para window. Como estas três são chamadas
+// de onclick inline no HTML, precisam ser expostas — mesmo padrão de
+// window.closeInfoModal / window.confirmDeleteAccount já usados no arquivo.
+window.abrirTema     = abrirTema;
+window.voltarDoTema  = voltarDoTema;
+window.treinarDoTema = treinarDoTema;
+
 // ── END + EVAL ────────────────────────────────────────────────────────────────
 function endSim(){
   clearInterval(timerInt);
@@ -5995,6 +6217,7 @@ function endSim(){
   console.log('[endSim] doctorLog has', doctorLog.length, 'entries');
   simLive = false;   // v1.6.106: estado limpo ao sair (o reset canônico é no startSim, mas isto evita qualquer janela com simLive preso em true)
   show('s-eval');
+  carregarResumoCTA();   // v1.6.146: card do resumo do tema (silencioso se indisponivel)
   // Render transcript IMMEDIATELY — don't depend on runEval finishing
   renderEvalTranscript();
   runEval();
