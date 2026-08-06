@@ -1430,6 +1430,9 @@ body.light .badge{color:var(--text)}
     <div id="hd-comentario-body" style="font-size:.92rem;line-height:1.65;color:var(--text)"></div>
   </div>
 
+  <!-- v1.6.147: resumo do tema — o aluno volta aqui para reler -->
+  <div id="hd-resumo-cta" style="display:none"></div>
+
   <!-- Checklist comparison table -->
   <div class="card" style="margin:1.25rem 0">
   <h2 style="margin-bottom:.875rem;font-size:1rem">Comparativo — Padrão Esperado de Procedimentos (PEP)</h2>
@@ -1543,9 +1546,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.146',
+  version: '1.6.147',
   date: '2026-08-06',
-  notes: '1.6.146 (base: 1.6.145): resumo de tema. (1) Card “Estude este tema” na tela de resultado (s-eval), alimentado pela RPC get_resumo_da_estacao — so renderiza para assinante/admin com >=1 sessao valida no tema e resumo com status=active; qualquer falha e silenciosa e a s-eval segue intacta. (2) Nova tela s-tema: corpo do resumo renderizado de markdown no cliente (titulos, tabelas com scroll horizontal, listas, citacao), barra de progresso do tema e lista de estacoes do tema com botao Treinar que chama loadStation direto (entra no atendimento, mantem o gesto do usuario que o iOS exige para o audio). (3) RPCs get_tema_resumo e marcar_resumo_lido. Servidor e autoritativo: acesso, desbloqueio e publicacao sao decididos no banco (§12) — trial/gratis nao recebem nada (§2). abrirTema, voltarDoTema e treinarDoTema exportadas em window por causa dos onclick inline (a IIFE de use-strict nao vaza). Sem mudanca no mic, no cronometro, no grader, no comentador ou no fluxo de acesso.'
+  notes: '1.6.147 (base: 1.6.146): o resumo do tema passa a ser consultavel pelo historico. (1) carregarResumoCTA parametrizada — (stationId, boxId, voltarPara) — com os mesmos padroes de antes, entao a chamada da s-eval segue identica. (2) Novo slot #hd-resumo-cta na revisao da sessao (s-hist-detail), logo abaixo da devolutiva do examinador; sair do resumo volta para o historico, nao para a s-eval. (3) A RPC get_resumo_da_estacao passou a devolver o campo lido (de user_tema_progresso) e o rotulo do card vira "Rever o resumo do tema" quando o aluno ja leu. Regras de acesso inalteradas: servidor continua autoritativo, trial/gratis nao recebem nada e qualquer falha e silenciosa. Sem mudanca no mic, cronometro, grader, comentador ou fluxo de acesso.'
 };
 
 // Função global pra inspeção via console
@@ -6088,15 +6091,20 @@ function _temaMd(md){
   return o.join('');
 }
 
-// Card na tela de resultado. Silencioso em qualquer falha — nunca atrapalha a s-eval.
-async function carregarResumoCTA(){
-  var box = document.getElementById('eval-resumo-cta');
+// Card do resumo. Silencioso em qualquer falha — nunca atrapalha a tela que o hospeda.
+// v1.6.147: parametrizado. Serve a s-eval (fim da estação) e a s-hist-detail (revisão
+// da sessão no histórico), que é onde o aluno volta para reler o resumo.
+async function carregarResumoCTA(stationId, boxId, voltarPara){
+  boxId      = boxId || 'eval-resumo-cta';
+  voltarPara = voltarPara || 's-eval';
+  var box = document.getElementById(boxId);
   if(!box) return;
   box.style.display = 'none';
   box.innerHTML = '';
   try{
-    if(!supabaseClient || !station || !station.id) return;
-    var r = await supabaseClient.rpc('get_resumo_da_estacao', { p_station_id: station.id });
+    var sid = stationId || (station && station.id) || '';
+    if(!supabaseClient || !sid) return;
+    var r = await supabaseClient.rpc('get_resumo_da_estacao', { p_station_id: sid });
     if(r.error) return;
     var d = r.data;
     if(!d || !d.acesso || !d.tema_id) return;          // trial/grátis: não renderiza nada (§2)
@@ -6106,9 +6114,9 @@ async function carregarResumoCTA(){
       : (d.escopo || '');
     var restam = Math.max(0, (d.estacoes||0) - (d.feitas||0));
     box.innerHTML =
-      '<button type="button" class="rescta" onclick="abrirTema(&quot;'+_temaEsc(d.tema_id)+'&quot;,&quot;s-eval&quot;)">'
+      '<button type="button" class="rescta" onclick="abrirTema(&quot;'+_temaEsc(d.tema_id)+'&quot;,&quot;'+_temaEsc(voltarPara)+'&quot;)">'
       + '<div class="rescta-top"><div style="flex:1;min-width:0">'
-      + '<div class="rescta-lbl">Estude este tema</div>'
+      + '<div class="rescta-lbl">'+(d.lido ? 'Rever o resumo do tema' : 'Estude este tema')+'</div>'
       + '<div class="rescta-nm">'+_temaEsc(d.nome)+'</div>'
       + '<div style="color:var(--text2);font-size:.86rem;line-height:1.6">'+_temaEsc(cob)+'</div>'
       + '<div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap">'
@@ -6116,7 +6124,7 @@ async function carregarResumoCTA(){
       + (restam > 0 ? '<span class="badge bb">'+restam+' estação'+(restam>1?'ões':'')+' para aplicar</span>' : '')
       + '</div></div><div class="rescta-ch">&rsaquo;</div></div></button>';
     box.style.display = 'block';
-  }catch(e){ /* silencioso: o resumo nunca pode quebrar a avaliação */ }
+  }catch(e){ /* silencioso: o resumo nunca pode quebrar a avaliação nem o histórico */ }
 }
 
 async function abrirTema(temaId, voltarPara){
@@ -8182,6 +8190,10 @@ function renderHistDetail(data){
 
   // v1.6.50: devolutiva salva (estações antigas não têm — box fica oculto)
   renderComentario('hd-comentario','hd-comentario-body', data.comentario_ia || null, false);
+
+  // v1.6.147: card do resumo do tema, logo abaixo da devolutiva. Volta para cá ao sair.
+  // station_id de sim_history é TEXT; a RPC recebe uuid e o PostgREST faz o cast.
+  carregarResumoCTA(data.station_id || '', 'hd-resumo-cta', 's-hist-detail');
 
   // Checklist comparison
   var tbody = $('hd-cl-body');
