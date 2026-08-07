@@ -1599,9 +1599,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.148',
-  date: '2026-08-06',
-  notes: '1.6.148 (base: 1.6.147): resultado enxuto na s-eval e na revisao do historico (s-hist-detail), mesmo layout nas duas. Ordem: nota (com a linha “perdeu X pts em N itens”) > devolutiva do examinador > “O que faltou” > resumo do tema > blocos recolhidos. (1) A tabela do PEP nasce mostrando SO as linhas com perda de ponto; as 100%% corretas ficam atras de “Ver PEP completo (N itens)”. Medido em 370 sessoes validas de 60 dias: PEP medio de 10,9 itens, 2,4 zerados + 2,3 parciais, ou seja ~6 linhas de puro Adequado que nao ensinavam nada e empurravam a tela. Nenhum dado saiu — mudou o que abre por padrao. (2) Transcricao (32 turnos em media) e Exames solicitados viraram blocos <details> recolhidos, com contagem no cabecalho. (3) Sessao sem perda mostra um estado proprio em vez de tabela vazia. (4) beforeprint/afterprint abrem tudo para o Ctrl+P; o botao Gerar PDF nao e afetado — ele monta um HTML proprio num iframe a partir dos dados. Listeners com guarda if(el) (§8). Sem mudanca no grader, no comentador, no mic, no cronometro ou no fluxo de acesso.'
+  version: '1.6.149',
+  date: '2026-08-07',
+  notes: '1.6.149 (base: 1.6.148): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
 };
 
 // Função global pra inspeção via console
@@ -4285,6 +4285,27 @@ function flattenOrientAtor(oa){
   }
   if(oa.se_perguntado_sobre_exame_fisico) parts.push('SOBRE EXAME FÍSICO: ' + oa.se_perguntado_sobre_exame_fisico);
   if(oa.fim_da_consulta) parts.push('FIM DA CONSULTA: ' + oa.fim_da_consulta);
+  // v1.6.149: QUALQUER outra chave do orientAtor tambem vai para o prompt.
+  // Antes a lista acima era um whitelist FECHADO e toda chave fora dela era
+  // descartada em silencio. Nas 10 estacoes INEP 2025/2 isso apagava
+  // `impressos_disponiveis` (10 estacoes), `duvidas_da_paciente` (o item 11 da
+  // estacao de doenca cronica paga por responder duvidas que a paciente nunca
+  // fazia) e `comportamento_da_caderneta` (o resgate aos 7 min da estacao de
+  // vacinacao nunca acontecia). Instrucao escrita pela curadoria tem de chegar
+  // ao ator — e o custo de uma chave nova ser ignorada e alto e invisivel.
+  var _lidas = { regra_fundamental:1, fala_inicial_espontanea:1, tom_emocional:1,
+                 se_perguntado_sobre:1, nao_falar_espontaneamente:1,
+                 se_perguntado_sobre_exame_fisico:1, fim_da_consulta:1 };
+  Object.keys(oa).forEach(function(k){
+    if(_lidas[k]) return;
+    var v = oa[k];
+    if(v === null || v === undefined || v === '') return;
+    var txt;
+    if(Array.isArray(v))            txt = '• ' + v.join('\n• ');
+    else if(typeof v === 'object')  txt = Object.keys(v).map(function(kk){ return '• '+kk.replace(/_/g,' ')+': '+v[kk]; }).join('\n');
+    else                            txt = String(v);
+    if(txt && txt.trim()) parts.push(k.replace(/_/g,' ').toUpperCase() + ': ' + txt);
+  });
   return parts.join('\n\n');
 }
 
@@ -4418,6 +4439,41 @@ $('btn-back-select').addEventListener('click', function(){ if(marathonActive){ m
 // abre a porta de leitura (relógio em 10:00 até tocar "Iniciar estação").
 $('btn-start-sim').addEventListener('click', function(){ startSim(); });
 
+// ── VERBOS DE SOLICITAÇÃO (v1.6.149) ─────────────────────────────────────────
+// Alternação única usada pelos 3 pontos do buildRules que exigem "contexto de
+// pedido" antes de uma trigger_keyword genérica.
+//
+// POR QUE ISTO EXISTE: até a v1.6.148 a lista era
+//   solicit|peco|quero|preciso|posso (ver|ter|olhar)|gostaria|me da|me passa|
+//   me entreg|mostra|exib|apresent|forneça|consultar|verificar
+// e NÃO continha `pedir`. Mas o REQUEST_RX (que decide se a fala é "técnica" e
+// CURTO-CIRCUITA a IA) contém. Consequência medida: "Vou pedir a carga viral"
+// entrava no caminho determinístico, nenhum gatilho casava, e o Chefe de estação
+// respondia "Não consta." para um impresso que existe no banco. A diferença
+// entre tirar 8 e tirar 1,7 era o candidato ter dito "solicito" em vez de
+// "vou pedir".
+//
+// Também faltavam os verbos com que o candidato realmente pede um documento:
+// trouxe/traz (o paciente trouxe o exame), preench/notific (ficha de notificação),
+// prescrev/receit/medicar/passar (receituário), confer/checar, aferir/medir (PA).
+var REQ_VERBS = 'solicit|peco|pedir|\\bpede\\b|pedi\\b|quero|precis[oa]|posso.{0,8}(ver|ter|olhar)'
+              + '|gostaria|me da|me passa|me entreg|mostra|exib|apresent|forne[cç]a?'
+              + '|consultar|verificar|trouxe|\\btraz\\b|preench|notific|prescrev|receit'
+              + '|medicar|passar|confer|checar|aferir|medir|deixa eu ver|vamos ver|da uma olhada';
+
+// Verbos de PROCEDIMENTO. Quem diz "vou palpar o abdome" está pedindo o impresso
+// do exame físico tanto quanto quem diz "solicito exame físico". Estes já eram
+// aceitos nos dois ramos de fallback do buildRules, mas NÃO no ramo das
+// trigger_keywords curadas — que é justamente o que as estações INEP usam.
+var PROC_VERBS = 'examin|avali|observ|inspecion|realiz|fazer|\\bfaco\\b|proceder|puncion'
+               + '|drenar|coletar|executar|colher|palpa|percut|ausculta|pesquis|tomar|receb';
+
+// Keywords AUTO-SUFICIENTES: dispensam verbo antes. São manobras clínicas e
+// documentos — ninguém diz "sinal de Murphy" ou "ficha de notificação" na
+// conversa fiada; se disse, está pedindo. (Antes, só palavras como "exame" e
+// "impresso" tinham esse passe livre.)
+var KW_AUTOSSUFICIENTE = /\b(exame|impresso|solicit|pedido|hemogram|raio|ecg|tomograf|ultrassom|usg)\b|palpa|ausculta|percus|inspec|\btoque\b|murphy|blumberg|giordano|especul|otoscop|oroscop|fundoscop|caderneta|carteirinha|cart[aã]o|receituario|receita|notific|prescric|carga viral|sorolog|antibiogram|urocultura|\bvacina\b|vacinac/;
+
 // ── BUILD ACTOR RULES ─────────────────────────────────────────────────────────
 function buildRules(s){
   var rules  = [];
@@ -4443,12 +4499,12 @@ function buildRules(s){
         try{
           // Match if keyword appears AFTER a request verb, OR keyword phrase contains
           // a strong indicator like "exame/impresso/solicito" already
-          if(/\b(exame|impresso|solicit|pedido|hemogram|raio|ecg|tomograf|ultrassom|usg)\b/.test(kwN)){
+          if(KW_AUTOSSUFICIENTE.test(kwN)){
             triggerParts.push(new RegExp('\\b' + kwFlex));
           } else {
-            // Generic keyword (e.g. "caderneta", "cartao crianca") — require request context
+            // Generic keyword (e.g. "peso", "temperatura") — require request context
             triggerParts.push(new RegExp(
-              '(solicit|peco|quero|preciso|posso.{0,8}(ver|ter|olhar)|gostaria|me da|me passa|me entreg|mostra|exib|apresent|forne[cç]a?|consultar|verificar).{0,30}' + kwFlex
+              '(' + REQ_VERBS + '|' + PROC_VERBS + ').{0,30}' + kwFlex
             ));
           }
         }catch(e){}
@@ -4545,7 +4601,7 @@ function buildRules(s){
           // e isso ative entrega de exame fora de hora.
           var kwShort = kwN.substring(0, Math.min(kwN.length, 9));
           triggerParts.push(new RegExp(
-            '(solicit|peco|quero|preciso|posso.{0,8}(ver|ter|olhar)|gostaria|me da|me passa|me entreg|mostra|exib|apresent|forne[cç]a?|consultar|verificar|examin|avali|observ|inspecion|realiz|fazer|\\bfaco\\b|proceder|puncion|drenar|coletar|executar|colher).{0,25}' + kwShort +
+            '(' + REQ_VERBS + '|examin|avali|observ|inspecion|realiz|fazer|\\bfaco\\b|proceder|puncion|drenar|coletar|executar|colher).{0,25}' + kwShort +
             '|' + kwShort + '.{0,25}(por favor|disponivel|seria possivel)'
           ));
         }catch(e){}
@@ -4568,7 +4624,7 @@ function buildRules(s){
           var kwShort = kwN.substring(0, Math.min(kwN.length, 9));
           try{
             triggerParts.push(new RegExp(
-              '(solicit|peco|quero|preciso|gostaria|mostra|exib|apresent|forne[cç]a?|examin|avali|observ|inspecion|realiz|fazer|\\bfaco\\b|proceder|puncion|drenar|coletar|executar|colher).{0,25}' + kwShort +
+              '(' + REQ_VERBS + '|examin|avali|observ|inspecion|realiz|fazer|\\bfaco\\b|proceder|puncion|drenar|coletar|executar|colher).{0,25}' + kwShort +
               '|' + kwShort + '.{0,25}(por favor|disponivel|seria possivel)'
             ));
           }catch(e){}
@@ -5145,6 +5201,12 @@ var EXAM_FAMILIES = [
   /exame.{0,5}ginecolog|especular|\bespeculo\b|toque.{0,5}vaginal|exame.{0,5}pelvic/i,
   /exame.{0,5}(das.{0,5})?mamas?|exame.{0,5}mamario|palpacao.{0,5}(das.{0,5})?mamas/i,
   /exame.{0,5}abdominal|palpacao.{0,5}abdominal|exame.{0,5}do.{0,5}abdome/i,
+  // v1.6.149 — duas famílias que faltavam e derrubavam impressos de 1,5 e 0,7 pt.
+  // Famílias casam pelo TÍTULO do impresso e disparam SEM exigir verbo de pedido,
+  // que é o que "vou preencher a ficha de notificação" e "vou prescrever
+  // cefalexina" precisavam (preench/prescrev não estavam em verbo nenhum).
+  /ficha.{0,8}notific|notific|\besavi\b|evento.{0,8}adverso|notifica.?saude/i,
+  /receituario|\breceita\b|prescric|prescrev|receitar/i,
 ];
 // Detecção de "solicitação de exame" = união das famílias + termos genéricos (mantém sincronia com a entrega).
 var EXAM_TERM_RX = new RegExp(EXAM_FAMILIES.map(function(r){ return r.source; }).join('|') + '|funcao.{0,8}(tireoid|pulmon)|exame.{0,5}fisic', 'i');
@@ -5216,9 +5278,22 @@ async function processInput(text){
 
   // Technical procedures: run script rules (deliver exams, confirm procedures)
   // These run regardless of API availability
+  //
+  // v1.6.149 — MISS DETERMINÍSTICO NÃO VIRA MAIS "Não consta."
+  // Antes: isTech=true → runTechRules() → se NENHUMA regra casasse, o Chefe de
+  // estação respondia "Não consta." e a função retornava. Isso transformava toda
+  // falha de casamento de string numa NEGATIVA AUTORITATIVA sobre um impresso que
+  // existe no banco. Medido: "Vou pedir a carga viral" caía exatamente aqui —
+  // o REQUEST_RX contém `pedir`, então a fala era classificada como técnica, mas
+  // a alternação de verbos do buildRules não continha, então nada casava.
+  // Agora: se a regra casou, caminho rápido igual ao anterior (nada muda). Se NÃO
+  // casou, a fala segue para a IA, que tem a lista EXAUSTIVA de impressos no
+  // prompt e já é instruída a dizer "Não consta." quando o exame de fato não
+  // existe. A IA erra menos que um regex que não casou.
   if(isTech){
-    runTechRules(text);
-    return; // tech responses don't also need actor response
+    var _techOk = runTechRules(text);
+    if(_techOk) return;   // entregou/confirmou algo — não precisa de resposta do ator
+    // miss: não responde nada aqui; deixa seguir para o ator (IA) abaixo
   }
 
   // ═══ DIAGNÓSTICO/CONDUTA — dirigido ao avaliador; chefe registra, paciente NÃO fala (v1.6.3) ═══
@@ -5338,10 +5413,11 @@ function runTechRules(text){
       if(rule.speech) speak(rule.speech, who);
     }
   }
-  if(!matched){
-    addMsg('chief', 'Não consta.');
-    speak('Não consta.', 'chief');
-  }
+  // v1.6.149: devolve se ALGO casou. O "Não consta." incondicional saiu daqui —
+  // quem decide agora é o ator (IA), que tem a lista exaustiva de impressos e a
+  // instrução explícita de responder "Não consta." quando o exame não existe.
+  // Um regex que não casou não é prova de que o impresso não existe.
+  return matched;
 }
 
 // Script-based actor fallback for when no API key
@@ -5468,6 +5544,34 @@ function renderReply(reply){
 }
 
 // ── START SIM ─────────────────────────────────────────────────────────────────
+// ── INSTRUMENTAÇÃO DO FUNIL DE ENTRADA (v1.6.149) ────────────────────────────
+// POR QUE: 19 de 34 leads reais (56%) cadastram e NUNCA aparecem em sim_history —
+// que só é escrito na avaliação. Hoje não há como separar "fechou a aba" de
+// "entrou na estação e o microfone não funcionou". Sem medir, qualquer
+// explicação para esses 56% é hipótese.
+// Grava só 5 eventos, num vocabulário fechado do lado do servidor
+// (log_ux_event ignora qualquer outro nome), sem conteúdo clínico e sem PII.
+// BEST-EFFORT ABSOLUTO: qualquer falha aqui é engolida e nunca quebra a estação.
+var _uxSessionRef = null;
+function newUxSessionRef(){
+  try{
+    _uxSessionRef = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }catch(e){ _uxSessionRef = null; }
+  return _uxSessionRef;
+}
+function logUx(event, detail){
+  try{
+    if(!supabaseClient || !currentUser) return;
+    var r = supabaseClient.rpc('log_ux_event', {
+      p_event:       event,
+      p_station_id:  (station && station.id) ? String(station.id) : null,
+      p_detail:      detail || null,
+      p_session_ref: _uxSessionRef
+    });
+    if(r && typeof r.then === 'function') r.then(function(){}, function(){});
+  }catch(e){}
+}
+
 function startSim(){
   console.log('[startSim] called, station=', station ? station.name : 'NULL');
   if(!station){
@@ -5475,6 +5579,9 @@ function startSim(){
     alert('Erro: estação não carregada. Volte e selecione a estação novamente.');
     return;
   }
+  newUxSessionRef();
+  logUx('station_open', { area: station.area || null, trial: !!station.trial_available,
+                          modo: window.__accessMode || null });
   simStartedAt = null;   // v1.6.102: setado no beginStation — a duração salva NÃO conta o tempo de leitura
   simLive = false;       // v1.6.106 FIX: reset OBRIGATÓRIO. endSim não zerava simLive, então na 2ª estação em diante beginStation() batia em "if(simLive) return" e o cronômetro NUNCA iniciava (travava em 10:00). Resetar aqui cobre toda nova estação (avulsa/maratona/recomeçar).
   var p = parsePatient(station);
@@ -5516,12 +5623,16 @@ function startSim(){
         // Permission granted — stop the stream (SpeechRecognition will handle audio)
         stream.getTracks().forEach(function(t){ t.stop(); });
         $('tbox').textContent = 'Pressione o microfone e fale...';
+        window.__micPermission = 'granted';
+        logUx('mic_permission', { result: 'granted' });   // v1.6.149
       })
       .catch(function(e){
         // Permission denied — show message but don't block sim
         $('tbox').textContent = 'Microfone bloqueado — use o campo de resgate abaixo para não perder a estação.';
         var _fb = $('txt-fallback'); if(_fb) _fb.style.display = 'flex';   // v1.6.76: só-voz, mas libera o texto de resgate quando o mic falha
         console.warn('Mic permission denied:', e);
+        window.__micPermission = 'denied';
+        logUx('mic_permission', { result: 'denied', erro: (e && e.name) ? String(e.name) : 'unknown' });   // v1.6.149
       });
   }
   recog    = initRec();
@@ -5624,6 +5735,11 @@ function submitTurn(text){
   addMsg('doctor', text);
   var elapsed = 600 - timeLeft;
   doctorLog.push({ t: elapsed, text: text });
+  // v1.6.149: só a PRIMEIRA fala — mede quanto tempo o candidato leva para
+  // conseguir falar (ou se nunca consegue). Sem conteúdo, só o relógio.
+  if(doctorLog.length === 1){
+    logUx('first_utterance', { t: elapsed, via: (window.__micPermission || 'unknown') });
+  }
   console.log('[doctorLog] added:', text.substring(0,50), 'total:', doctorLog.length);
   addLogEntry(elapsed, text);
   processInput(text);
@@ -6357,6 +6473,33 @@ function endSim(){
   speakQ=[]; isSpeaking=false;
   console.log('[endSim] doctorLog has', doctorLog.length, 'entries');
   simLive = false;   // v1.6.106: estado limpo ao sair (o reset canônico é no startSim, mas isto evita qualquer janela com simLive preso em true)
+
+  // ── v1.6.149: SESSÃO SEM UMA ÚNICA FALA NÃO É SESSÃO ───────────────────────
+  // Até aqui, QUALQUER saída depois que o cronômetro ligou disparava
+  // runEval() → saveHistory() → refreshTrialAfterSession(), e portanto queimava
+  // uma das 3 estações grátis. Medido em sim_history: 12 de 86 sessões de trial
+  // (14%) tinham `conversation: []` — o médico nunca falou. Uma lead perdeu as 3
+  // em sessões de 83 s, 23 s e 66 s sem nunca ter conversado com o paciente, e
+  // foi direto para o paywall. O padrão (mic bloqueado, ou entrou e saiu) é
+  // indistinguível de fraude pelo cliente, então o servidor também protege:
+  // get_trial_status só conta sessão com ao menos uma fala com quem='medico'.
+  if(!doctorLog || doctorLog.length === 0){
+    logUx('station_exit_empty', { t: (typeof timeLeft === 'number' ? 600 - timeLeft : null),
+                                 mic: window.__micPermission || 'unknown' });
+    try{
+      alert('Você saiu da estação sem falar com o paciente, então ela não foi avaliada '
+          + 'e não consumiu nenhuma das suas estações.\n\n'
+          + 'Se o microfone não funcionou, verifique a permissão do navegador — '
+          + 'ou use o campo de texto de resgate que aparece abaixo do microfone.');
+    }catch(e){}
+    if(marathonActive){ marathonActive=false; removeMarathonBars(); showMarathon(); return; }
+    if(window._stationBackTo==='s-dashboard'){ show('s-dashboard'); if(window.renderDashboard) renderDashboard(); }
+    else { show('s-select'); renderStations(); }
+    return;
+  }
+
+  logUx('station_eval_start', { t: (typeof timeLeft === 'number' ? 600 - timeLeft : null),
+                                turnos: doctorLog.length });
   show('s-eval');
   carregarResumoCTA();   // v1.6.146: card do resumo do tema (silencioso se indisponivel)
   // Render transcript IMMEDIATELY — don't depend on runEval finishing
