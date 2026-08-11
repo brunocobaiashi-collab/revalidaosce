@@ -95,13 +95,63 @@
        canonico em station.area e o sorteio "Aleatoria" so produz areas canonicas.
      • Ordem de deploy segura: ESTE arquivo pode (e deve) sair ANTES do fix do admin.
      • ENGINE_VERSION 1.3.0. Exports novos: canonArea, eixosDaArea.
+   AUDITORIA DO ENGINE (2026-08-11) — doc "claude/auditoria-station-engine-20260811.md":
+     • auditPayload: checklist_resumo 3000 -> 12000 chars; exams[].achados 240 -> 600. MEDIDO: um PEP
+       realista de 8 itens ocupa 4.137 chars e um de 12 ocupa 6.208 — o auditor via ~5 itens SEMPRE, e o
+       proprio prompt o proibia de reclamar de truncamento. Conduta e Orientacao (fim da lista, onde se
+       concentram os defeitos da REGRA DO ATO) eram INVISIVEIS. Toda regra que so a IA aplica (crit_adeq
+       vago, coerencia PEP<->impressos, inversao orientAtor<->PEP) morria na cauda. Agravante: o
+       endurecimento de 10/07 alongou cada item — melhorar o PEP piorava a cobertura do auditor.
+     • preValidate: gates deterministicos que NAO existiam para invariantes do contrato §11 —
+       'crit_adeq_vazio' (high; sem crit_adeq o corretor fica sem limiar) e 'crit_parc_vazio' (high;
+       3 faixas sem limiar parcial). Ambos mecanicos, sem falso positivo possivel.
+     • normalizeChecklistItems: REPARA em vez de reprovar (custo zero, sem retry):
+       (a) BAND-COLLAPSE — crit_parc preenchido com so 2 faixas expande p/ [0, max/2, max], preservando o
+           MAXIMO (soma do PEP intacta). Era o defeito "sistematico em estacoes geradas" sem gate nenhum.
+       (b) ID DUPLICADO — id repetido faz o results.find do grader casar SEMPRE o primeiro item; os demais
+           recebem nota errada ou zeram (mesmo estado final do P0 de 04/08, por outra porta). O fallback
+           por indice (i+1) ainda COLIDIA com ids que o modelo mandou.
+     • processPEP: fecharEmDez() unico para os dois ramos. O ajuste fino passa a cair no MAIOR item
+       (nunca no ULTIMO, que pela distribuicao da buildSys2 e a Orientacao, de menor peso) e ganha piso.
+       MEDIDO: [0.5,2,2,2,2,1.5,0.25] zerava o ultimo item -> item_morto -> FAIL -> retry inteiro. O ramo
+       'ressuscitou' ja escolhia o maior item ("preserva o peso da orientacao"); o ramo principal, nao.
+     • DIAGNOSTICOS: casamento por engNorm + fronteira de palavra. O indexOf anterior, sem \b e sem
+       desacentuar, reprovava "glicose plasmatica" por 'asma' e "dores que irradiam" por 'iam' (FAIL falso
+       = 2 chamadas Opus queimadas), e deixava passar 'cancer'/'rubeola'/'pre-eclampsia' ACENTUADOS (a
+       lista e sem acento; o texto do modelo, nao). O engNorm ja existia no arquivo e nao era usado aqui.
+     • LEAK_RX: plurais. "compativeis com", "sugestivas de" e "caracteristicos de" escapavam — e plural e
+       a forma MAIS natural num laudo.
+     • IMG_LAUDO_RX (excecao de laudo-com-dx do nivel medio): testada contra title + rows, nao so title.
+       Titulo generico "EXAME DE IMAGEM" (que a propria buildSys1 sugere) perdia a excecao e virava FAIL.
+     • softWarnings: CRITERIO DO LOCAL (06/08) — em PS/UPA/emergencia, item que paga por SOLICITAR exame
+       exige o resultado na estacao (laudo em texto basta); em UBS/ambulatorio, solicitar sem resultado e
+       a conduta CORRETA. stObj.local existia e so viajava no payload, sem nenhuma regra que o usasse.
+     • softWarnings: referencia do orientAtor x exams[].title (invariante #6) nas duas direcoes, e
+       limiar do criterio (numeral > nº de subitens / parcial >= adequado). WARN de proposito: a leitura
+       do numeral e heuristica e falso positivo aqui custaria retry.
+     • audit(): 'warnings' presente em TODOS os retornos (os 4 AUDIT_ERROR e o override TRUNCATED nao
+       tinham a chave — wrapper que fizesse audit.warnings.length quebrava com TypeError).
+   TIER FACIL / BASICO (2026-08-11) — decisao de Bruno: vale a regua VIVA do admin (GEN_DIFF_RUBRIC),
+   NAO a tabela do briefing de 03/08 (que dizia "laudo entrega tecnica+achado+diagnostico" — desatualizada):
+     • Regua: atencao primaria (UBS/ESF/ambulatorio geral), paciente ESTAVEL, SEM urgencia, SEM impresso
+       de imagem, fisico e laboratorio BRUTOS, quadro protipico — o candidato diagnostica. O que torna a
+       estacao facil e o raciocinio ser direto, NAO o impresso entregar a resposta.
+     • generate: msg1 dizia 'Nivel: medium' FIXO quando o wrapper nao passava opts.nivel — e o lote do
+       admin (genStationCore) nao passa. O modelo recebia "Nivel: medium" e "NIVEL FACIL" (do extra) no
+       MESMO prompt. Agora cai para difUse.
+     • complexity: 'simple' liberado e FORCADO quando Basico (espelha o diffToComplexity do admin).
+     • buildSys1/buildSysAudit ganham bloco Basico; o auditor passa a saber que ausencia de imagem no
+       Basico NAO e defeito. softWarnings: 'basico_com_imagem' e 'basico_com_urgencia' — WARN, nao
+       bloqueiam (decisao de Bruno: FAIL falso custa 2 chamadas Opus por estacao).
+     • Intermediario / Avancado / ancorado: prompts byte-a-byte IDENTICOS a 1.3.0 (verificado por teste).
+     • ENGINE_VERSION 1.4.0. Export novo: nivelBasico.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.3.0'; // 2026-07-26 — areas canonicas no TEMA_EIXOS + lookup tolerante eixosDaArea + canonArea no generate
+  var ENGINE_VERSION = '1.4.0'; // 2026-08-11 — correcoes da auditoria do engine + tier FACIL/Basico (regua viva do admin)
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -112,6 +162,47 @@
   // Nivel MEDIO (Intermediario) permite achados + interpretacao/diagnostico nos impressos
   // (o candidato CONDUZ, nao diagnostica). Facil/Dificil seguem estritos (dados brutos).
   function nivelPermiteDx(n) { return /intermedi|m[\u00e9e]dio|medium/i.test(n || ''); }
+  // Tier FACIL/BASICO (2026-08-11). A regua valida e a VIVA do admin (GEN_DIFF_RUBRIC['Básico']):
+  // atencao primaria, paciente estavel, SEM urgencia, SEM imagem, impressos BRUTOS. NAO e a definicao
+  // do briefing de 03/08 ("o laudo entrega o diagnostico"), que ficou desatualizada.
+  function nivelBasico(n) { return /b[a\u00e1]sic|f[a\u00e1]cil|simple|easy/i.test(n || ''); }
+
+  // Bloco do sys1 (geracao do caso) para o tier FACIL. Aditivo: quando nao e Basico, os prompts
+  // permanecem byte-a-byte identicos a 1.3.0.
+  function basicoSys1Block() {
+    return [
+      '0) TIER FACIL / BASICO (PREVALECE sobre qualquer instrucao geral de nivel):',
+      '   • CENARIO: ATENCAO PRIMARIA — UBS / Unidade Basica de Saude / ESF / ambulatorio geral.',
+      '     Paciente ESTAVEL, SEM urgencia. NAO use pronto-socorro, UPA, emergencia, enfermaria',
+      '     nem centro obstetrico neste tier.',
+      '   • SEM EXAME DE IMAGEM: esta estacao NAO tem impresso de radiografia, tomografia, ultrassom,',
+      '     ressonancia, ECG, ecocardiograma, mamografia, doppler, cintilografia nem foto clinica.',
+      '     Apenas EXAME FISICO e, se pertinente ao caso, LABORATORIO.',
+      '   • Impressos 100% BRUTOS (a regra 5 vale integralmente): valores e descricoes objetivas, sem',
+      '     interpretacao, sem "(ALTERADO)", sem laudo concluindo. O candidato e quem diagnostica.',
+      '   • QUADRO PROTOTIPICO: apresentacao classica de livro-texto, sem distratores e sem comorbidade',
+      '     que confunda o raciocinio. O que torna a estacao FACIL e o raciocinio ser DIRETO — NUNCA o',
+      '     impresso entregar a resposta. Anti-vazamento (regra 1) continua valendo integralmente.',
+      '   • O PEP NAO pode ter item que mande INTERPRETAR imagem (nao existe imagem nesta estacao).',
+      ''
+    ];
+  }
+
+  // Bloco do sysAudit para o tier FACIL — sem isto o auditor reporta a ausencia de imagem como defeito.
+  function basicoSysAuditBlock() {
+    return [
+      'ESTACAO DO TIER FACIL / BASICO (atencao primaria). Regras ADICIONAIS:',
+      '  - A AUSENCIA de exame de imagem e o DESENHO CORRETO deste tier. NAO reporte "faltam exames',
+      '    complementares", "estacao incompleta" nem "PEP nao cobre exames de imagem" por isso.',
+      '  - MEDIUM: existe impresso de exame de imagem (radiografia/TC/US/RM/ECG/eco/mamografia/foto) —',
+      '    o tier facil nao usa imagem.',
+      '  - MEDIUM: o "caso" se passa em pronto-socorro/UPA/emergencia, ou o quadro descrito e instavel/',
+      '    urgente — o tier facil e atencao primaria com paciente ESTAVEL.',
+      '  - Exame fisico e laboratorio seguem BRUTOS: qualquer interpretacao/diagnostico neles e',
+      '    VAZAMENTO (high), como no tier dificil. Aqui nao ha excecao de laudo-com-diagnostico.',
+      ''
+    ];
+  }
 
   function buildSys1(area, nivel, fewShotExamples, dificuldade, anchor) {
     var head = [
@@ -268,7 +359,9 @@
       '      ✅ "Espaco esplenorrenal (a esquerda): liquido livre presente"',
       '',
       '6) VALIDACOES TECNICAS:',
-      '   • complexity: "medium" ou "advanced" (NUNCA simple/easy/intermediate).',
+      (nivelBasico(dificuldade)
+        ? '   • complexity: "simple" (esta estacao e do tier FACIL).'
+        : '   • complexity: "medium" ou "advanced" (NUNCA simple/easy/intermediate).'),
       '   • COBERTURA DE PALAVRAS (trigger_keywords) — OBRIGATORIA em CADA impresso, senao o candidato',
       '     NAO consegue solicitar o exame e o impresso NUNCA aparece (falha grave de estacao):',
       '     Cada exam DEVE ter trigger_keywords: array de 4-8 strings (3+ chars, minusculas, SEM acento)',
@@ -299,7 +392,9 @@
       '',
       'Area: ' + (area || '') + ' | Nivel: ' + (nivel || '')
     ];
-    return head.concat(anchor ? anchorSys1Block(anchor) : [], corpo).join(NL);
+    return head.concat(anchor ? anchorSys1Block(anchor) : [],
+                       (!anchor && nivelBasico(dificuldade)) ? basicoSys1Block() : [],
+                       corpo).join(NL);
   }
 
   // sys2 — PEP. Canônico: Simulador (superset, com distribuição sugerida).
@@ -486,7 +581,9 @@
       'terminando com }. NADA antes nem depois. Sem markdown, sem explicacao. O parser e estrito.',
       '{"status":"OK"|"WARN"|"FAIL","score":0-10,"issues":[{"severity":"high"|"medium","category":"vazamento"|"coerencia"|"alinhamento"|"demografia"|"estrutura"|"pep","message":"..."}]}'
     ];
-    return head.concat(anchor ? anchorSysAuditBlock(anchor) : [], corpo).join(NL);
+    return head.concat(anchor ? anchorSysAuditBlock(anchor) : [],
+                       (!anchor && nivelBasico(dificuldade)) ? basicoSysAuditBlock() : [],
+                       corpo).join(NL);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -561,11 +658,12 @@
   // apenas quando o tamanho ja bate; caso contrario, aplica o esquema canonico por n.
   function labelsForBands(n, provided) {
     if (Array.isArray(provided) && provided.length === n) return provided.slice();
+    // So 2 (binario) e 3 niveis sao padrao INEP. As entradas 4/5 daqui eram codigo morto (o colapso
+    // ocorre em normalizeChecklistItems ANTES desta chamada) e continham justamente os rotulos
+    // "Insuficiente"/"Totalmente adequado" que a buildSys2 proibe — removidas (2026-08-11).
     var CANON = {
       2: ['Inadequado', 'Adequado'],
-      3: ['Inadequado', 'Parcialmente adequado', 'Adequado'],
-      4: ['Inadequado', 'Insuficiente', 'Parcialmente adequado', 'Adequado'],
-      5: ['Inadequado', 'Insuficiente', 'Parcialmente adequado', 'Adequado', 'Totalmente adequado']
+      3: ['Inadequado', 'Parcialmente adequado', 'Adequado']
     };
     if (CANON[n]) return CANON[n].slice();
     if (n <= 1) return ['Adequado'];
@@ -578,6 +676,7 @@
   // Normaliza cada item do PEP: garante 'text' (de varias chaves possiveis) e 'scores'.
   // Filtra itens sem texto ou sem pontuacao (que sumiriam silenciosamente no save).
   function normalizeChecklistItems(arr) {
+    var seenIds = {};
     return (arr || []).map(function (it, i) {
       if (!it || typeof it !== 'object') return null;
       var text = it.text || it.titulo || it['t\u00edtulo'] || it.descricao || it['descri\u00e7\u00e3o']
@@ -594,9 +693,26 @@
         scores = [0, Math.round((mxB / 2) * 100) / 100, mxB];
         provLabels = null;
       }
+      // BAND-COLLAPSE (2026-08-11) — REPARO, nao reprovacao (custo zero, sem retry). Item com crit_parc
+      // preenchido mas SO 2 faixas deixa a banda parcial sem slot: o grader nao tem onde dar credito
+      // parcial e o candidato cai direto para inadequado. Expande p/ [0, max/2, max] preservando o
+      // MAXIMO — a soma do PEP nao muda. Era o defeito "sistematico em estacoes geradas" (pep-auditoria.md)
+      // e nao tinha gate nenhum: o preValidate so olhava o excesso (4+ faixas), nunca o inverso.
+      if (scores.length === 2 && String(it.crit_parc || '').trim()) {
+        var mxP = Math.max.apply(null, scores.map(function (x) { return Number(x) || 0; }));
+        if (mxP > 0) { scores = [0, Math.round((mxP / 2) * 100) / 100, mxP]; provLabels = null; }
+      }
       var labels = labelsForBands(scores.length, provLabels);
+      // ID UNICO (2026-08-11) — REPARO. Id vazio ja virava o indice; faltava DEDUPLICAR. Id repetido faz
+      // o results.find do grader casar SEMPRE o primeiro item: os demais recebem a nota do irmao ou
+      // zeram — mesmo estado final do P0 de 04/08, por outra porta. E o proprio fallback (i+1) podia
+      // COLIDIR com um id que o modelo mandou (ex.: item 1 com id '3' e o 3o item sem id -> '3').
+      var idBase = String(it.id == null ? '' : it.id).trim() || String(i + 1);
+      var idUse = idBase, _k = 2;
+      while (seenIds[idUse]) { idUse = idBase + '_' + _k; _k++; }
+      seenIds[idUse] = 1;
       return {
-        id: String(it.id || (i + 1)),
+        id: idUse,
         text: String(text).trim(),
         subitens: it.subitens || it.sub || '',
         scores: scores, labels: labels,
@@ -613,6 +729,47 @@
       }
       return s;
     }, 0);
+  }
+
+  // Fecha a soma do PEP em 10.0 (rotina UNICA — 2026-08-11). Reescala por fator, aplica piso e joga o
+  // residuo no MAIOR item. NUNCA no ULTIMO: pela distribuicao sugerida da buildSys2 o ultimo item e a
+  // Orientacao, de menor peso (0.25-0.5), e um residuo negativo a zerava -> item_morto -> FAIL -> retry
+  // inteiro (medido: [0.5,2,2,2,2,1.5,0.25] zerava o ultimo). O ramo 'ressuscitou' do processPEP ja
+  // fazia certo ("preserva o peso da orientacao"); o ramo principal repetia o bug 20 linhas abaixo.
+  function fecharEmDez(clArr) {
+    if (!Array.isArray(clArr) || !clArr.length) return;
+    var t = pepTotal(clArr);
+    if (!(t > 0) || Math.abs(t - 10) <= 0.01) return;
+    var f = 10 / t;
+    clArr.forEach(function (item) {
+      if (item && Array.isArray(item.scores)) {
+        item.scores = item.scores.map(function (x) { return Math.round((Number(x) || 0) * f * 4) / 4; });
+      }
+    });
+    // PISO: a quantizacao em 0.25 pode zerar um item de peso pequeno. Item binario -> 0.25;
+    // item de 3 faixas -> 0.5, para o parcial (metade) continuar na granularidade de 0.25.
+    clArr.forEach(function (item) {
+      if (!item || !Array.isArray(item.scores) || !item.scores.length) return;
+      var li = item.scores.length - 1;
+      if (!(Number(item.scores[li]) > 0)) {
+        item.scores[li] = (item.scores.length >= 3) ? 0.5 : 0.25;
+        if (item.scores.length === 3) item.scores[1] = Math.round((item.scores[li] / 2) * 100) / 100;
+      }
+    });
+    var t2 = Math.round(pepTotal(clArr) * 100) / 100;
+    if (Math.abs(t2 - 10) <= 0.01) return;
+    var maior = null, maiorMx = -1;
+    clArr.forEach(function (item) {
+      if (item && Array.isArray(item.scores) && item.scores.length) {
+        var m = Number(item.scores[item.scores.length - 1]) || 0;
+        if (m > maiorMx) { maiorMx = m; maior = item; }
+      }
+    });
+    if (maior) {
+      var lm = maior.scores.length - 1;
+      maior.scores[lm] = Math.round((Number(maior.scores[lm]) + (10 - t2)) * 100) / 100;
+      if (maior.scores.length === 3) maior.scores[1] = Math.round((maior.scores[lm] / 2) * 100) / 100;
+    }
   }
 
   // policy 'normalize' (Maratona): ajusta scores para somar 10 e devolve o array.
@@ -633,56 +790,13 @@
         }
       });
     }
-    if (ressuscitou && Array.isArray(clArr) && clArr.length) {
-      var tR = pepTotal(clArr);
-      if (tR > 0 && Math.abs(tR - 10) > 0.01) {
-        var fR = 10 / tR;
-        clArr.forEach(function (item) {
-          if (item && Array.isArray(item.scores)) {
-            item.scores = item.scores.map(function (x) { return Math.round((Number(x) || 0) * fR * 4) / 4; });
-          }
-        });
-        // ajuste fino no MAIOR item p/ fechar exatamente 10 (preserva o peso da orientacao)
-        var tR2 = pepTotal(clArr);
-        if (Math.abs(tR2 - 10) > 0.01) {
-          var maior = null, maiorMx = -1;
-          clArr.forEach(function (item) {
-            if (item && Array.isArray(item.scores) && item.scores.length) {
-              var m = Number(item.scores[item.scores.length - 1]) || 0;
-              if (m > maiorMx) { maiorMx = m; maior = item; }
-            }
-          });
-          if (maior) {
-            var li = maior.scores.length - 1;
-            maior.scores[li] = Math.round((Number(maior.scores[li]) + (10 - tR2)) * 100) / 100;
-            if (maior.scores.length === 3) maior.scores[1] = Math.round((maior.scores[li] / 2) * 100) / 100;
-          }
-        }
-      }
-    }
+    if (ressuscitou) fecharEmDez(clArr);
     var total = Math.round(pepTotal(clArr) * 100) / 100;
     if (policy === 'reject') {
       return { checklist: clArr, ok: Math.abs(total - 10) <= 0.01, total: total };
     }
     // normalize
-    if (Array.isArray(clArr) && clArr.length && total > 0 && Math.abs(total - 10) > 0.01) {
-      var fator = 10 / total;
-      clArr = clArr.map(function (item) {
-        if (item && Array.isArray(item.scores)) {
-          item.scores = item.scores.map(function (x) { return Math.round((Number(x) || 0) * fator * 4) / 4; });
-        }
-        return item;
-      });
-      var t2 = Math.round(pepTotal(clArr) * 100) / 100;
-      if (Math.abs(t2 - 10) > 0.01 && clArr.length) {
-        var ult = clArr[clArr.length - 1];
-        if (ult && Array.isArray(ult.scores) && ult.scores.length) {
-          var maxIdx = ult.scores.length - 1;
-          ult.scores[maxIdx] = Math.round((Number(ult.scores[maxIdx]) + (10 - t2)) * 100) / 100;
-          if (ult.scores.length === 3) ult.scores[1] = Math.round((ult.scores[maxIdx] / 2) * 100) / 100;
-        }
-      }
-    }
+    fecharEmDez(clArr);
     return { checklist: clArr, ok: true, total: Math.round(pepTotal(clArr) * 100) / 100 };
   }
 
@@ -690,6 +804,29 @@
   // AUDITOR — pré-validação determinística (fail-closed) + auditor IA (fail-closed)
   // ─────────────────────────────────────────────────────────────────────────
   var DIAGNOSTICOS = ['apendicite','colecistite','pancreatite','diverticulite','pneumonia','tuberculose','asma','dpoc','dengue','zika','chikungunya','covid','sarampo','rubeola','caxumba','avc','iam','infarto','tep','tvp','hipertireoidismo','hipotireoidismo','lupus','cancer','neoplasia','meningite','sepse','cetoacidose','aborto','eclampsia','pre-eclampsia'];
+  // Casamento de diagnostico por FRONTEIRA DE PALAVRA sobre texto DESACENTUADO (2026-08-11).
+  // O indexOf anterior errava nos DOIS sentidos, medido:
+  //   falso positivo  -> "Glicose plasmatica: 98 mg/dL"      reprovava por 'asma'  (pl-ASMA-tica)
+  //   falso positivo  -> "dores que irradiam para o dorso"   reprovava por 'iam'   (irrad-IAM)
+  //   falso negativo  -> "cancer" / "rubeola" / "pre-eclampsia" ACENTUADOS passavam batido
+  // Cada FAIL falso custa um retry inteiro (2 chamadas Opus). engNorm ja existia e nao era usado aqui.
+  var DIAG_RX = null; // preenchido abaixo, apos engNorm (function declaration, hoisted)
+  function _diagRx() {
+    if (DIAG_RX) return DIAG_RX;
+    DIAG_RX = DIAGNOSTICOS.map(function (d) {
+      var corpo = engNorm(d).replace(/[-\s]+/g, '[-\\s]?');
+      return { termo: d, rx: new RegExp('(^|[^a-z0-9])' + corpo + '([^a-z0-9]|$)') };
+    });
+    return DIAG_RX;
+  }
+  // Devolve a lista de diagnosticos citados no texto (vazia quando nenhum).
+  function citaDiagnostico(txt) {
+    var t = engNorm(txt || ''), out = [];
+    if (!t) return out;
+    _diagRx().forEach(function (d) { if (d.rx.test(t)) out.push(d.termo); });
+    return out;
+  }
+
   var ESPECIALIDADES = ['ginecologista','obstetra','cardiologista','pediatra','pneumologista','gastroenterologista','endocrinologista','neurologista','psiquiatra','urologista','nefrologista','oncologista','hematologista','reumatologista','dermatologista','ortopedista','oftalmologista','otorrinolaringologista','cirurgiao','cirurgião','infectologista','mastologista'];
 
   // Eixos tematicos por area — sorteados quando o tema vem vazio (garante diversidade da geracao).
@@ -942,13 +1079,11 @@
     if (clCheck.length === 0) {
       issues.push({ severity: 'high', category: 'pep_vazio', message: 'Estacao sem checklist valido (PEP vazio ou nao reconhecido).' });
     }
-    var nameLow = (stObj.name || '').toLowerCase();
-    var orientLow = (stObj.orientMed || '').toLowerCase();
     var casoLow = (stObj.caso || '').toLowerCase();
-    DIAGNOSTICOS.forEach(function (d) {
-      if (nameLow.indexOf(d) >= 0) issues.push({ severity: 'high', category: 'vazamento', message: 'name cita diagnostico: ' + d });
-      if (orientLow.indexOf(d) >= 0) issues.push({ severity: 'high', category: 'vazamento', message: 'orientMed cita diagnostico: ' + d });
-      if (casoLow.indexOf(d) >= 0) issues.push({ severity: 'high', category: 'vazamento', message: 'caso cita diagnostico: ' + d });
+    [['name', stObj.name], ['orientMed', stObj.orientMed], ['caso', stObj.caso]].forEach(function (par) {
+      citaDiagnostico(par[1]).forEach(function (d) {
+        issues.push({ severity: 'high', category: 'vazamento', message: par[0] + ' cita diagnostico: ' + d });
+      });
     });
     ESPECIALIDADES.forEach(function (esp) {
       if (new RegExp('\\b' + esp + '\\b', 'i').test(casoLow))
@@ -972,6 +1107,21 @@
         issues.push({ severity: 'high', category: 'banda_invalida', message: 'Item "' + (it.text || ('#' + (i + 1))) + '" tem ' + it.scores.length + ' faixas — padrao INEP admite apenas 2 (binario) ou 3 niveis. Colapse para [0, max/2, max].' });
       }
     });
+    // CRITERIOS DO PEP (2026-08-11) — invariantes do contrato §11 que nao tinham gate nenhum. Checagem
+    // MECANICA (campo vazio), sem heuristica: falso positivo e impossivel, entao pode ser high. A
+    // checagem de LIMIAR (numeral do criterio vs nº de subitens) e heuristica e vive no softWarnings.
+    clCheck.forEach(function (it, i) {
+      if (!it || !Array.isArray(it.scores) || !it.scores.length) return;
+      var rot = (it.text || ('#' + (i + 1)));
+      if (!String(it.crit_adeq || '').trim()) {
+        issues.push({ severity: 'high', category: 'crit_adeq_vazio',
+          message: 'Item "' + rot + '" esta sem crit_adeq. O corretor aplica o crit_adeq LITERALMENTE — sem ele o item fica sem limiar e a nota vira arbitrio do modelo.' });
+      }
+      if (it.scores.length === 3 && !String(it.crit_parc || '').trim()) {
+        issues.push({ severity: 'high', category: 'crit_parc_vazio',
+          message: 'Item "' + rot + '" tem 3 faixas mas nao tem crit_parc — a banda parcial fica sem limiar. Preencha o crit_parc ou torne o item binario.' });
+      }
+    });
     // Impresso sem dados (rows vazios e sem imagem) = estacao incompleta (provavel truncamento) -> reprova
     var examsArr = Array.isArray(stObj.exams) ? stObj.exams : [];
     var vazios = examsArr.filter(function (e) {
@@ -984,17 +1134,24 @@
       issues.push({ severity: 'high', category: 'impresso_vazio', message: vazios.length + ' impresso(s) sem dados: ' + vazios.map(function (e) { return e.title; }).join('; ') + '. Estacao incompleta (provavel truncamento).' });
     }
     // Vazamento de DIAGNOSTICO/INTERPRETACAO nos impressos: o candidato deve INTERPRETAR, nao receber pronto
-    var LEAK_RX = /\bdiagn[o\u00f3]stic[oa]\b|\bhip[o\u00f3]tese\s+diagn|compat[i\u00ed]vel\s+com|sugest[i\u00ed]v[oa]\s+de|caracter[i\u00ed]stic[oa]\s+de|padr\w+\s+t[i\u00ed]pic|patognom|consistente\s+com|indicativ[oa]\s+de|confirma\w*\s+(o\s+)?(diagn|quadro)|\((febril|alterad[oa]?|leucocitose|leucopenia|anormal|aumentad[oa]?|diminuid[oa]?|reduzid[oa]?|elevad[oa]?|baix[oa]|alt[oa]|positiv[oa]|negativ[oa]|normal|desvio|reagente|hipertrofi)\b/i;
+    // Plurais incluidos em 2026-08-11: "compativeis com", "sugestivas de", "caracteristicos de" e
+    // "consistentes com" escapavam — e o plural e a forma MAIS natural num laudo ("achados compativeis").
+    var LEAK_RX = /\bdiagn[o\u00f3]stic[oa]s?\b|\bhip[o\u00f3]tese\s+diagn|compat[i\u00ed]ve(l|is)\s+com|sugest[i\u00ed]v[oa]s?\s+de|caracter[i\u00ed]stic[oa]s?\s+de|padr\w+\s+t[i\u00ed]pic|patognom|consistentes?\s+com|indicativ[oa]s?\s+de|confirma\w*\s+(o\s+)?(diagn|quadro)|\((febril|alterad[oa]?|leucocitose|leucopenia|anormal|aumentad[oa]?|diminuid[oa]?|reduzid[oa]?|elevad[oa]?|baix[oa]|alt[oa]|positiv[oa]|negativ[oa]|normal|desvio|reagente|hipertrofi)\b/i;
     var IMG_LAUDO_RX = /ultrass|ecograf|tomograf|ressonanc|ecocardiogram|doppler|mamograf|angiotomograf/i;
     examsArr.forEach(function (e) {
       var rowsTxt = Array.isArray(e.rows) ? e.rows.join(' ') : '';
       // No nivel MEDIO, o LAUDO DE IMAGEM pode trazer o diagnostico; laboratorio/fisico/raio-x seguem estritos.
-      if (nivelPermiteDx(dificuldade) && IMG_LAUDO_RX.test(e.title || '')) return;
+      // 2026-08-11: testar TITLE + ROWS. So o titulo perdia a excecao quando o impresso vinha com titulo
+      // generico ("EXAME DE IMAGEM"/"IMAGEM") — que a propria buildSys1 sugere — e a estacao tomava um
+      // FAIL falso por um laudo que no medio e PERMITIDO. (ANCHOR_IMG_TITLE_RX, no mesmo arquivo, ja
+      // incluia \bimagem\b; IMG_LAUDO_RX nao — inconsistencia entre regexes irmas.)
+      if (nivelPermiteDx(dificuldade) && IMG_LAUDO_RX.test((e.title || '') + ' ' + rowsTxt)) return;
       if (rowsTxt && LEAK_RX.test(rowsTxt)) {
         issues.push({ severity: 'high', category: 'vazamento_impresso', message: 'Impresso "' + (e.title || '') + '" contem interpretacao/diagnostico nos dados (use apenas valores brutos — sem "(LEUCOCITOSE)", "Diagnostico:", "compativel com", etc).' });
       }
-      var rl = rowsTxt.toLowerCase();
-      DIAGNOSTICOS.forEach(function (d) { if (rl.indexOf(d) >= 0) issues.push({ severity: 'high', category: 'vazamento_impresso', message: 'Impresso "' + (e.title || '') + '" cita diagnostico: ' + d }); });
+      citaDiagnostico(rowsTxt).forEach(function (d) {
+        issues.push({ severity: 'high', category: 'vazamento_impresso', message: 'Impresso "' + (e.title || '') + '" cita diagnostico: ' + d });
+      });
     });
     // COBERTURA DE PALAVRAS por exame (BLOQUEIA): impresso que o candidato NAO consegue solicitar some
     // da estacao na pratica (so responde a "impresso N") — exame nao exibido = falha grave de reputacao.
@@ -1078,13 +1235,22 @@
       },
       exams: (stObj.exams || []).map(function (e) {
         var rows = Array.isArray(e.rows) ? e.rows.join(' | ') : '';
-        var o = { title: e.title, achados: rows.length > 240 ? rows.substring(0, 240) + '...' : rows, tem_imagem: !!(e.images && e.images.length) };
+        // 240 -> 600 (2026-08-11): um impresso de exame fisico com sinais vitais + exame segmentar
+        // passa de 240 chars com folga, e as regras HIGH de ACHADOS INCONSISTENTES e COERENCIA DE
+        // GRAVIDADE rodavam sobre dado cortado.
+        var o = { title: e.title, achados: rows.length > 600 ? rows.substring(0, 600) + '...' : rows, tem_imagem: !!(e.images && e.images.length) };
         if (anchor) o.ancora = !!(e.images && e.images.indexOf && e.images.indexOf(anchor.image_file) >= 0);
         return o;
       }),
+      // 3000 -> 12000 (2026-08-11). MEDIDO com item realista no formato que a buildSys2 exige
+      // (subitens + crit_adeq contavel + crit_parc + crit_inad): 8 itens = 4.137 chars, 10 = 5.172,
+      // 12 = 6.208. Com o cap antigo o auditor via ~5 itens SEMPRE — e o prompt o proibia de reclamar
+      // de truncamento ("e RESUMO"). Conduta e Orientacao, que a distribuicao da buildSys2 poe no FIM,
+      // ficavam invisiveis: toda regra que so a IA aplica (crit_adeq vago, coerencia PEP<->impressos,
+      // inversao orientAtor<->PEP) morria na cauda. O checklist inteiro cabe agora nos 8-12 itens.
       checklist_resumo: (function () {
         var raw = (typeof stObj.checklist === 'string') ? stObj.checklist : JSON.stringify(stObj.checklist);
-        return raw.length <= 3000 ? raw : raw.substring(0, 3000) + '...[truncado]';
+        return raw.length <= 12000 ? raw : raw.substring(0, 12000) + '...[truncado]';
       })(),
       // Gabarito da imagem (modo ancorado) — undefined some no JSON.stringify quando ausente.
       image_anchor: anchor ? { modality: anchor.modality, incidence: anchor.incidence, finding_truth: anchor.finding_truth, diagnosis_truth: anchor.diagnosis_truth } : undefined
@@ -1110,13 +1276,69 @@
     // SOLICITACAO/verbalizacao e desenho valido e nao deve gerar aviso. Imagem so vira defeito quando
     // o PEP manda INTERPRETAR e nao ha laudo — tratado por IMG_INTERP_RX (pep_imagem_sem_laudo) abaixo.
   ];
+  // ── CRITERIO DO LOCAL (2026-08-11; regra de curadoria de 06/08) ───────────────────────────────
+  // Em PS/UPA/emergencia, item que PAGA por solicitar exame exige o RESULTADO na estacao (laudo em
+  // texto basta — nao precisa de imagem). Em UBS/ambulatorio, solicitar SEM resultado e a conduta
+  // CORRETA e nao e defeito. stObj.local existia e so viajava no payload do auditor, sem regra alguma.
+  var LOCAL_EMERG_RX = /pronto.?socorro|pronto.?atendimento|\bupa\b|emergenc|urgenc|sala\s+de\s+estabiliz|politraumatiz/;
+  // Exames de IMAGEM so entram na cobrança quando o local e de emergencia (fora dela, pedir sem
+  // resultado e correto — por isso a imagem foi removida do EXAM_CHECKS amplo em 10/07; aqui ela
+  // volta CONDICIONADA ao local, que e o que a regra de 06/08 realmente diz).
+  var EXAM_CHECKS_EMERG = [
+    { nome: 'radiografia', rx: /radiograf|raio.{0,3}x/i },
+    { nome: 'tomografia', rx: /tomograf/i },
+    { nome: 'ultrassom/FAST', rx: /ultrass|\busg\b|ecograf|\bfast\b/i },
+    { nome: 'ECG', rx: /\becg\b|eletrocardiogr/i },
+    { nome: 'ecocardiograma', rx: /ecocardiogr/i }
+  ];
+
+  // ── LIMIAR DO CRITERIO (2026-08-11) ───────────────────────────────────────────────────────────
+  // Contrato §11: o numeral citado no crit_adeq/crit_parc nao pode ser maior que o numero real de
+  // subitens, e as faixas de adequado e parcial nao podem se sobrepor. A leitura do numeral e
+  // HEURISTICA, entao isto e WARN e nao FAIL: um falso positivo aqui custaria um retry (2 chamadas).
+  function contaSubitens(v) {
+    var m = String(v == null ? '' : v).match(/\(\s*\d+\s*\)/g);
+    return m ? m.length : 0;
+  }
+  var NUM_TXT = { um:1, uma:1, dois:2, duas:2, ambos:2, ambas:2, tres:3, quatro:4, cinco:5, seis:6, sete:7, oito:8, nove:9, dez:10 };
+  function _num(tok) {
+    if (!tok) return 0;
+    var d = parseInt(tok, 10);
+    if (!isNaN(d)) return (d >= 1 && d <= 12) ? d : 0;
+    return NUM_TXT[tok] || 0;
+  }
+  // So conta numeral em construcao de CONTAGEM explicita. De proposito NAO le numero solto: doses e
+  // tempos ("ceftriaxona 1 g", "por 7 dias", "2.400.000 UI") nao podem virar limiar.
+  var _N = '(\\d{1,2}|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)';
+  var CONTA_RX = [
+    new RegExp('(^|[^a-z])(?:os|as)\\s+' + _N + '(?![a-z0-9])', 'g'),
+    new RegExp('(^|[^a-z])(?:todos?|todas?)\\s+(?:os|as)\\s+' + _N + '(?![a-z0-9])', 'g'),
+    new RegExp('(^|[^a-z])(?:realiza|cita|citar|investiga|contempla|aborda|identifica|menciona|pergunta|executa|solicita|orienta|cumpre|atende|verifica|avalia)\\s+(?:ao menos\\s+|pelo menos\\s+|no minimo\\s+|os\\s+|as\\s+)?' + _N + '(?![a-z0-9])', 'g'),
+    new RegExp('(^|[^a-z])' + _N + '\\s+(?:ou mais\\s+)?(?:dos|das|de)\\s+(?:os\\s+|as\\s+)?\\d{1,2}(?![a-z0-9])', 'g'),
+    /(^|[^a-z])(ambos|ambas)(?![a-z])/g
+  ];
+  function numeralCriterio(txt) {
+    var t = engNorm(txt || '');
+    if (!t) return 0;
+    var max = 0;
+    CONTA_RX.forEach(function (rx) {
+      rx.lastIndex = 0;
+      var m;
+      while ((m = rx.exec(t)) !== null) {
+        var v = (m[2] === 'ambos' || m[2] === 'ambas') ? 2 : _num(m[2]);
+        if (v > max) max = v;
+      }
+    });
+    return max;
+  }
+
   // Termos que indicam que um IMPRESSO fornece imagem (laudo).
   var IMG_TERM_RX = /radiograf|tomograf|angiotomograf|angio-?tc|ultrass|\busg\b|ecograf|\bfast\b|doppler|mamograf|cintilograf|ressonanc|ecocardiogr|\becg\b|eletrocardiogr|\bimagem\b|\blaudo\b|incidencia/i;
   // Item de PEP que exige INTERPRETAR imagem: verbo de leitura ligado a um termo de imagem (na mesma linha).
   var IMG_INTERP_RX = /(interpreta|descreve.{0,15}achad|reconhec|identifica|analisa|evidencia|observa|leitura).{0,45}(radiograf|tomograf|ultrass|\busg\b|angio|doppler|mamograf|cintilograf|ressonanc|ecocardiogr|\becg\b|eletrocardiogr|\bimagem\b|\blaudo\b)|(radiograf|tomograf|ultrass|\busg\b|angio|doppler|mamograf|ecocardiogr|\becg\b|\bimagem\b|\blaudo\b).{0,45}(interpreta|mostra|evidencia|revela|com achado|com sinal|apresenta)/i;
 
   // Avisos NAO bloqueantes (portao de qualidade p/ curadoria). Nao gasta retry.
-  function softWarnings(stObj) {
+  function softWarnings(stObj, dificuldade) {
     var warns = [];
     var clArr = Array.isArray(stObj.checklist) ? stObj.checklist : [];
     var pepTxt = clArr.map(function (it) {
@@ -1126,12 +1348,72 @@
     var corpus = examsArr.map(function (e) {
       return ((e && e.title) || '') + ' ' + (Array.isArray(e.rows) ? e.rows.join(' ') : '');
     }).join(' \n ').toLowerCase();
-    EXAM_CHECKS.forEach(function (chk) {
+    // CRITERIO DO LOCAL (06/08): em PS/UPA/emergencia a lista ganha os exames de IMAGEM — ali, item
+    // que paga por solicitar exige o resultado na estacao. Em UBS/ambulatorio, nao.
+    var localEmerg = LOCAL_EMERG_RX.test(engNorm(stObj.local || '') + ' ' + engNorm(stObj.caso || ''));
+    EXAM_CHECKS.concat(localEmerg ? EXAM_CHECKS_EMERG : []).forEach(function (chk) {
       if (chk.rx.test(pepTxt) && !chk.rx.test(corpus)) {
         warns.push({ severity: 'warn', category: 'pep_exame_ausente',
-          message: 'PEP cobra "' + chk.nome + '" mas nenhum impresso fornece esse dado. Adicione ao impresso ou ajuste o subitem (ou confirme que e resposta verbal do chefe).' });
+          message: 'PEP cobra "' + chk.nome + '" mas nenhum impresso fornece esse dado. Adicione ao impresso ou ajuste o subitem (ou confirme que e resposta verbal do chefe).'
+            + (localEmerg ? ' Esta estacao e de PRONTO-SOCORRO/UPA/emergencia: ali o item que paga por SOLICITAR exige o RESULTADO na estacao (laudo em texto basta, nao precisa de imagem).' : '') });
       }
     });
+    // LIMIAR DO CRITERIO (contrato §11): numeral do crit_adeq maior que o nº real de subitens torna o
+    // item INALCANCAVEL; parcial >= adequado faz as faixas se sobreporem.
+    clArr.forEach(function (it, i) {
+      if (!it) return;
+      var rot = (it.text || ('#' + (i + 1)));
+      var nSub = contaSubitens(it.subitens);
+      var nAdeq = numeralCriterio(it.crit_adeq), nParc = numeralCriterio(it.crit_parc);
+      if (nSub > 0 && nAdeq > nSub) {
+        warns.push({ severity: 'warn', category: 'limiar_inalcancavel',
+          message: 'Item "' + rot + '": o crit_adeq exige ' + nAdeq + ' mas o item tem apenas ' + nSub + ' subiten(s) — o limiar e inalcancavel e o item nunca pode ser adequado. Alinhe o numeral aos subitens.' });
+      }
+      if (nAdeq > 0 && nParc > 0 && nParc >= nAdeq) {
+        warns.push({ severity: 'warn', category: 'limiar_sobreposto',
+          message: 'Item "' + rot + '": o limiar parcial (' + nParc + ') nao e MENOR que o adequado (' + nAdeq + ') — as faixas se sobrepoem e o corretor nao consegue separa-las.' });
+      }
+    });
+    // REFERENCIA DO orientAtor x exams[].title (invariante #6). Duas direcoes:
+    //  (a) o campo cita "IMPRESSO N — TITULO" que nao casa com nenhum title -> a entrega quebra;
+    //  (b) existe impresso que o campo NUNCA menciona -> o Chefe de estacao nao sabe quando entregar.
+    // A direcao (b) e justamente a comparacao por CONTINENCIA (o titulo dentro da frase-gatilho) —
+    // a mesma que em SQL exige LIKE e nunca ILIKE (regra 11.5 do briefing).
+    var _oa = stObj.orientAtor || {};
+    var instr = String(_oa.se_perguntado_sobre_exame_fisico || '');
+    var instrN = engNorm(instr);
+    var titulosN = examsArr.map(function (e) { return engNorm((e && e.title) || ''); }).filter(function (t) { return t.length >= 3; });
+    (instr.match(/IMPRESSO\s+\d+\s*[\u2014\u2013:-]\s*[^.;\n]{3,60}/gi) || []).forEach(function (ref) {
+      var alvo = engNorm(ref.replace(/^IMPRESSO\s+\d+\s*[\u2014\u2013:-]\s*/i, '')).trim();
+      if (alvo.length < 3) return;
+      var casa = titulosN.some(function (t) { return t.indexOf(alvo) >= 0 || alvo.indexOf(t) >= 0; });
+      if (!casa) {
+        warns.push({ severity: 'warn', category: 'orientator_ref_quebrada',
+          message: 'orientAtor referencia "' + ref.trim() + '" mas nenhum impresso tem esse titulo. A referencia precisa casar LITERALMENTE com exams[].title, senao o Chefe de estacao nao entrega o impresso.' });
+      }
+    });
+    if (instrN) {
+      examsArr.forEach(function (e) {
+        var t = engNorm((e && e.title) || '');
+        if (t.length >= 3 && instrN.indexOf(t) < 0) {
+          warns.push({ severity: 'warn', category: 'impresso_sem_instrucao_entrega',
+            message: 'Impresso "' + (e.title || '') + '" nao aparece no se_perguntado_sobre_exame_fisico. O campo deve dizer QUANDO entregar CADA impresso — sem isso o ator nao sabe entrega-lo.' });
+        }
+      });
+    }
+    // TIER FACIL/BASICO: a regua viva do admin manda atencao primaria, paciente estavel e SEM imagem.
+    // WARN e nao FAIL por decisao de projeto (11/08): reprovar custa 2 chamadas Opus por estacao e o
+    // gate humano da Angelica ja pega isto.
+    if (nivelBasico(dificuldade)) {
+      if (IMG_TERM_RX.test(corpus)) {
+        warns.push({ severity: 'warn', category: 'basico_com_imagem',
+          message: 'Estacao do tier FACIL com impresso de exame de IMAGEM. A regua do Basico e atencao primaria SEM imagem (apenas exame fisico e, se pertinente, laboratorio, todos brutos).' });
+      }
+      if (localEmerg) {
+        warns.push({ severity: 'warn', category: 'basico_com_urgencia',
+          message: 'Estacao do tier FACIL ambientada em pronto-socorro/UPA/emergencia. A regua do Basico e UBS/ESF/ambulatorio geral, com paciente ESTAVEL e sem urgencia.' });
+      }
+    }
     // IMAGEM SEM LAUDO (principio: estacao SEM exame de imagem NUNCA pode cobrar INTERPRETAR imagem).
     // So avisa quando um item manda INTERPRETAR/descrever achados de imagem E nenhum impresso fornece
     // imagem. Item que apenas SOLICITA/verbaliza a imagem e desenho valido e NAO dispara (fim do ruido).
@@ -1160,39 +1442,39 @@
 
   async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade, anchor, maxTokensAudit) {
     var local = preValidate(stObj, pepResult, dificuldade, anchor);
-    var warnings = softWarnings(stObj);
+    var warnings = softWarnings(stObj, dificuldade);
     if (local.length > 0) return { passed: false, status: 'FAIL', score: 0, issues: local, warnings: warnings };
     var mtAudit = maxTokensAudit || 4000; // Fable 5 gasta thinking no mesmo orcamento (media 1.860); 1500 truncava
     try {
       var r = await aiCall({ model: modelAudit, max_tokens: mtAudit, system: buildSysAudit(dificuldade, anchor),
         messages: [{ role: 'user', content: 'Audite esta estacao OSCE:\n' + JSON.stringify(auditPayload(stObj, anchor), null, 2) }] });
-      if (!r.ok) return { passed: false, status: 'AUDIT_ERROR', score: 0,
+      if (!r.ok) return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
         issues: [{ severity: 'high', category: 'auditor_indisponivel', message: 'Auditor nao respondeu (HTTP ' + r.status + ').' }] };
       var dataAudit;
       try { dataAudit = await r.json(); }
       catch (_e0) {
-        return { passed: false, status: 'AUDIT_ERROR', score: 0,
+        return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
           issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor retornou resposta ilegivel.' }] };
       }
       // TRUNCAMENTO NA AUDITORIA (espelha trunc1/trunc2 da geracao). Checar ANTES do parseLoose:
       // o parseLoose REPARA JSON truncado (fecha chaves) — um audit cortado no meio de "issues"
       // podia parsear com status OK e issues faltando (fail-open). Truncou -> reprova SEMPRE.
       if (dataAudit && dataAudit.stop_reason === 'max_tokens') {
-        return { passed: false, status: 'AUDIT_ERROR', score: 0,
+        return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
           issues: [{ severity: 'high', category: 'auditor_truncado',
             message: 'Auditoria truncada por max_tokens (orcamento atual: ' + mtAudit + ') — aumente opts.maxTokensAudit.' }] };
       }
       var parsed;
       try { parsed = parseLoose(extractText(dataAudit)); }
       catch (_) {
-        return { passed: false, status: 'AUDIT_ERROR', score: 0,
+        return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
           issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor retornou resposta ilegivel.' }] };
       }
-      if (!parsed || !parsed.status) return { passed: false, status: 'AUDIT_ERROR', score: 0,
+      if (!parsed || !parsed.status) return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
         issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor sem campo status.' }] };
       return { passed: parsed.status === 'OK', status: parsed.status, score: parsed.score || 0, issues: parsed.issues || [], warnings: warnings };
     } catch (e) {
-      return { passed: false, status: 'AUDIT_ERROR', score: 0,
+      return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
         issues: [{ severity: 'high', category: 'auditor_excecao', message: 'Erro na auditoria: ' + (e && e.message ? e.message : e) }] };
     }
   }
@@ -1283,7 +1565,10 @@
     }
     var msg1 = 'Crie uma NOVA estacao OSCE no padrao INEP. Area: ' + areaUse + '. '
       + temaClause
-      + 'Nivel: ' + (opts.nivel || 'medium') + '. '
+      // 2026-08-11: caia em 'medium' FIXO quando o wrapper nao passava opts.nivel — e o lote do admin
+      // (genStationCore) so passa 'dificuldade'. O modelo recebia "Nivel: medium" no user e "NIVEL FACIL"
+      // no extra, ao mesmo tempo. Agora usa a dificuldade efetiva.
+      + 'Nivel: ' + (opts.nivel || difUse || 'medium') + '. '
       + (opts.extra ? 'Instrucoes extras: ' + opts.extra + '. ' : '')
       + 'Responda APENAS o JSON, no formato dos exemplos. NAO copie os exemplos — crie estacao original e DIFERENTE dos exemplos.';
     var r1 = await aiCall({ model: modelGen, max_tokens: 16000, system: sys1, messages: [{ role: 'user', content: msg1 }] });
@@ -1317,8 +1602,12 @@
     var pep = processPEP(clArr, pepPolicy);
 
     // sanitizar complexity (ancorado: SEMPRE advanced — e a definicao do modo)
+    // 2026-08-11: 'simple' liberado e FORCADO no tier Basico — espelha o diffToComplexity do admin
+    // ('Básico' -> 'simple'), que ate agora sobrescrevia um valor que o engine se recusava a produzir.
     var compFromAI = (base.complexity || '').toLowerCase().trim();
-    var complexity = anchor ? 'advanced' : ((['medium', 'advanced'].indexOf(compFromAI) >= 0) ? compFromAI : 'medium');
+    var complexity = anchor ? 'advanced'
+      : (nivelBasico(difUse) ? 'simple'
+      : ((['medium', 'advanced'].indexOf(compFromAI) >= 0) ? compFromAI : 'medium'));
 
     var station = Object.assign({}, base, { checklist: pep.checklist, complexity: complexity });
     // Avancada ancorada NUNCA e estacao demo do trial (protecao de IP do acervo).
@@ -1333,7 +1622,8 @@
       var truncIssues = [];
       if (trunc1) truncIssues.push({ severity: 'high', category: 'truncamento', message: 'Geracao do caso (Call 1) truncada por max_tokens — estacao incompleta (impressos podem vir sem dados).' });
       if (trunc2) truncIssues.push({ severity: 'high', category: 'truncamento', message: 'Geracao do PEP (Call 2) truncada por max_tokens.' });
-      auditResult = { passed: false, status: 'TRUNCATED', score: 0, issues: truncIssues.concat(auditResult.issues || []) };
+      auditResult = { passed: false, status: 'TRUNCATED', score: 0, issues: truncIssues.concat(auditResult.issues || []),
+                      warnings: auditResult.warnings || [] };
     }
 
     onProgress(4);
@@ -1350,6 +1640,7 @@
     extractChecklistArray: extractChecklistArray, normalizeChecklistItems: normalizeChecklistItems,
     extractText: extractText, pepTotal: pepTotal,
     normalizeAnchor: normalizeAnchor, enforceAnchorImpresso: enforceAnchorImpresso,
-    canonArea: canonArea, eixosDaArea: eixosDaArea
+    canonArea: canonArea, eixosDaArea: eixosDaArea,
+    nivelBasico: nivelBasico, citaDiagnostico: citaDiagnostico, numeralCriterio: numeralCriterio
   };
 })(typeof window !== 'undefined' ? window : this);
