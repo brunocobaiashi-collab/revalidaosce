@@ -945,14 +945,8 @@ body.light .badge{color:var(--text)}
         <option value="done">Já feitas</option>
       </select>
     </div>
-    <!-- v1.6.151: seletor de síntese RESTAURADO (removido na 1.6.143). Diferença p/ o
-         original: nasce MARCADO (síntese visível), porque os nomes já não entregam o
-         diagnóstico — o modo cego virou escolha de treino, não proteção. -->
-    <label style="display:flex;align-items:center;gap:8px;margin-top:.6rem;font-size:.78rem;color:var(--text2);cursor:pointer;user-select:none">
-      <input type="checkbox" id="show-diagnoses-chk" checked style="cursor:pointer">
-      <span>Síntese da estação</span>
-      <span style="font-size:.7rem;color:var(--text3);font-style:italic">(desabilite para treinar sem ver a síntese)</span>
-    </label>
+    <!-- v1.6.143: seletor de síntese removido — a síntese é sempre exibida (os nomes
+         das estações não revelam mais o diagnóstico, que era o motivo do modo cego) -->
     <input id="station-search" type="text" placeholder="Buscar pela síntese da estação..." class="tinput" style="font-family:var(--sans);margin-top:.5rem">
   </div>
   <div id="station-count" style="font-family:var(--mono);font-size:.72rem;color:var(--text3);letter-spacing:.05em;margin:0 0 .8rem;min-height:1em"></div>
@@ -1365,12 +1359,7 @@ body.light .badge{color:var(--text)}
     <select id="m-origem-filter" class="tinput" style="font-family:var(--sans);margin-bottom:.55rem" onchange="loadMarathonStationList()">
       <option value="">Todas as origens</option>
     </select>
-    <!-- v1.6.151: seletor de síntese RESTAURADO (removido na 1.6.143); nasce marcado -->
-    <label style="display:flex;align-items:center;gap:8px;margin:.15rem 0 .55rem;font-size:.78rem;color:var(--text2);cursor:pointer;user-select:none">
-      <input type="checkbox" id="m-show-diagnoses-chk" checked style="cursor:pointer">
-      <span>Síntese da estação</span>
-      <span style="font-size:.7rem;color:var(--text3);font-style:italic">(desabilite para escolher sem ver a síntese)</span>
-    </label>
+    <!-- v1.6.143: seletor de síntese removido — síntese sempre exibida -->
     <input id="m-station-search" type="text" placeholder="Buscar pela síntese da estação..." class="tinput" style="font-family:var(--sans);margin-bottom:.55rem" oninput="filterMarathonSearch()">
     <div id="m-station-list" style="display:flex;flex-direction:column;gap:.4rem;max-height:320px;overflow-y:auto"></div>
   </div>
@@ -1611,8 +1600,8 @@ body.light .badge{color:var(--text)}
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
   version: '1.6.151',
-  date: '2026-08-12',
-  notes: '1.6.151 (base: main 1.6.150): SELETOR DE SINTESE DA ESTACAO RESTAURADO no acervo e na maratona (tinha sido removido na 1.6.143, que fixou showDiag=true em 5 pontos). A infraestrutura do modo cego nunca saiu — blindLbl, marathonPool e os chips continuavam calculando o rotulo Area · Simulacao N —, entao a volta e o controle + a leitura da preferencia. (1) Dois checkboxes de volta com o markup original da 1.6.142, mas nascendo MARCADOS. (2) CHAVE DE PREFERENCIA NOVA: rv_sintese, NAO a antiga rv_show_diagnoses. Motivo: quem usava modo cego antes da 1.6.143 tem rv_show_diagnoses congelada no valor zero no navegador; reusar a chave faria a sintese SUMIR sozinha depois de 8 versoes vendo o nome. rv_sintese ausente = visivel, entao o deploy nao muda nada para ninguem. (3) sinteseVisivel() unica alimenta os 5 pontos: card do acervo, busca do acervo, lista da maratona, busca da maratona e chips das selecionadas. (4) Os 2 checkboxes ficam em sincronia (mesma preferencia) e a maratona re-renderiza os chips na hora, para estacao ja escolhida com a sintese a mostra virar rotulo cego. (5) Campo de busca volta a sumir e a ser LIMPO no modo cego — senao um filtro invisivel esconderia cards (regra do contrato par.7: busca por sintese so quando a sintese esta ligada). Padrao acordado com Bruno: sintese VISIVEL, modo cego vira escolha de treino e nao protecao — os nomes ja nao entregam diagnostico desde as 38 renomeacoes de 04/08. Guarda if(!chk) return em todo bind (listener orfao = TypeError que aborta o script). Nada de SQL, edge function, acesso, grader ou custo tocado. | 1.6.150 (base: 1.6.149): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
+  date: '2026-08-14',
+  notes: '1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
 };
 
 // Função global pra inspeção via console
@@ -3590,27 +3579,7 @@ var _ofp=document.getElementById('origem-filter'); if(_ofp) _ofp.addEventListene
 var _dfp=document.getElementById('difficulty-filter'); if(_dfp) _dfp.addEventListener('change', renderStations);
 var _stp=document.getElementById('status-filter'); if(_stp) _stp.addEventListener('change', renderStations);
 var _ssb=document.getElementById('station-search'); if(_ssb) _ssb.addEventListener('input', filterStationSearch);
-// ── v1.6.151: MODO SÍNTESE (restaurado; removido na 1.6.143) ──────────────────
-// Chave NOVA de propósito: a antiga 'rv_show_diagnoses' ficou congelada em '0' no
-// navegador de quem usava o modo cego antes da 1.6.143. Reusá-la faria a síntese
-// SUMIR sem o usuário pedir, depois de 8 versões vendo o nome. 'rv_sintese' nasce
-// visível ('1') para todo mundo; quem quiser treinar às cegas desmarca.
-function sinteseVisivel(){
-  try{ return localStorage.getItem('rv_sintese') !== '0'; }catch(e){ return true; }
-}
-function _bindSinteseChk(chkId, onChange){
-  var chk = $(chkId);
-  if(!chk) return;                       // guarda: elemento ausente não derruba o script
-  chk.checked = sinteseVisivel();
-  chk.addEventListener('change', function(){
-    try{ localStorage.setItem('rv_sintese', chk.checked ? '1' : '0'); }catch(e){}
-    // mantém acervo e maratona em sincronia — é uma preferência só
-    var outro = $(chkId === 'show-diagnoses-chk' ? 'm-show-diagnoses-chk' : 'show-diagnoses-chk');
-    if(outro) outro.checked = chk.checked;
-    try{ onChange(); }catch(e){ console.warn('[sintese] re-render falhou:', e); }
-  });
-}
-_bindSinteseChk('show-diagnoses-chk', function(){ renderStations(); });
+// v1.6.143: checkbox de síntese removido — preferência rv_show_diagnoses aposentada.
 
 function normText(x){ return (x==null?'':String(x)).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
@@ -4023,8 +3992,8 @@ async function renderStations(){
         +'Curadoria RevalidaOSCE'
         +'</div>';
     }
-    // v1.6.151: síntese volta a ser opcional (modo cego restaurado)
-    var showDiag = sinteseVisivel();
+    // v1.6.143: síntese sempre visível (modo cego aposentado)
+    var showDiag = true;
     var titleHtml = showDiag && s.name
       ? '<div class="sname">'+esc(s.name)+'</div>'
       : '<div class="sname">Simulação '+s._seq+'</div>';
@@ -4062,13 +4031,9 @@ async function renderStations(){
 
 // Busca client-side por nome da síntese (prática avulsa) — só quando a síntese está visível
 function filterStationSearch(){
-  // v1.6.151: buscar pela síntese só faz sentido com a síntese à mostra — com o modo
-  // cego ligado o campo some e é limpo (senão um filtro invisível esconderia cards).
-  var showDiag = sinteseVisivel();
+  // v1.6.143: síntese sempre visível — busca sempre ativa
   var inp = document.getElementById('station-search');
-  if(inp) inp.style.display = showDiag ? '' : 'none';
-  if(inp && !showDiag) inp.value = '';
-  var q = normText(inp && showDiag ? inp.value : '');
+  var q = normText(inp ? inp.value : '');
   document.querySelectorAll('#station-list .scard').forEach(function(c){
     var nm = normText(c.getAttribute('data-name'));
     c.style.display = (!q || nm.indexOf(q) !== -1) ? '' : 'none';
@@ -7204,6 +7169,72 @@ function renderComentario(boxId, bodyId, text, loading){
   }
 }
 
+// ── v1.6.151: GUARD DETERMINÍSTICO DE COERÊNCIA label×justification ──────────
+// Auditoria de 448 sessões (14/08) achou ~24 itens onde a justification do grader
+// ADMITE que o critério não foi cumprido ("2 itens" com crit exigindo 3-4; "não
+// mencionou X" em critério conjuntivo; "não pontua item binário") e mesmo assim o
+// level veio na banda cheia — o modelo raciocina certo no texto e erra o número.
+// O prompt já proíbe isso (COERENCIA OBRIGATORIA etc.) e mesmo assim vazou HOJE
+// (sessão 64b49915, item do psicólogo da UBS). Este guard roda DEPOIS da IA, só
+// REBAIXA (nunca sobe), só na banda cheia, e foi calibrado contra os 24 casos
+// reais + ~100 créditos legítimos da varredura (zero falso-rebaixamento no set).
+function _evalNormTxt(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+function _evalFirstNum(s){
+  // primeiro número do critério = piso do limiar ("tres ou quatro"→3, "5 ou 6"→5, "cinco a seis"→5)
+  var m = s.match(/\b(\d+)\b/); if(m) return parseInt(m[1],10);
+  var words = {um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8};
+  var w = s.match(/\b(um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito)\b/);
+  return w ? words[w[1]] : null;
+}
+function _evalClaimedCount(just){
+  // contagem que a PRÓPRIA justification declara ter sido cumprida
+  var words = {um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8};
+  var m;
+  m = just.match(/\b(\d+)\s*(?:de|das|dos)\s*\d+\b/);                    // "3 de 4", "2 das 3"
+  if(m) return parseInt(m[1],10);
+  m = just.match(/\b(um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito)\s+de\s+(?:um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito)\b/);
+  if(m) return words[m[1]];
+  var UNI = '(?:itens?|subitens?|sintomas?|acoes|condutas?|aspectos?|grupos?|caracteristicas?|orientacoes|medidas?|exames?|componentes?|criterios?)';
+  m = just.match(new RegExp('\\b(\\d+)\\s*\\+?\\s*'+UNI+'\\b'));         // "2 itens", "4+ itens", "(2 sintomas"
+  if(m) return parseInt(m[1],10);
+  m = just.match(new RegExp('\\b(um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito)\\s+'+UNI+'\\b'));
+  if(m) return words[m[1]];
+  m = just.match(/(?:apenas|somente|so)\s+(?:fez\s+|realizou\s+)?(\d+)\b/); // "só fez 1", "apenas 2"
+  if(m) return parseInt(m[1],10);
+  m = just.match(/ating\w*\s+(?:o\s+)?(\d+)\b/);                          // "atinge 4-5", "atingiu 4"
+  if(m) return parseInt(m[1],10);
+  m = just.match(/[=(]\s*(\d+)\s*\+?\s*\)?\s*(?:;|,|\.|$)/);              // "= 5;", "(4+);"
+  if(m) return parseInt(m[1],10);
+  return null;
+}
+function evalCoherenceGuard(item, level, justification){
+  try{
+    if(!item || level !== item.scores.length-1) return null;             // só banda cheia
+    var just = _evalNormTxt(justification); if(!just) return null;
+    var adeq = _evalNormTxt(item.crit_adeq); if(!adeq) return null;
+    if(/\bnao\b/.test(adeq)) return null;                                // critério negativo ("NÃO solicita...") — negação na justification é o esperado
+    if(/interromp|escuta/.test(_evalNormTxt(item.text))) return null;    // "não há evidência de interrupção" é crédito legítimo
+    // (1) a justification declara explicitamente a banda de baixo
+    if(/nao pontua|atinge (?:o |a )?parcial|banda parcial|criterio inadequad|nao cumpre o? ?criterio|nao atinge o? ?criterio/.test(just))
+      return 'declara_nao_credito';
+    // (2) contagem admitida abaixo do piso do limiar do crit_adeq
+    var N = _evalFirstNum(adeq), K = _evalClaimedCount(just);
+    if(N !== null && K !== null && K < N) return 'contagem_'+K+'_abaixo_de_'+N;
+    // (3) critério conjuntivo (exige TODOS) + justification admite componente exigido ausente
+    var limiarAberto = /pelo menos|ao menos|ou mais|no minimo|\bou\b|e\/ou/.test(adeq);
+    var allOf = /\b(todos|todas|ambos|ambas|os dois|as duas|os tres|as tres|os quatro|as quatro|os cinco|as cinco)\b/.test(adeq)
+                || (/,.+\be\b/.test(adeq) && !limiarAberto);
+    if(allOf && !limiarAberto){
+      var admiteFalta = /\bfaltou\b|\bfaltaram\b|nao (?:mencionou|investigou|perguntou|abordou|orientou|explicou|citou|realizou|indicou|descreveu|verbalizou|definiu)|sem (?:mencionar|citar|abordar|verbalizar|descrever)/.test(just);
+      var afirmaTudo  = /atingiu ambos|atingiu ambas|(?:indicou|realizou|fez|cumpriu|investigou|solicitou|contemplou) (?:as duas|os dois|as tres|os tres|as quatro|os quatro|todas|todos|ambos|ambas)|(?:as duas|os dois|as tres|os tres|as quatro|os quatro|todos os|todas as) (?:acoes |itens |condutas )?(?:realizad|cumprid|contemplad|indicad|feit|investigad|solicitad)/.test(just);
+      if(admiteFalta && !afirmaTudo) return 'conjuncao_incompleta';
+    }
+  }catch(_e){}
+  return null;
+}
+
 async function runEval(isReeval){
   var cl = station.checklist || [];
   if(!cl.length){ alert('Esta estação não tem checklist.'); return; }
@@ -7585,15 +7616,25 @@ async function runEval(isReeval){
       evalItems = cl.map(function(item){
         var ar = results.find(function(r){ return String(r.id) === String(item.id); });
         var level   = ar ? Math.min(Math.max(ar.level||0, 0), item.scores.length-1) : 0;
-        var score   = item.scores[level] || 0;
-        var max     = Math.max.apply(null, item.scores);
         var snippet = ar && ar.snippet ? ar.snippet : null;
         var justif  = ar && ar.justification ? ar.justification : null;
-        return {
+        // v1.6.151: guard determinístico — se a justification admite que o critério
+        // não foi cumprido, a banda cheia é rebaixada (3 níveis → parcial; binário → 0).
+        var _dg = ar ? evalCoherenceGuard(item, level, justif) : null;
+        if(_dg){
+          level = (item.scores.length >= 3) ? 1 : 0;
+          console.warn('[Eval] coherence guard rebaixou item '+item.id+' ('+_dg+')');
+          try{ if(typeof debugLog==='function') debugLog({ type:'eval_coherence_downgrade', item_id:String(item.id), reason:_dg }); }catch(__){}
+        }
+        var score = item.scores[level] || 0;
+        var max   = Math.max.apply(null, item.scores);
+        var out = {
           id: item.id, text: item.text, scores: item.scores, labels: item.labels,
           level: level, score: score, max: max,
           snippet: snippet, justification: justif, aiReviewed: true
         };
+        if(_dg) out.coherence_downgrade = _dg;
+        return out;
       });
       aiOk = true;
 
@@ -9040,8 +9081,8 @@ async function loadMarathonStationList(){
       updateMarathonSelCount();
       return;
     }
-    // v1.6.151: síntese volta a ser opcional na maratona
-    var showDiag = sinteseVisivel();
+    // v1.6.143: síntese sempre visível
+    var showDiag = true;
     var areaSeq = {};
     list.innerHTML = stations.map(function(s){
       areaSeq[s.area] = (areaSeq[s.area]||0) + 1;
@@ -9070,12 +9111,9 @@ async function loadMarathonStationList(){
 
 // Busca client-side por nome da síntese (maratona) — só quando a síntese está visível
 function filterMarathonSearch(){
-  // v1.6.151: mesmo tratamento do acervo — campo some e é limpo no modo cego
-  var showDiag = sinteseVisivel();
+  // v1.6.143: síntese sempre visível — busca sempre ativa
   var inp = document.getElementById('m-station-search');
-  if(inp) inp.style.display = showDiag ? '' : 'none';
-  if(inp && !showDiag) inp.value = '';
-  var q = normText(inp && showDiag ? inp.value : '');
+  var q = normText(inp ? inp.value : '');
   document.querySelectorAll('#m-station-list label').forEach(function(r){
     var nm = normText(r.getAttribute('data-name'));
     r.style.display = (!q || nm.indexOf(q) !== -1) ? 'flex' : 'none';
@@ -9104,7 +9142,7 @@ function removeMarathonSel(id){
 // usa para montar a fila). Rótulo respeita o modo síntese.
 function renderMarathonChips(){
   var wrap = $('m-sel-chips'); if(!wrap) return;
-  var showDiag = sinteseVisivel(); // v1.6.151: chip usa o rótulo cego quando desligado
+  var showDiag = true; // v1.6.143: síntese sempre visível
   var ids = Object.keys(marathonSel);
   var emptyEl = $('m-sel-empty'); if(emptyEl) emptyEl.style.display = ids.length ? 'none' : 'block';
   wrap.innerHTML = ids.map(function(id, i){
@@ -9967,11 +10005,7 @@ window.addEventListener('load', function(){
     if(marathonSource==='db') loadMarathonStationList();
     updateMarathonSelCount();   // v1.6.109: barra/badge/texto refletem a meta nova mesmo em "Todas"
   });
-  // v1.6.151: checkbox de síntese da maratona restaurado (mesma preferência do acervo).
-  _bindSinteseChk('m-show-diagnoses-chk', function(){
-    if(marathonSource==='db') loadMarathonStationList();
-    renderMarathonChips();   // chips já escolhidos trocam p/ o rótulo cego na hora
-  });
+  // v1.6.143: checkbox de síntese da maratona removido.
   $('btn-marathon-start').addEventListener('click', startMarathon);
   $('btn-mr-home').addEventListener('click', function(){ marathonActive=false; removeMarathonBars(); show('s-dashboard'); renderDashboard(); });
   $('btn-mr-again').addEventListener('click', function(){ marathonActive=false; removeMarathonBars(); showMarathon(); });
