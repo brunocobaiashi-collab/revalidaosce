@@ -2793,7 +2793,7 @@ function showAccessRequired(currentUser, profileData, mode){
     var ctaBtn = document.getElementById('btn-acquire-access');
     if(ctaBtn){
       ctaBtn.href = ACCESS_CONFIG.kiwify_link + ACCESS_CONFIG.utm;
-      ctaBtn.textContent = isExpired ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Renovar Acesso' : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Adquirir Acesso';
+      ctaBtn.textContent = isExpired ? 'Renovar Acesso' : 'Adquirir Acesso';
     }
 
     show('s-access-required');
@@ -2825,7 +2825,7 @@ function wireAccessRequiredButtons(){
             msgEl.style.display = 'block';
             msgEl.style.background = 'rgba(34,197,94,.1)';
             msgEl.style.color = '#22c55e';
-            msgEl.textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Acesso liberado! Redirecionando...';
+            msgEl.textContent = 'Acesso liberado! Redirecionando...';
           }
           setTimeout(function(){ show('s-dashboard'); }, 800);
         } else {
@@ -2996,7 +2996,7 @@ function computeSubDisplay(info, daysLeft){
   // ADMIN
   if(info.type === 'admin'){
     return {
-      title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 6 4.5 4L12 4l5.5 6L22 6l-2 12H4z"/></svg> Administrador',
+      title: 'Administrador',
       detailHtml: 'Acesso completo ao sistema.',
       menuDetailHtml: 'Acesso completo',
       showLink: false,
@@ -3039,7 +3039,7 @@ function computeSubDisplay(info, daysLeft){
     if(plan === 'invite'){
       if(!info.expires_at){
         return {
-          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg> Acesso por convite',
+          title: 'Acesso por convite',
           detailHtml: 'Sem data de expiração.',
           showLink: false,
           borderColor: 'rgba(245,200,66,.25)'
@@ -3049,7 +3049,7 @@ function computeSubDisplay(info, daysLeft){
       var expDate = formatDate(info.expires_at);
       var daysText = daysLeft != null ? daysLeft + ' dias restantes' : '';
       return {
-        title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg> Acesso por convite',
+        title: 'Acesso por convite',
         detailHtml: 'Válido até ' + expDate + (daysText ? ' (' + daysText + ')' : '') + '.',
         showLink: false,
         borderColor: 'rgba(245,200,66,.25)'
@@ -3063,7 +3063,7 @@ function computeSubDisplay(info, daysLeft){
       // Cancelado mas no prazo
       if(status === 'cancelled' && daysLeft != null && daysLeft > 0){
         return {
-          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal · Cancelado',
+          title: 'Plano Mensal · Cancelado',
           detailHtml: 'Acesso até ' + expDate2 + ' (' + daysLeft + ' dias).<br>Não haverá nova cobrança.',
           menuDetailHtml: 'Cancelado · acesso até ' + expDate2,
           showLink: true,
@@ -3075,7 +3075,7 @@ function computeSubDisplay(info, daysLeft){
       // Expirado
       if(daysLeft != null && daysLeft <= 0){
         return {
-          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal · Expirado',
+          title: 'Plano Mensal · Expirado',
           detailHtml: 'Sua assinatura expirou. <a href="https://app.kiwify.com.br" target="_blank" rel="noopener" style="color:var(--accent)">Renovar</a>',
           menuDetailHtml: 'Expirado',
           showLink: true,
@@ -3087,7 +3087,7 @@ function computeSubDisplay(info, daysLeft){
       // Alerta vermelho (≤ 3 dias)
       if(daysLeft != null && daysLeft <= 3){
         return {
-          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
+          title: 'Plano Mensal',
           detailHtml: '<span style="color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + ' (' + expDate2 + ')</span>',
           menuDetailHtml: '<span style="color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + '</span>',
           showLink: true,
@@ -3098,7 +3098,7 @@ function computeSubDisplay(info, daysLeft){
       // Alerta amarelo (≤ 7 dias)
       if(daysLeft != null && daysLeft <= 7){
         return {
-          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
+          title: 'Plano Mensal',
           detailHtml: '<span style="color:var(--gold)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Renova em ' + daysLeft + ' dias (' + expDate2 + ')</span>',
           menuDetailHtml: '<span style="color:var(--gold)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Renova em ' + daysLeft + ' dias</span>',
           showLink: true,
@@ -3108,7 +3108,7 @@ function computeSubDisplay(info, daysLeft){
       
       // Normal
       return {
-        title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
+        title: 'Plano Mensal',
         detailHtml: 'Renova em ' + (daysLeft != null ? daysLeft + ' dias (' : '') + expDate2 + (daysLeft != null ? ')' : ''),
         menuDetailHtml: daysLeft != null ? 'Renova em ' + daysLeft + ' dias' : 'Ativo',
         showLink: true,
@@ -5363,7 +5363,7 @@ async function processInput(text){
           return;
         }
         console.error('API error:', msg);
-        addMsg('sys', '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> ' + msg);
+        addMsg('sys', '' + msg);
         scriptActorFallback(text);
         return;
       }
@@ -5855,7 +5855,7 @@ function initRec(){
     $('mic-btn').classList.remove('on');
     if(e.error === 'not-allowed' || e.error === 'permission-denied'){
       accumulated = '';
-      $('tbox').textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Microfone bloqueado. Vá em Configurações do browser → Permissões → Microfone → Permitir.';
+      $('tbox').textContent = 'Microfone bloqueado. Vá em Configurações do browser → Permissões → Microfone → Permitir.';
       $('tbox').className = 'tbox';
     } else if(e.error === 'no-speech'){
       // No speech detected — keep accumulated text, just re-enable button
@@ -6060,7 +6060,7 @@ $('mic-btn').addEventListener('click', async function(){
   mediaRecorder.start();
   isRecording = true;
   $('mic-btn').classList.add('on');
-  $('tbox').textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg> Gravando... (toque novamente para parar)';
+  $('tbox').textContent = 'Gravando... (toque novamente para parar)';
   $('tbox').className = 'tbox';
   $('sv-btn').disabled = true;
 });
@@ -8337,7 +8337,7 @@ async function submitBugReport(){
       submitBtn.textContent = 'Enviar relato';
       return;
     }
-    showFeedback('<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Relato enviado! Obrigado por contribuir.', 'success');
+    showFeedback('Relato enviado! Obrigado por contribuir.', 'success');
     setTimeout(function(){ closeBugModal(); }, 1800);
   } catch(err){
     console.error('[bug_report] Exceção:', err);
@@ -8450,7 +8450,7 @@ async function renderAccountScreen(){
     title.textContent=window.__planLabel||'Assinante'; tag.textContent='Ativa'; tag.classList.add('is-sub');
     detail.textContent = exp ? ('Assinatura ativa — acesso até '+exp+'.') : 'Assinatura ativa.';
     usage.innerHTML='<div style="color:var(--green);font-weight:500">✓ Acesso ilimitado às estações</div>';
-    btn.style.display=''; btn.textContent='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Gerenciar assinatura'; btn.href='https://app.kiwify.com.br';
+    btn.style.display=''; btn.textContent='Gerenciar assinatura'; btn.href='https://app.kiwify.com.br';
   } else {
     var r=(typeof window.__trialRemaining==='number')?window.__trialRemaining:0; var used=Math.max(0,3-r);
     title.textContent='Grátis'; tag.textContent='Demonstração'; tag.classList.add('is-trial');
@@ -9616,7 +9616,7 @@ async function generateMarathonStation(entry, onStep){
     // - WARN: 1 retry automático; se falhar, DESCARTA (não salva)
     // - OK: salva como pending (admin revisa antes de aprovar)
     if(auditResult.status === 'FAIL' || auditResult.status === 'WARN' || auditResult.status === 'AUDIT_ERROR'){
-      console.warn('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Estação com problemas detectados (status=' + auditResult.status + ')');
+      console.warn('[AI Auditor] Estação com problemas detectados (status=' + auditResult.status + ')');
       console.warn('[AI Auditor] Issues principais:');
       (auditResult.issues||[]).filter(function(i){ return i.severity === 'high' || i.severity === 'medium'; })
         .slice(0, 3)
@@ -9696,9 +9696,9 @@ async function generateMarathonStation(entry, onStep){
     }
 
     if(auditResult.status === 'WARN'){
-      console.warn('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>  Estação salva como pending COM RESSALVAS (score:', auditResult.score + '). Revise no admin antes de aprovar.');
+      console.warn('[AI Auditor]  Estação salva como pending COM RESSALVAS (score:', auditResult.score + '). Revise no admin antes de aprovar.');
     } else if(auditResult.status === 'OK'){
-      console.log('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Estação aprovada pelo auditor (score:', auditResult.score + '). Pendente de revisão humana.');
+      console.log('[AI Auditor] Estação aprovada pelo auditor (score:', auditResult.score + '). Pendente de revisão humana.');
     }
 
     return stObj;
