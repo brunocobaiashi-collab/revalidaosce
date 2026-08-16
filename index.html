@@ -71,6 +71,14 @@
         "@type": "Answer",
         "text": "Sim. O banco de estações curadas RevalidaOSCE é ampliado continuamente pela nossa equipe, com novos casos entrando com frequência."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "O que são os resumos de tema do RevalidaOSCE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "São materiais de estudo curtos, de 5 a 8 minutos de leitura, escritos para o que a prova cobra: hipótese diagnóstica, exames que pontuam, conduta correta e os erros que mais custam ponto. O resumo do tema aparece ao final da estação e fica salvo no histórico do candidato. Todo resumo passa pela revisão clínica da médica curadora antes de ir ao ar. No teste grátis, dois resumos ficam liberados ao terminar as estações de demonstração; nos planos pagos, o candidato tem o resumo de todos os temas que treinar."
+      }
     }
   ]
 }
@@ -265,10 +273,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 1.5rem;
   letter-spacing:.02em}
 .preco-btn:hover{background:#33d4ff;transform:translateY(-2px)}
 .preco-note{font-size:.78rem;color:var(--text3);margin-top:1rem;text-align:center}
-/* grade de 3 planos (grátis / mensal / semestral) */
+/* grade de 2 planos (grátis / mensal) — semestral suspenso em 14/08 */
 .preco-wide{max-width:1080px;margin:0 auto;text-align:center}
 .preco-grid{display:grid;grid-template-columns:1fr;gap:1.4rem;margin-top:2.5rem;align-items:stretch;text-align:center}
-@media(min-width:900px){.preco-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.preco-grid{grid-template-columns:repeat(2,1fr);max-width:760px;margin-left:auto;margin-right:auto}}
 .preco-grid .preco-card{margin-top:0;display:flex;flex-direction:column;padding:2rem 1.6rem}
 .preco-card.plain{border-color:var(--border);box-shadow:none}
 .preco-card.plain::before{background:rgba(0,201,255,.25)}
@@ -410,7 +418,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">Revalida<span>OSCE</span></a>
-  <a href="#preco" class="nav-cta"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> R$ 97/mês →</a>
+  <a href="#preco" class="nav-cta"><svg class="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> R$ 197/mês →</a>
 </nav>
 
 <!-- HERO -->
@@ -426,7 +434,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
           <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Testar 3 estações grátis →</a>
           <a href="#solucao" class="btn-secondary">Ver como funciona</a>
         </div>
-        <p style="margin-top:.9rem;font-size:.88rem;color:var(--text3)">Sem cartão, sem compromisso · ou <a href="#preco" style="color:#7d96a8;text-decoration:underline">assine o acesso completo por R$ 97/mês</a>.</p>
+        <p style="margin-top:.9rem;font-size:.88rem;color:var(--text3)">Sem cartão, sem compromisso · ou <a href="#preco" style="color:#7d96a8;text-decoration:underline">assine o acesso completo por R$ 197/mês</a>.</p>
       </div>
       <!-- ============================================================ -->
       <style>
@@ -723,7 +731,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
   <div class="container">
     <div class="stats-grid">
       <div><div class="stat-n" style="font-size:1.6rem">2020-2025</div><div class="stat-l">Edições oficiais Revalida</div></div>
-      <div><div class="stat-n" data-count="150" data-suffix="+">0+</div><div class="stat-l">Estações curadas</div></div>
+      <!-- contagem real do banco em 16/08/2026: 236 ativas (75 INEP + 161 curadas) -->
+      <div><div class="stat-n" data-count="236">0</div><div class="stat-l">Estações no banco</div></div>
       <div><div class="stat-n" data-count="5">0</div><div class="stat-l">Áreas do Revalida</div></div>
       <div><div class="stat-n">IA</div><div class="stat-l">Avaliação automática</div></div>
       <div><div class="stat-n" data-count="100" data-suffix="%">0%</div><div class="stat-l">Padrão INEP/Revalida</div></div>
@@ -901,6 +910,33 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
   </div>
 </section>
 
+<!-- RESUMOS DE TEMA -->
+<section id="resumos">
+  <div class="container">
+    <div class="section-tag">Novo · Resumos de tema</div>
+    <h2>Errou na estação?<br>O estudo já está ali</h2>
+    <p class="section-sub">Saber que você foi mal em cardiologia não adianta se, na hora de estudar, você não sabe por onde começar. Ao terminar uma estação, o RevalidaOSCE abre o resumo do tema daquele caso — escrito pela nossa equipe, revisado por médica e amarrado ao que o PEP cobrou de você.</p>
+    <div class="features-grid reveal">
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+        <div class="feat-title">Escrito para a prova, não para a faculdade</div>
+        <div class="feat-desc">Cada resumo cobre a conduta que o PEP cobra: hipótese, exames que pontuam, tratamento correto e os erros que mais custam ponto. Leitura de 5 a 8 minutos, sem enrolação.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3"/><path d="M22 12.5a10 10 0 0 1-18.8 4.3"/></svg></div>
+        <div class="feat-title">Treinar, estudar, repetir</div>
+        <div class="feat-desc">O resumo aparece na tela de resultado e fica salvo no seu histórico. Você lê, refaz a estação e vê a nota subir — o ciclo completo, dentro da mesma plataforma.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="feat-title">Revisado por médica, não gerado e publicado</div>
+        <div class="feat-desc">Nenhum resumo vai ao ar sem passar pela revisão clínica da nossa médica curadora. Se a estação muda, o resumo entra na fila para ser conferido de novo.</div>
+      </div>
+    </div>
+    <p class="section-sub" style="margin-top:2rem;font-size:.92rem">Disponível nos planos pagos. No teste grátis, dois resumos ficam liberados ao terminar as estações de demonstração.</p>
+  </div>
+</section>
+
 <div class="cta-mid">
   <p class="cta-mid-line">É assim que você treina — quantas vezes quiser, no seu ritmo.</p>
   <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Começar grátis agora →</a>
@@ -936,7 +972,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
       <div class="feat-card">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
         <div class="feat-title">Banco curado RevalidaOSCE</div>
-        <div class="feat-desc">Mais de 150 estações curadas pela Equipe RevalidaOSCE, ampliado continuamente — para treinar pontos fracos específicos antes da prova.</div>
+        <div class="feat-desc">São 161 estações curadas pela Equipe RevalidaOSCE, somadas às 75 oficiais do INEP — 236 no total, ampliadas continuamente para você treinar pontos fracos específicos antes da prova.</div>
       </div>
       <div class="feat-card">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div>
@@ -948,9 +984,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 </section>
 
 <div class="cta-mid">
-  <p class="cta-mid-line">Tudo isso a partir de R$ 66/mês, com 7 dias de garantia.</p>
+  <p class="cta-mid-line">Tudo isso por R$ 197/mês, com 7 dias de garantia.</p>
   <a href="#preco" class="btn-primary">Ver planos →</a>
-  <div class="cta-mid-sub">Grátis para testar · Mensal R$ 97 · Semestral R$ 396 (equivale a R$ 66/mês)</div>
+  <div class="cta-mid-sub">Grátis para testar, sem cartão · Assinatura mensal R$ 197 · Cancele quando quiser</div>
 </div>
 
 <!-- DEPOIMENTOS (prova social — preenchido via endpoint público) -->
@@ -988,43 +1024,25 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
           <div class="preco-note">Leva menos de 1 minuto</div>
         </div>
 
-        <!-- PLANO MENSAL -->
-        <div class="preco-card plain reveal">
-          <div><div class="preco-badge">✦ MENSAL</div></div>
-          <div style="font-size:.85rem;color:var(--text3);text-decoration:line-through;margin-bottom:.25rem">de R$ 197/mês</div>
-          <div class="preco-valor"><sup>R$</sup>97<span>/mês</span></div>
+        <!-- PLANO MENSAL — único plano pago desde 14/08 (semestral suspenso) -->
+        <div class="preco-card reveal">
+          <div><div class="preco-badge">✦ ACESSO COMPLETO</div></div>
+          <div style="font-size:.85rem;color:var(--text3);margin-bottom:.25rem">&nbsp;</div>
+          <div class="preco-valor"><sup>R$</sup>197<span>/mês</span></div>
           <div class="preco-equiv">Acesso completo, sem fidelidade</div>
           <div class="preco-features">
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Acesso ilimitado a todas as estações</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Banco completo Revalida 2020-2025 (oficiais INEP)</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Mais de 150 estações curadas pela Equipe RevalidaOSCE</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 75 estações oficiais do INEP — banco completo Revalida 2020-2025</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 161 estações curadas pela Equipe RevalidaOSCE</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Modo Maratona com múltiplas estações em sequência</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Avaliação pelo PEP + devolutiva do examinador</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> <strong>Resumos de estudo por tema</strong>, liberados conforme você treina</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Cancele quando quiser</div>
           </div>
-          <a href="https://pay.kiwify.com.br/nL4sRJD" class="preco-btn">Assinar mensal →</a>
+          <a href="https://pay.kiwify.com.br/OpKRKOr" class="preco-btn">Assinar mensal →</a>
           <div class="preco-note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
         </div>
 
-        <!-- PLANO SEMESTRAL -->
-        <div class="preco-card reveal">
-          <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem">
-            <div class="preco-badge" style="margin-bottom:0">★ MAIS VANTAJOSO</div>
-            <div class="preco-badge" style="margin-bottom:0;background:var(--gold);color:#000">ECONOMIZE R$ 186</div>
-          </div>
-          <div style="font-size:.85rem;color:var(--text3);text-decoration:line-through;margin-bottom:.25rem">de R$ 582 (6× R$ 97)</div>
-          <div class="preco-valor"><sup>R$</sup>396<span>/semestre</span></div>
-          <div class="preco-equiv">equivale a <b>R$ 66/mês</b> — 32% de desconto</div>
-          <div class="preco-features">
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> <strong>Tudo do plano mensal</strong>, sem limites</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 6 meses de acesso — preparação completa até a prova</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Sem mensalidades — cobrança semestral</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Economia de R$ 186 em relação ao mensal</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Garantia de 7 dias</div>
-          </div>
-          <a href="https://pay.kiwify.com.br/DImelOK" class="preco-btn">Assinar semestral →</a>
-          <div class="preco-note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
-        </div>
 
       </div>
       <div class="garantia">
@@ -1064,6 +1082,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
       <div class="faq-item">
         <div class="faq-q">Novas estações são adicionadas?</div>
         <div class="faq-a">Sim. O banco de estações curadas RevalidaOSCE é ampliado continuamente pela nossa equipe, com novos casos entrando com frequência.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">O que são os resumos de tema?</div>
+        <div class="faq-a">São materiais de estudo curtos, de 5 a 8 minutos de leitura, escritos para o que a prova cobra — hipótese diagnóstica, exames que pontuam, conduta correta e os erros que mais custam ponto. O resumo do tema aparece ao final da estação e fica salvo no seu histórico, para você reler quando quiser. Todo resumo passa pela revisão clínica da nossa médica curadora antes de ir ao ar. No teste grátis, dois resumos ficam liberados ao terminar as estações de demonstração; nos planos pagos, você tem o resumo de todos os temas que treinar.</div>
       </div>
     </div>
     <div style="text-align:center;margin-top:2.5rem">
