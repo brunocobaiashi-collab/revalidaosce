@@ -505,6 +505,8 @@ body.light .badge{color:var(--text)}
   font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 .pep-toggle:hover{text-decoration:underline}
 @media(max-width:600px){.rblk>summary{padding:.9rem 1rem}.rblk-body{padding:0 1rem 1rem}}
+
+.ic{width:1em;height:1em;vertical-align:-.14em;display:inline-block;flex:none;stroke-width:2}
 </style>
 <!-- build:20260428_filters_badges_ux -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js'"></script>
@@ -691,13 +693,13 @@ body.light .badge{color:var(--text)}
 <div id="modal-delete-account" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:300;align-items:center;justify-content:center;padding:1rem;overflow-y:auto">
   <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:480px;padding:2rem;margin:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-      <h2 style="font-family:var(--serif);font-size:1.3rem;font-weight:400;color:var(--red)">🗑 Excluir minha conta</h2>
+      <h2 style="font-family:var(--serif);font-size:1.3rem;font-weight:400;color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg> Excluir minha conta</h2>
       <button onclick="closeDeleteAccount()" style="background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:6px">✕</button>
     </div>
     <div id="del-acct-msg" style="display:none;border-radius:8px;padding:.75rem 1rem;font-size:.85rem;margin-bottom:1rem"></div>
     <div id="del-acct-form">
       <div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem">
-        <p style="font-size:.82rem;color:var(--text);margin:0 0 .65rem;font-weight:500">⚠ O que vai acontecer:</p>
+        <p style="font-size:.82rem;color:var(--text);margin:0 0 .65rem;font-weight:500"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> O que vai acontecer:</p>
         <ul style="margin:0;padding-left:1.1rem;font-size:.78rem;color:var(--text2);line-height:1.65">
           <li>Seu acesso ao simulador será cancelado <strong style="color:var(--text)">imediatamente</strong></li>
           <li>Seus dados (histórico, simulações) serão apagados em <strong style="color:var(--text)">30 dias</strong></li>
@@ -706,7 +708,7 @@ body.light .badge{color:var(--text)}
         </ul>
       </div>
       <div id="del-acct-kiwify-warn" style="display:none;background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.25);border-radius:10px;padding:.875rem 1rem;font-size:.78rem;color:#fcd34d;margin-bottom:1rem;line-height:1.6">
-        <strong style="display:block;margin-bottom:.3rem">⚠ Você tem assinatura ativa</strong>
+        <strong style="display:block;margin-bottom:.3rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Você tem assinatura ativa</strong>
         Para evitar futuras cobranças, cancele sua recorrência diretamente no painel do <strong>Kiwify</strong>. A exclusão da conta aqui não cancela automaticamente a assinatura no Kiwify.
       </div>
       <div id="del-acct-autocreated-warn" style="display:none;background:rgba(0,201,255,.06);border:1px solid rgba(0,201,255,.2);border-radius:10px;padding:.875rem 1rem;font-size:.78rem;color:var(--text2);margin-bottom:1rem;line-height:1.6">
@@ -755,7 +757,7 @@ body.light .badge{color:var(--text)}
   <div style="max-width:480px;margin:4rem auto;padding:0 1rem">
     <div style="text-align:center;margin-bottom:2rem">
       <div style="font-family:var(--mono);font-size:.75rem;color:var(--text3);letter-spacing:.18em;margin-bottom:.5rem">REVALIDA &middot; OSCE</div>
-      <div style="font-size:3rem;margin:1rem 0">🗑</div>
+      <div style="font-size:3rem;margin:1rem 0"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
       <h1 style="font-size:1.5rem;margin-bottom:.5rem;color:var(--red)">Conta em processo de exclusão</h1>
     </div>
     <div class="card" style="padding:1.5rem">
@@ -786,7 +788,7 @@ body.light .badge{color:var(--text)}
     <div style="text-align:center;margin-bottom:2rem">
       <div style="font-family:var(--mono);font-size:.75rem;color:var(--text3);letter-spacing:.18em;margin-bottom:.5rem">REVALIDA &middot; OSCE</div>
       <div id="access-required-avatar" style="margin:1rem 0">
-        <div style="font-size:3rem">👋</div>
+        <div style="font-size:3rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
       </div>
       <h1 id="access-required-title" style="font-size:1.5rem;margin-bottom:.5rem;color:var(--accent)">Olá!</h1>
     </div>
@@ -795,7 +797,7 @@ body.light .badge{color:var(--text)}
         <!-- Texto injetado por JS -->
       </p>
       <a id="btn-acquire-access" href="#" target="_blank" rel="noopener" class="btn" style="display:flex;width:100%;justify-content:center;align-items:center;padding:14px;background:var(--accent);color:#000;font-weight:600;font-size:1rem;border:none;border-radius:10px;text-decoration:none;margin-bottom:.85rem">
-        💳 Adquirir Acesso
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Adquirir Acesso
       </a>
       <!-- v1.6.135: botão Voltar — só aparece no modo locked_station (clique em estação com cadeado) -->
       <button id="btn-access-back" class="btn" style="display:none;width:100%;justify-content:center;padding:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.85rem;margin-bottom:.5rem">&larr; Voltar</button>
@@ -881,7 +883,7 @@ body.light .badge{color:var(--text)}
     <!-- Avisos -->
     <div class="mural-card" id="mural-avisos">
       <div class="mural-card-h"><span class="dot"></span>Avisos</div>
-      <div class="mural-card-body" id="avisos-body"><a href="https://www.instagram.com/revalida.osce?igsh=Mm9yOWRtNDUyNmlr&amp;utm_source=qr" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📸 Siga a gente no Instagram: <strong>@revalida.osce</strong></a> — novidades e dicas para a sua preparação.</div>
+      <div class="mural-card-body" id="avisos-body"><a href="https://www.instagram.com/revalida.osce?igsh=Mm9yOWRtNDUyNmlr&amp;utm_source=qr" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> Siga a gente no Instagram: <strong>@revalida.osce</strong></a> — novidades e dicas para a sua preparação.</div>
     </div>
 
     <!-- Meu desempenho -->
@@ -1080,7 +1082,7 @@ body.light .badge{color:var(--text)}
           <label>Velocidade <input type="range" id="rate-slider" min=".6" max="1.3" step=".1" value="1.3"> <span id="rate-lbl">1.3&times;</span></label>
           <label><input type="checkbox" id="tts-chk" checked> Voz</label>
         </div>
-        <p class="hint" id="mic-hint">🎙 Toque para gravar &middot; Toque novamente para parar &middot; Toque com texto para apagar e regravar</p>
+        <p class="hint" id="mic-hint"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg> Toque para gravar &middot; Toque novamente para parar &middot; Toque com texto para apagar e regravar</p>
       </div>
     </div>
     <div id="tab-exams" class="pane-hidden">
@@ -1093,7 +1095,7 @@ body.light .badge{color:var(--text)}
     </div>
    </div><!-- /.sim-main -->
    <aside class="sim-aside" id="sim-aside">
-     <div class="sim-aside-hd"><span>📋 Instruções da estação</span><button class="brief-start-btn" id="btn-brief-done" type="button">Começar a falar &rarr;</button></div>
+     <div class="sim-aside-hd"><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> Instruções da estação</span><button class="brief-start-btn" id="btn-brief-done" type="button">Começar a falar &rarr;</button></div>
      <div id="sim-brief-content"></div>
    </aside>
   </div><!-- /.sim-work -->
@@ -1210,19 +1212,19 @@ body.light .badge{color:var(--text)}
     <div id="bug-radios" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem">
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="ia_inventou">
-        <span><strong>🤖 IA inventou sintomas/falas</strong><br><span style="font-size:.75rem;color:var(--text3)">A paciente disse algo que não fazia sentido com a estação</span></span>
+        <span><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg> IA inventou sintomas/falas</strong><br><span style="font-size:.75rem;color:var(--text3)">A paciente disse algo que não fazia sentido com a estação</span></span>
       </label>
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="impresso_nao_apareceu">
-        <span><strong>📋 Impresso/exame não apareceu</strong><br><span style="font-size:.75rem;color:var(--text3)">Solicitei mas o impresso não foi entregue</span></span>
+        <span><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> Impresso/exame não apareceu</strong><br><span style="font-size:.75rem;color:var(--text3)">Solicitei mas o impresso não foi entregue</span></span>
       </label>
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="pontuacao_incorreta">
-        <span><strong>📊 Pontuação incorreta</strong><br><span style="font-size:.75rem;color:var(--text3)">O PEP avaliou errado algum item</span></span>
+        <span><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg> Pontuação incorreta</strong><br><span style="font-size:.75rem;color:var(--text3)">O PEP avaliou errado algum item</span></span>
       </label>
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="fala_fora_contexto">
-        <span><strong>💬 Fala fora de contexto</strong><br><span style="font-size:.75rem;color:var(--text3)">A paciente repetiu instruções internas ou falou estranho</span></span>
+        <span><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg> Fala fora de contexto</strong><br><span style="font-size:.75rem;color:var(--text3)">A paciente repetiu instruções internas ou falou estranho</span></span>
       </label>
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="lentidao_travamento">
@@ -1230,7 +1232,7 @@ body.light .badge{color:var(--text)}
       </label>
       <label class="bug-radio">
         <input type="radio" name="bug-type" value="outro">
-        <span><strong>❓ Outro</strong><br><span style="font-size:.75rem;color:var(--text3)">Descreva no campo abaixo</span></span>
+        <span><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Outro</strong><br><span style="font-size:.75rem;color:var(--text3)">Descreva no campo abaixo</span></span>
       </label>
     </div>
 
@@ -1311,7 +1313,7 @@ body.light .badge{color:var(--text)}
     </div>
     <div id="m-ai-limit-notice" style="display:none;margin-top:1rem;padding:.7rem .85rem;border-radius:8px;background:rgba(0,201,255,0.07);border:1px solid rgba(0,201,255,0.25)">
       <div style="display:flex;gap:.6rem;align-items:flex-start">
-        <span style="font-size:1.05rem;line-height:1.3">💡</span>
+        <span style="font-size:1.05rem;line-height:1.3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg></span>
         <div style="flex:1;min-width:0">
           <p class="small" style="margin:0 0 .55rem;line-height:1.45">Estações geradas com <strong>IA</strong> têm um limite de <strong>2 por dia</strong>, que renova à meia-noite. As estações já salvas no banco <strong>não têm limite</strong> — você pode maratonar quantas quiser.</p>
           <button type="button" id="m-ai-limit-dismiss" class="btn" style="font-size:.8rem;padding:.35rem .7rem">Entendi, não mostrar novamente</button>
@@ -1549,7 +1551,7 @@ body.light .badge{color:var(--text)}
       <div id="acct-usage" style="margin-top:.9rem"></div>
       <div style="display:flex;gap:8px;margin-top:1.25rem;flex-wrap:wrap">
         <a id="acct-plan-btn" class="btn btn-p" href="#" target="_blank" rel="noopener" style="text-decoration:none">Gerenciar assinatura</a>
-        <button class="btn" id="acct-support-btn">💬 Falar com suporte</button>
+        <button class="btn" id="acct-support-btn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg> Falar com suporte</button>
       </div>
       <div class="small muted" style="margin-top:.9rem;font-size:.75rem">Valores e cobrança são gerenciados na Kiwify.</div>
     </div>
@@ -2537,7 +2539,7 @@ function handleSessionKicked(device, when){
   if(info){
     var lines = [];
     if(device){
-      lines.push('<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:1rem">💻</span><strong style="color:var(--text)">'+esc(device)+'</strong></div>');
+      lines.push('<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:1rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11H3z"/><path d="M2 20h20"/></svg></span><strong style="color:var(--text)">'+esc(device)+'</strong></div>');
     }
     var timeStr = formatKickedTime(when);
     if(timeStr){
@@ -2589,7 +2591,7 @@ function showTrialBanner(remaining){
     document.body.insertBefore(b, document.body.firstChild);
   }
   var _kiwify = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/OpKRKOr';
-  b.innerHTML = '🎁 Demonstração grátis — você tem <strong style="color:#00c9ff">' + n + '</strong> estaç' + (n===1?'ão':'ões') + ' grátis restante' + (n===1?'':'s') + '. <a href="' + _kiwify + '" target="_blank" rel="noopener" style="color:#00c9ff;text-decoration:underline;font-weight:600">Assine para acesso ilimitado →</a>';
+  b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> Demonstração grátis — você tem <strong style="color:#00c9ff">' + n + '</strong> estaç' + (n===1?'ão':'ões') + ' grátis restante' + (n===1?'':'s') + '. <a href="' + _kiwify + '" target="_blank" rel="noopener" style="color:#00c9ff;text-decoration:underline;font-weight:600">Assine para acesso ilimitado →</a>';
   b.style.display = 'block';
   // v1.6.140: banner sticky ocupa altura propria no fluxo — o paddingTop compensatorio
   // da v1.6.73 saiu; apenas limpamos residuo de versoes antigas.
@@ -2730,13 +2732,13 @@ function showAccessRequired(currentUser, profileData, mode){
       titleEl.textContent = firstName ? ('Olá, ' + firstName + '!') : 'Olá!';
     }
 
-    // Avatar Google se disponível, fallback para emoji 👋
+    // Avatar Google se disponível, fallback para emoji <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
     var avatarEl = document.getElementById('access-required-avatar');
     if(avatarEl){
       if(avatarUrl){
         avatarEl.innerHTML = '<img src="' + avatarUrl + '" alt="" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--border)" referrerpolicy="no-referrer">';
       } else {
-        avatarEl.innerHTML = '<div style="font-size:3rem">👋</div>';
+        avatarEl.innerHTML = '<div style="font-size:3rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>';
       }
     }
 
@@ -2791,7 +2793,7 @@ function showAccessRequired(currentUser, profileData, mode){
     var ctaBtn = document.getElementById('btn-acquire-access');
     if(ctaBtn){
       ctaBtn.href = ACCESS_CONFIG.kiwify_link + ACCESS_CONFIG.utm;
-      ctaBtn.textContent = isExpired ? '💳 Renovar Acesso' : '💳 Adquirir Acesso';
+      ctaBtn.textContent = isExpired ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Renovar Acesso' : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Adquirir Acesso';
     }
 
     show('s-access-required');
@@ -2823,7 +2825,7 @@ function wireAccessRequiredButtons(){
             msgEl.style.display = 'block';
             msgEl.style.background = 'rgba(34,197,94,.1)';
             msgEl.style.color = '#22c55e';
-            msgEl.textContent = '✅ Acesso liberado! Redirecionando...';
+            msgEl.textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Acesso liberado! Redirecionando...';
           }
           setTimeout(function(){ show('s-dashboard'); }, 800);
         } else {
@@ -2994,7 +2996,7 @@ function computeSubDisplay(info, daysLeft){
   // ADMIN
   if(info.type === 'admin'){
     return {
-      title: '👑 Administrador',
+      title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 6 4.5 4L12 4l5.5 6L22 6l-2 12H4z"/></svg> Administrador',
       detailHtml: 'Acesso completo ao sistema.',
       menuDetailHtml: 'Acesso completo',
       showLink: false,
@@ -3037,7 +3039,7 @@ function computeSubDisplay(info, daysLeft){
     if(plan === 'invite'){
       if(!info.expires_at){
         return {
-          title: '✉ Acesso por convite',
+          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg> Acesso por convite',
           detailHtml: 'Sem data de expiração.',
           showLink: false,
           borderColor: 'rgba(245,200,66,.25)'
@@ -3047,7 +3049,7 @@ function computeSubDisplay(info, daysLeft){
       var expDate = formatDate(info.expires_at);
       var daysText = daysLeft != null ? daysLeft + ' dias restantes' : '';
       return {
-        title: '✉ Acesso por convite',
+        title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg> Acesso por convite',
         detailHtml: 'Válido até ' + expDate + (daysText ? ' (' + daysText + ')' : '') + '.',
         showLink: false,
         borderColor: 'rgba(245,200,66,.25)'
@@ -3061,7 +3063,7 @@ function computeSubDisplay(info, daysLeft){
       // Cancelado mas no prazo
       if(status === 'cancelled' && daysLeft != null && daysLeft > 0){
         return {
-          title: '💳 Plano Mensal · Cancelado',
+          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal · Cancelado',
           detailHtml: 'Acesso até ' + expDate2 + ' (' + daysLeft + ' dias).<br>Não haverá nova cobrança.',
           menuDetailHtml: 'Cancelado · acesso até ' + expDate2,
           showLink: true,
@@ -3073,7 +3075,7 @@ function computeSubDisplay(info, daysLeft){
       // Expirado
       if(daysLeft != null && daysLeft <= 0){
         return {
-          title: '💳 Plano Mensal · Expirado',
+          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal · Expirado',
           detailHtml: 'Sua assinatura expirou. <a href="https://app.kiwify.com.br" target="_blank" rel="noopener" style="color:var(--accent)">Renovar</a>',
           menuDetailHtml: 'Expirado',
           showLink: true,
@@ -3085,9 +3087,9 @@ function computeSubDisplay(info, daysLeft){
       // Alerta vermelho (≤ 3 dias)
       if(daysLeft != null && daysLeft <= 3){
         return {
-          title: '💳 Plano Mensal',
-          detailHtml: '<span style="color:var(--red)">🚨 Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + ' (' + expDate2 + ')</span>',
-          menuDetailHtml: '<span style="color:var(--red)">🚨 Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + '</span>',
+          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
+          detailHtml: '<span style="color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + ' (' + expDate2 + ')</span>',
+          menuDetailHtml: '<span style="color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Renova em ' + daysLeft + ' dia' + (daysLeft===1?'':'s') + '</span>',
           showLink: true,
           borderColor: 'rgba(239,68,68,.45)'
         };
@@ -3096,9 +3098,9 @@ function computeSubDisplay(info, daysLeft){
       // Alerta amarelo (≤ 7 dias)
       if(daysLeft != null && daysLeft <= 7){
         return {
-          title: '💳 Plano Mensal',
-          detailHtml: '<span style="color:var(--gold)">⚠ Renova em ' + daysLeft + ' dias (' + expDate2 + ')</span>',
-          menuDetailHtml: '<span style="color:var(--gold)">⚠ Renova em ' + daysLeft + ' dias</span>',
+          title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
+          detailHtml: '<span style="color:var(--gold)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Renova em ' + daysLeft + ' dias (' + expDate2 + ')</span>',
+          menuDetailHtml: '<span style="color:var(--gold)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Renova em ' + daysLeft + ' dias</span>',
           showLink: true,
           borderColor: 'rgba(245,200,66,.45)'
         };
@@ -3106,7 +3108,7 @@ function computeSubDisplay(info, daysLeft){
       
       // Normal
       return {
-        title: '💳 Plano Mensal',
+        title: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Plano Mensal',
         detailHtml: 'Renova em ' + (daysLeft != null ? daysLeft + ' dias (' : '') + expDate2 + (daysLeft != null ? ')' : ''),
         menuDetailHtml: daysLeft != null ? 'Renova em ' + daysLeft + ' dias' : 'Ativo',
         showLink: true,
@@ -3743,7 +3745,7 @@ var AVISO_INCIDENTE = {
   ativo: false,
   emitido: '02/07/2026 às HH:MM', // data/hora de emissão do aviso — AJUSTE (ou me peça p/ preencher com a hora certa)
   ate: null, // ex.: '2026-07-02T21:00:00-03:00' (horário do deploy + 2h). null = mostra até desativar manualmente.
-  html: '<strong style="color:var(--red)">⚠ Instabilidade temporária.</strong> '
+  html: '<strong style="color:var(--red)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Instabilidade temporária.</strong> '
       + 'Estamos com uma indisponibilidade momentânea do sistema que pode afetar a qualidade das estações e das avaliações. '
       + 'Previsão de normalização em até <strong>2 horas</strong>. '
       + 'Recomendamos <strong>aguardar antes de iniciar novas simulações ou avaliações</strong>. Agradecemos a compreensão.'
@@ -3775,11 +3777,11 @@ var INFO_CONTENT = {
   contato: {
     title: 'Fale com a gente',
     html:
-      '<p><strong>📧 E-mail:</strong> <a href="mailto:revalida.osce@gmail.com">revalida.osce@gmail.com</a><br>'+
+      '<p><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg> E-mail:</strong> <a href="mailto:revalida.osce@gmail.com">revalida.osce@gmail.com</a><br>'+
       '<span style="font-size:.82rem;color:var(--text2)">Resposta em até 24h em dias úteis.</span></p>'+
-      '<p><strong>💼 Suporte técnico</strong> — problemas de acesso, pagamento, microfone, áudio: use o e-mail acima descrevendo o problema e, se possível, em qual etapa aconteceu.</p>'+
-      '<p><strong>🩺 Sugestões de estações</strong> — envie casos clínicos que você gostaria de ver na plataforma. Estações sugeridas pela comunidade entram na fila de curadoria.</p>'+
-      '<p><strong>💡 Feedback</strong> — críticas, elogios e ideias são bem-vindos. Estamos construindo isso com vocês.</p>'
+      '<p><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Suporte técnico</strong> — problemas de acesso, pagamento, microfone, áudio: use o e-mail acima descrevendo o problema e, se possível, em qual etapa aconteceu.</p>'+
+      '<p><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v6a4 4 0 0 0 8 0V2"/><path d="M4 2h2"/><path d="M10 2h2"/><path d="M8 12v3a5 5 0 0 0 10 0v-2"/><circle cx="19" cy="11" r="2"/></svg> Sugestões de estações</strong> — envie casos clínicos que você gostaria de ver na plataforma. Estações sugeridas pela comunidade entram na fila de curadoria.</p>'+
+      '<p><strong><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg> Feedback</strong> — críticas, elogios e ideias são bem-vindos. Estamos construindo isso com vocês.</p>'
   },
   quem: {
     title: 'Quem somos',
@@ -3787,7 +3789,7 @@ var INFO_CONTENT = {
       '<p><strong>RevalidaOSCE</strong> é a primeira plataforma brasileira de simulação OSCE com inteligência artificial dedicada exclusivamente ao Revalida INEP.</p>'+
       '<p>Criamos o sistema que gostaríamos de ter tido na nossa preparação: estações que seguem o Padrão Esperado de Procedimentos (PEP) do INEP, atores virtuais que respondem como pacientes reais, e avaliação automática item por item — tudo acessível 24h por dia, no seu ritmo.</p>'+
       '<p>Nossa missão é tornar a aprovação no Revalida menos sobre sorte e ansiedade, e mais sobre prática deliberada. Cada estação é uma oportunidade de errar em segurança, receber feedback objetivo e voltar mais forte na próxima.</p>'+
-      '<p style="font-size:.82rem;color:var(--text2);margin-top:1.25rem">📍 <a href="https://revalidaosce.com.br" target="_blank">revalidaosce.com.br</a></p>'
+      '<p style="font-size:.82rem;color:var(--text2);margin-top:1.25rem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> <a href="https://revalidaosce.com.br" target="_blank">revalidaosce.com.br</a></p>'
   }
 };
 // Expostas no window: chamadas via onclick no HTML (escopo global)
@@ -5361,7 +5363,7 @@ async function processInput(text){
           return;
         }
         console.error('API error:', msg);
-        addMsg('sys', '⚠ ' + msg);
+        addMsg('sys', '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> ' + msg);
         scriptActorFallback(text);
         return;
       }
@@ -5853,7 +5855,7 @@ function initRec(){
     $('mic-btn').classList.remove('on');
     if(e.error === 'not-allowed' || e.error === 'permission-denied'){
       accumulated = '';
-      $('tbox').textContent = '⚠️ Microfone bloqueado. Vá em Configurações do browser → Permissões → Microfone → Permitir.';
+      $('tbox').textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Microfone bloqueado. Vá em Configurações do browser → Permissões → Microfone → Permitir.';
       $('tbox').className = 'tbox';
     } else if(e.error === 'no-speech'){
       // No speech detected — keep accumulated text, just re-enable button
@@ -6058,7 +6060,7 @@ $('mic-btn').addEventListener('click', async function(){
   mediaRecorder.start();
   isRecording = true;
   $('mic-btn').classList.add('on');
-  $('tbox').textContent = '🎙 Gravando... (toque novamente para parar)';
+  $('tbox').textContent = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg> Gravando... (toque novamente para parar)';
   $('tbox').className = 'tbox';
   $('sv-btn').disabled = true;
 });
@@ -8028,7 +8030,7 @@ async function loadRadarAnalysis(){
   var html = '';
   // Header: explicação geral
   html += '<div style="margin-bottom:1.25rem;padding:1rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;font-size:.82rem;color:var(--text2);line-height:1.6">';
-  html += '<strong style="color:var(--text)">📊 Como ler:</strong> Cada gráfico mostra seu desempenho médio nas 6 fases da consulta OSCE. Quanto maior a área preenchida, melhor seu desempenho geral.';
+  html += '<strong style="color:var(--text)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg> Como ler:</strong> Cada gráfico mostra seu desempenho médio nas 6 fases da consulta OSCE. Quanto maior a área preenchida, melhor seu desempenho geral.';
   html += '</div>';
 
   areas.forEach(function(a){
@@ -8335,7 +8337,7 @@ async function submitBugReport(){
       submitBtn.textContent = 'Enviar relato';
       return;
     }
-    showFeedback('✅ Relato enviado! Obrigado por contribuir.', 'success');
+    showFeedback('<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Relato enviado! Obrigado por contribuir.', 'success');
     setTimeout(function(){ closeBugModal(); }, 1800);
   } catch(err){
     console.error('[bug_report] Exceção:', err);
@@ -8448,7 +8450,7 @@ async function renderAccountScreen(){
     title.textContent=window.__planLabel||'Assinante'; tag.textContent='Ativa'; tag.classList.add('is-sub');
     detail.textContent = exp ? ('Assinatura ativa — acesso até '+exp+'.') : 'Assinatura ativa.';
     usage.innerHTML='<div style="color:var(--green);font-weight:500">✓ Acesso ilimitado às estações</div>';
-    btn.style.display=''; btn.textContent='💳 Gerenciar assinatura'; btn.href='https://app.kiwify.com.br';
+    btn.style.display=''; btn.textContent='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Gerenciar assinatura'; btn.href='https://app.kiwify.com.br';
   } else {
     var r=(typeof window.__trialRemaining==='number')?window.__trialRemaining:0; var used=Math.max(0,3-r);
     title.textContent='Grátis'; tag.textContent='Demonstração'; tag.classList.add('is-trial');
@@ -9614,7 +9616,7 @@ async function generateMarathonStation(entry, onStep){
     // - WARN: 1 retry automático; se falhar, DESCARTA (não salva)
     // - OK: salva como pending (admin revisa antes de aprovar)
     if(auditResult.status === 'FAIL' || auditResult.status === 'WARN' || auditResult.status === 'AUDIT_ERROR'){
-      console.warn('[AI Auditor] 🚨 Estação com problemas detectados (status=' + auditResult.status + ')');
+      console.warn('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Estação com problemas detectados (status=' + auditResult.status + ')');
       console.warn('[AI Auditor] Issues principais:');
       (auditResult.issues||[]).filter(function(i){ return i.severity === 'high' || i.severity === 'medium'; })
         .slice(0, 3)
@@ -9694,9 +9696,9 @@ async function generateMarathonStation(entry, onStep){
     }
 
     if(auditResult.status === 'WARN'){
-      console.warn('[AI Auditor] ⚠️  Estação salva como pending COM RESSALVAS (score:', auditResult.score + '). Revise no admin antes de aprovar.');
+      console.warn('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>  Estação salva como pending COM RESSALVAS (score:', auditResult.score + '). Revise no admin antes de aprovar.');
     } else if(auditResult.status === 'OK'){
-      console.log('[AI Auditor] ✅ Estação aprovada pelo auditor (score:', auditResult.score + '). Pendente de revisão humana.');
+      console.log('[AI Auditor] <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Estação aprovada pelo auditor (score:', auditResult.score + '). Pendente de revisão humana.');
     }
 
     return stObj;
