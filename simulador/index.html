@@ -470,6 +470,11 @@ body.light .badge{color:var(--text)}
 .rd td:first-child{color:#fff;font-weight:500}
 .tema-stn{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.85rem 0;border-bottom:1px solid var(--border)}
 .tema-stn:last-child{border-bottom:0}
+/* v1.6.152: estação do tema fora do plano do usuário — mesmo tratamento do acervo */
+.tema-stn-locked{opacity:.62}
+.tema-stn-locked:hover{opacity:.85}
+.tema-lock-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .8rem;font-size:.8rem;flex-shrink:0;white-space:nowrap}
+.tema-lock-nota{color:var(--text2);font-size:.78rem;padding:.85rem 0 0;line-height:1.5}
 .tema-prog{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin:.5rem 0}
 .tema-prog>i{display:block;height:100%;background:var(--accent);border-radius:99px}
 @media(max-width:560px){.rd table{min-width:460px}.rescta-nm{font-size:1.08rem}}
@@ -1599,9 +1604,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.151',
-  date: '2026-08-14',
-  notes: '1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
+  version: '1.6.152',
+  date: '2026-08-16',
+  notes: '1.6.152 (base: 1.6.151): CADEADO E PAYWALL nas estacoes listadas dentro do resumo de tema. Defeito medido em 16/08: get_tema_resumo montava a lista de estacoes com `where st.tema_id=t.id and s.status=\'active\'`, sem olhar trial_available nem o v_full que a propria funcao ja calculava. O abrirTema renderizava botao "Treinar" em TODAS e o treinarDoTema chamava loadStation direto — cujo guard (__hasActiveAccess !== true) NAO pega o trial, que tem true. Resultado: fetchStation, RLS devolve zero linhas, e o candidato recebia o alert "Estacao nao encontrada. Verifique a conexao com o Supabase.". Nos dois temas demo eram 7 de 8 e 3 de 4 estacoes bloqueadas; e como a unica abrivel do tema e justamente a demo que ele acabou de fazer (que aparece com badge "feita", sem botao), 100% dos botoes "Treinar" visiveis ao trial levavam ao erro. Mesmo modo de falha do P0 de 21/07 (§2, NAO REGREDIR: "a Maratona oferece estacoes que a RLS bloqueia ao abrir"), por uma porta criada depois. FIX: (a) SQL — get_tema_resumo devolve `bloqueada` por estacao e `plano_completo` no topo; o servidor e autoritativo porque o cliente nao consegue nem dar SELECT nessas linhas; para assinante/admin v_full e true, logo bloqueada e sempre false (payer-safe, conferido por SQL nos dois perfis). (b) abrirTema renderiza cadeado + botao "Assinar" e uma linha dizendo quantas estacoes do tema estao no plano completo, em vez de sumir com elas — paywall no pico do desejo, mesma decisao do acervo na v1.6.120. (c) treinarDoTema ganhou defesa em profundidade: id marcado como bloqueada vai para o paywall, nunca para o loadStation. (d) O botao Voltar do modo locked_station ja devolve ao resumo, porque o showAccessRequired captura a tela de origem pelo data-screen. Nenhuma leitura nova foi exposta: os nomes das estacoes do tema ja eram devolvidos antes; o que muda e o que acontece no clique. BONUS (§8, achado durante a varredura de onclick inline desta versao, nao relacionado ao cadeado): openExamsTab e closeChangePass eram chamadas de onclick inline mas NAO tinham window.X = X. Como o bloco e uma IIFE com "use strict", o onclick resolvia no escopo global e lancava ReferenceError. openExamsTab e o chip que o Chefe de estacao entrega em TODA solicitacao de impresso, com o texto "Toque para abrir na aba Exames" — o toque (e o Enter/Espaco do onkeydown) nao fazia nada desde a v1.6.54; o candidato so chegava ao impresso abrindo a aba Exames na mao, entao a falha era silenciosa. closeChangePass e o X do modal de troca de senha. Ambas expostas. Varredura completa: as 14 funcoes chamadas de onclick inline no arquivo agora resolvem no escopo global, provado em jsdom. Sem mudanca no grader, comentador, STT, TTS, cronometro, mic ou caminho do assinante/admin. Nota anterior (1.6.151): 1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
 };
 
 // Função global pra inspeção via console
@@ -1936,6 +1941,9 @@ function closeChangePass(){
   var modal = $('modal-change-pass');
   if(modal) modal.style.display = 'none';
 }
+// v1.6.152 (§8): o ✕ do modal de troca de senha usa onclick inline — sem esta
+// linha o botão de fechar lançava ReferenceError e o modal não fechava.
+window.closeChangePass = closeChangePass;
 
 async function saveNewPassword(){
   var np  = $('cp-new') ? $('cp-new').value : '';
@@ -4795,6 +4803,14 @@ function openExamsTab(){
   var b = document.querySelector('.tab[data-tab="exams"]');
   if(b) b.click();
 }
+// v1.6.152 (§8): o chip do Chefe de estação é HTML com onclick="openExamsTab()",
+// e onclick inline resolve no escopo GLOBAL. Como este bloco todo é uma IIFE com
+// 'use strict', a função não existia em window: tocar no chip lançava
+// ReferenceError e não fazia nada — justamente o chip que anuncia
+// "Toque para abrir na aba Exames ›" em TODA entrega de impresso (§4). O
+// candidato ainda chegava ao impresso pela aba Exames, então a falha era
+// silenciosa. Vale também para o onkeydown (Enter/Espaço) do mesmo chip.
+window.openExamsTab = openExamsTab;
 // v1.6.54: no FLUXO do atendimento, o chefe entrega um CHIP compacto (não o tabelão),
 // que leva à aba Exames — onde o impresso completo vive sem clipping de viewport (mobile).
 function buildExamChip(ex){
@@ -6417,15 +6433,40 @@ async function abrirTema(temaId, voltarPara){
     }
     if(corpo) corpo.innerHTML = _temaMd(d.corpo_md || '');
     if(lst){
+      // v1.6.152: CADEADO nas estações fora do plano do usuário.
+      // `bloqueada` vem do servidor (get_tema_resumo) porque o cliente NÃO tem
+      // como saber: a RLS de `stations` nem devolve essas linhas para ele.
+      // Antes, todas vinham com botão "Treinar", o clique ia ao loadStation, a
+      // RLS negava e o candidato levava "Estação não encontrada. Verifique a
+      // conexão com o Supabase." — 100% dos botões visíveis ao trial.
+      var _bloq = 0;
       lst.innerHTML = (d.estacoes||[]).map(function(s){
-        return '<div class="tema-stn"><div style="flex:1;min-width:0">'
+        var isLock = (s.bloqueada === true);
+        if(isLock) _bloq++;
+        var acao;
+        if(isLock){
+          acao = '<button type="button" class="btn tema-lock-btn" title="Disponível no plano completo" onclick="assinarDoTema()">'
+               + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+               + '<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 018 0v3.5"/></svg>Assinar</button>';
+        } else if(s.feita){
+          acao = '<span class="badge bg" style="flex-shrink:0">feita</span>';
+        } else {
+          acao = '<button type="button" class="btn" style="padding:.45rem .9rem;font-size:.82rem;flex-shrink:0" onclick="treinarDoTema(&quot;'+s.id+'&quot;)">Treinar</button>';
+        }
+        return '<div class="tema-stn'+(isLock ? ' tema-stn-locked' : '')+'"><div style="flex:1;min-width:0">'
           + '<div style="font-size:.92rem;margin-bottom:.15rem">'+_temaEsc(s.nome)+'</div>'
           + '<div style="color:var(--text2);font-size:.76rem">'+_temaEsc(s.area)+'</div></div>'
-          + (s.feita
-              ? '<span class="badge bg" style="flex-shrink:0">feita</span>'
-              : '<button type="button" class="btn" style="padding:.45rem .9rem;font-size:.82rem;flex-shrink:0" onclick="treinarDoTema(&quot;'+s.id+'&quot;)">Treinar</button>')
+          + acao
           + '</div>';
       }).join('') || '<div style="color:var(--text2);font-size:.85rem">Nenhuma estação ativa neste tema.</div>';
+      // Torna o cadeado legível em vez de punitivo: diz o que ele ganha assinando.
+      if(_bloq > 0){
+        lst.innerHTML += '<div class="tema-lock-nota">'
+          + (_bloq === 1
+              ? 'Mais 1 estação deste tema faz parte do plano completo.'
+              : 'Mais ' + _bloq + ' estações deste tema fazem parte do plano completo.')
+          + '</div>';
+      }
     }
     var prog = document.getElementById('tema-prog-bar');
     if(prog) prog.style.width = (total ? Math.round(feitas*100/total) : 0) + '%';
@@ -6447,9 +6488,30 @@ function voltarDoTema(){
 // Chamado de dentro do onclick — mantém o gesto do usuário, que o iOS exige p/ o áudio.
 function treinarDoTema(stationId){
   if(!stationId) return;
+  // v1.6.152: defesa em profundidade. Se por qualquer motivo um botão "Treinar"
+  // for renderizado para estação bloqueada, o clique vai para o PAYWALL — nunca
+  // para o loadStation, que cairia no "Estação não encontrada" da RLS.
+  // (O guard do próprio loadStation não pega este caso: ele testa
+  // __hasActiveAccess, que é `true` para o trial com crédito.)
+  try{
+    var _lst = (_temaAtual && _temaAtual.estacoes) ? _temaAtual.estacoes : [];
+    for(var i = 0; i < _lst.length; i++){
+      if(String(_lst[i].id) === String(stationId) && _lst[i].bloqueada === true){
+        assinarDoTema(); return;
+      }
+    }
+  }catch(e){}
   if(typeof loadStation === 'function'){ loadStation(stationId, false, true); return; }
   show('s-select');
   if(typeof renderStations === 'function') renderStations();
+}
+
+// v1.6.152: paywall a partir do resumo. O showAccessRequired captura a tela de
+// origem pelo data-screen, então o botão "Voltar" do modo locked_station devolve
+// o médico ao resumo que ele estava lendo — não ao acervo.
+function assinarDoTema(){
+  try{ showAccessRequired(currentUser, null, 'locked_station'); }
+  catch(e){ console.warn('[tema] paywall falhou:', e); }
 }
 
 // A IIFE de 'use strict' não vaza nada para window. Como estas três são chamadas
@@ -6458,6 +6520,7 @@ function treinarDoTema(stationId){
 window.abrirTema     = abrirTema;
 window.voltarDoTema  = voltarDoTema;
 window.treinarDoTema = treinarDoTema;
+window.assinarDoTema = assinarDoTema;   // v1.6.152 — onclick inline do cadeado
 
 // ── END + EVAL ────────────────────────────────────────────────────────────────
 function endSim(){
