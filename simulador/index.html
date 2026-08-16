@@ -2588,7 +2588,7 @@ function showTrialBanner(remaining){
     // o cabecalho/avatar (fixed cobria o conteudo rolado; ver screenshot do Bruno 22/07).
     document.body.insertBefore(b, document.body.firstChild);
   }
-  var _kiwify = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/nL4sRJD';
+  var _kiwify = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/OpKRKOr';
   b.innerHTML = '🎁 Demonstração grátis — você tem <strong style="color:#00c9ff">' + n + '</strong> estaç' + (n===1?'ão':'ões') + ' grátis restante' + (n===1?'':'s') + '. <a href="' + _kiwify + '" target="_blank" rel="noopener" style="color:#00c9ff;text-decoration:underline;font-weight:600">Assine para acesso ilimitado →</a>';
   b.style.display = 'block';
   // v1.6.140: banner sticky ocupa altura propria no fluxo — o paddingTop compensatorio
@@ -2692,7 +2692,7 @@ async function checkSubscription(){
 // Configuração centralizada: alterar aqui pra trocar link, mensagens, UTM.
 var ACCESS_CONFIG = {
   // Link Kiwify de venda
-  kiwify_link: 'https://pay.kiwify.com.br/nL4sRJD',
+  kiwify_link: 'https://pay.kiwify.com.br/OpKRKOr',
   utm: '?utm_source=app&utm_medium=blocked_screen&utm_campaign=access_required',
   // Mensagens finais (tom: valoriza a médica como profissional)
   msg_new_user:
@@ -3021,7 +3021,7 @@ function computeSubDisplay(info, daysLeft){
   if(info.type === 'inactive' || info.type === 'unknown'){
     return {
       title: 'Sem assinatura ativa',
-      detailHtml: 'Assine em <a href="https://pay.kiwify.com.br/nL4sRJD" style="color:var(--accent)" target="_blank" rel="noopener">Kiwify — assinar agora →</a>',
+      detailHtml: 'Assine em <a href="https://pay.kiwify.com.br/OpKRKOr" style="color:var(--accent)" target="_blank" rel="noopener">Kiwify — assinar agora →</a>',
       showLink: false,
       borderColor: 'rgba(239,68,68,.25)',
       titleColor: 'var(--red)'
@@ -8455,7 +8455,7 @@ async function renderAccountScreen(){
     detail.textContent='Demonstração gratuita de 3 estações.';
     usage.innerHTML='<div style="font-weight:500">'+r+' de 3 estações restantes</div>'
       +'<div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:.5rem;max-width:280px"><div style="height:100%;width:'+(used/3*100)+'%;background:var(--accent)"></div></div>';
-    var _k=(typeof ACCESS_CONFIG!=='undefined'&&ACCESS_CONFIG.kiwify_link)?ACCESS_CONFIG.kiwify_link:'https://pay.kiwify.com.br/nL4sRJD';
+    var _k=(typeof ACCESS_CONFIG!=='undefined'&&ACCESS_CONFIG.kiwify_link)?ACCESS_CONFIG.kiwify_link:'https://pay.kiwify.com.br/OpKRKOr';
     var _utm=(typeof ACCESS_CONFIG!=='undefined'&&ACCESS_CONFIG.utm)?ACCESS_CONFIG.utm:'';
     btn.style.display=''; btn.textContent='Assinar acesso ilimitado →'; btn.href=_k+_utm;
   }
@@ -9872,7 +9872,7 @@ window.addEventListener('load', function(){
     });
     var buy = $('invite-gate-buy');
     if(buy) buy.addEventListener('click', function(){
-      var base = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/nL4sRJD';
+      var base = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/OpKRKOr';
       window.open(base + '?utm_source=app&utm_medium=signup_gate&utm_campaign=invite_required', '_blank', 'noopener');
     });
     var closeBtn = $('invite-gate-close');
