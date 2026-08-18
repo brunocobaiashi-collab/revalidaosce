@@ -1,1 +1,41 @@
+# Validação do frontend do simulador.
+#
+# Fase 1: ALARME, não trava. O Vercel publica assim que o arquivo entra no repo;
+# este workflow roda em paralelo e avisa por e-mail em ~1 min se algum portão
+# reprovar. Para virar gate de verdade, o fluxo precisa passar por pull request
+# com o check obrigatório em Settings > Branches.
 
+name: Validação do simulador
+
+on:
+  push:
+    paths:
+      - 'simulador/**'
+      - 'ci/**'
+      - '.github/workflows/validacao.yml'
+  pull_request:
+    paths:
+      - 'simulador/**'
+      - 'ci/**'
+  workflow_dispatch:
+
+jobs:
+  portoes:
+    name: 5 portões
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # o portão 2 compara a versão com o commit anterior
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar dependências dos portões
+        working-directory: ci
+        run: npm install --no-audit --no-fund
+
+      - name: Rodar os portões
+        run: node ci/run-all.mjs
