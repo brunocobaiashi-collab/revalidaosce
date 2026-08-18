@@ -1,1 +1,9 @@
-
+{
+  "name": "revalidaosce-ci",
+  "private": true,
+  "type": "module",
+  "description": "Portões de validação do RevalidaOSCE. Roda no GitHub Actions e tambem na mao: cd ci && npm install && node run-all.mjs (a partir da raiz do repo).",
+  "dependencies": {
+    "jsdom": "30.0.1"
+  }
+}
