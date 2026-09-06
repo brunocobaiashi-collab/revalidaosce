@@ -12,6 +12,44 @@
   gtag('js', new Date());
   gtag('config', 'AW-18306871741');
 </script>
+<script>
+/* v2.2 (06/09/2026) — atribuição: guarda gclid/utm em cookie do domínio (.revalidaosce.com.br, 90 dias)
+   e decora os links de checkout (Kiwify: utm_* + sck=gclid, volta no webhook em TrackingParameters)
+   e do simulador (?gclid= para o cadastro). Falha silenciosa: nunca quebra a página. */
+(function(){
+  try{
+    var KEYS=['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+    var q=new URLSearchParams(location.search), fresh={}, has=false;
+    KEYS.forEach(function(k){ var v=q.get(k); if(v){ fresh[k]=v.slice(0,200); has=true; } });
+    var NAME='rosce_attr', attr=null;
+    function readCookie(){ var m=document.cookie.match(new RegExp('(?:^|; )'+NAME+'=([^;]*)')); if(!m) return null; try{ return JSON.parse(decodeURIComponent(m[1])); }catch(_e){ return null; } }
+    if(has){
+      attr=fresh; attr.ts=new Date().toISOString().slice(0,10); attr.lp=location.pathname;
+      var dom=/revalidaosce\.com\.br$/.test(location.hostname)?'; domain=.revalidaosce.com.br':'';
+      document.cookie=NAME+'='+encodeURIComponent(JSON.stringify(attr))+'; max-age=7776000; path=/'+dom+'; SameSite=Lax; Secure';
+    } else { attr=readCookie(); }
+    attr=attr||{}; /* sem origem conhecida: ainda marca o checkout como vindo da landing */
+    var click=attr.gclid||attr.gbraid||attr.wbraid||'';
+    function decorate(){
+      document.querySelectorAll('a[href]').forEach(function(a){
+        var h=a.getAttribute('href')||''; if(h.indexOf('pay.kiwify.com.br')<0 && h.indexOf('simulador.revalidaosce.com.br')<0) return;
+        var u; try{ u=new URL(h); }catch(_e){ return; }
+        if(u.hostname==='pay.kiwify.com.br'){
+          if(!u.searchParams.get('utm_source')) u.searchParams.set('utm_source', click?'google_ads':(attr.utm_source||'landing'));
+          if(!u.searchParams.get('utm_medium')) u.searchParams.set('utm_medium', attr.utm_medium||'landing_cta');
+          if(!u.searchParams.get('utm_campaign')) u.searchParams.set('utm_campaign', attr.utm_campaign||'preco');
+          if(click && !u.searchParams.get('sck')) u.searchParams.set('sck', click);
+        } else {
+          if(click && !u.searchParams.get('gclid')) u.searchParams.set('gclid', click);
+          if(attr.utm_source && !u.searchParams.get('utm_source')) u.searchParams.set('utm_source', attr.utm_source);
+        }
+        a.setAttribute('href', u.toString());
+      });
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', decorate); else decorate();
+  }catch(_e){}
+})();
+</script>
 <meta name="description" content="Treine para a prova prática do Revalida com estações OSCE reais, avaliação por IA e feedback instantâneo. O único simulador desenvolvido para o padrão INEP.">
 <link rel="canonical" href="https://revalidaosce.com.br/">
 <meta property="og:type" content="website">
