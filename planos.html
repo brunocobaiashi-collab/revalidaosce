@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos e preços — RevalidaOSCE</title>
+<!-- Google tag (gtag.js) — Google Ads AW-18306871741 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18306871741"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18306871741');
+</script>
+<script>
+/* v1.0 (06/09/2026) — mesma atribuição da landing: cookie rosce_attr (.revalidaosce.com.br, 90 dias),
+   checkout Kiwify decorado com utm_* + sck=gclid, simulador com ?gclid=. Falha silenciosa. */
+(function(){
+  try{
+    var KEYS=['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+    var q=new URLSearchParams(location.search), fresh={}, has=false;
+    KEYS.forEach(function(k){ var v=q.get(k); if(v){ fresh[k]=v.slice(0,200); has=true; } });
+    var NAME='rosce_attr', attr=null;
+    function readCookie(){ var m=document.cookie.match(new RegExp('(?:^|; )'+NAME+'=([^;]*)')); if(!m) return null; try{ return JSON.parse(decodeURIComponent(m[1])); }catch(_e){ return null; } }
+    if(has){
+      attr=fresh; attr.ts=new Date().toISOString().slice(0,10); attr.lp=location.pathname;
+      var dom=/revalidaosce\.com\.br$/.test(location.hostname)?'; domain=.revalidaosce.com.br':'';
+      document.cookie=NAME+'='+encodeURIComponent(JSON.stringify(attr))+'; max-age=7776000; path=/'+dom+'; SameSite=Lax; Secure';
+    } else { attr=readCookie(); }
+    attr=attr||{};
+    var click=attr.gclid||attr.gbraid||attr.wbraid||'';
+    function decorate(){
+      document.querySelectorAll('a[href]').forEach(function(a){
+        var h=a.getAttribute('href')||''; if(h.indexOf('pay.kiwify.com.br')<0 && h.indexOf('simulador.revalidaosce.com.br')<0) return;
+        var u; try{ u=new URL(h); }catch(_e){ return; }
+        if(u.hostname==='pay.kiwify.com.br'){
+          if(!u.searchParams.get('utm_source')) u.searchParams.set('utm_source', click?'google_ads':(attr.utm_source||'planos'));
+          if(!u.searchParams.get('utm_medium')) u.searchParams.set('utm_medium', attr.utm_medium||'planos_cta');
+          if(!u.searchParams.get('utm_campaign')) u.searchParams.set('utm_campaign', attr.utm_campaign||'preco');
+          if(click && !u.searchParams.get('sck')) u.searchParams.set('sck', click);
+        } else {
+          if(click && !u.searchParams.get('gclid')) u.searchParams.set('gclid', click);
+          if(attr.utm_source && !u.searchParams.get('utm_source')) u.searchParams.set('utm_source', attr.utm_source);
+        }
+        a.setAttribute('href', u.toString());
+      });
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', decorate); else decorate();
+  }catch(_e){}
+})();
+</script>
+<meta name="description" content="Quanto custa o RevalidaOSCE: teste grátis com 3 estações, sem cartão, e plano completo por R$ 197/mês com acesso ilimitado, sem fidelidade e garantia de 7 dias.">
+<link rel="canonical" href="https://revalidaosce.com.br/planos.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Planos e preços — RevalidaOSCE">
+<meta property="og:description" content="3 estações grátis sem cartão. Acesso completo por R$ 197/mês, sem fidelidade, com garantia de 7 dias.">
+<meta property="og:url" content="https://revalidaosce.com.br/planos.html">
+<meta property="og:site_name" content="RevalidaOSCE">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "RevalidaOSCE — Acesso completo",
+  "description": "Simulador OSCE para a segunda etapa do Revalida INEP: estações com paciente virtual por voz, impressos e avaliação pelo PEP.",
+  "brand": {"@type": "Brand", "name": "RevalidaOSCE"},
+  "offers": [
+    {"@type": "Offer", "name": "Teste grátis", "price": "0", "priceCurrency": "BRL", "url": "https://simulador.revalidaosce.com.br?signup=1", "availability": "https://schema.org/InStock"},
+    {"@type": "Offer", "name": "Acesso completo mensal", "price": "197", "priceCurrency": "BRL", "url": "https://revalidaosce.com.br/planos.html", "availability": "https://schema.org/InStock"}
+  ]
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0e;--bg2:#0a1520;--bg3:#0f1f30;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#e8f0f8;--text2:#7a9ab5;--text3:#445566;
+  --accent:#00c9ff;--accent2:#0077cc;
+  --green:#22c55e;--yellow:#f5c842;--red:#ef4444;
+  --serif:'DM Serif Display',Georgia,serif;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.7;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 70% 0%,rgba(0,100,200,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 10% 100%,rgba(0,201,255,.04) 0%,transparent 50%);
+}
+header{
+  border-bottom:1px solid var(--border);padding:1.25rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:10;background:rgba(5,10,14,.92);backdrop-filter:blur(12px);
+  flex-wrap:wrap;gap:.5rem;
+}
+.logo{font-family:var(--serif);font-size:1.2rem;color:var(--text);text-decoration:none}
+.logo em{color:var(--accent);font-style:italic}
+.header-nav{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.nav-link{font-size:.82rem;color:var(--text2);text-decoration:none;border:1px solid var(--border2);border-radius:8px;padding:6px 14px;transition:.2s}
+.nav-link:hover{color:var(--accent);border-color:var(--accent)}
+.nav-link.primary{color:var(--accent);border-color:rgba(0,201,255,.3)}
+.hero{max-width:760px;margin:0 auto;padding:4rem 1.5rem 2rem;text-align:center}
+.hero-tag{font-family:var(--mono);font-size:.7rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;display:block}
+.hero h1{font-family:var(--serif);font-size:clamp(2rem,6vw,3rem);font-weight:400;letter-spacing:-.02em;line-height:1.15;margin-bottom:1rem}
+.hero h1 em{color:var(--accent);font-style:italic}
+.hero p.lead{font-size:1.05rem;color:var(--text2);max-width:560px;margin:0 auto;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1.5rem 0 1.25rem}
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.75rem;display:flex;flex-direction:column}
+.card.featured{border-color:rgba(0,201,255,.45);background:linear-gradient(160deg,rgba(0,201,255,.08) 0%,rgba(10,21,32,1) 55%);box-shadow:0 0 0 1px rgba(0,201,255,.08),0 20px 60px -30px rgba(0,201,255,.35)}
+.badge{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid rgba(0,201,255,.35);color:var(--accent);margin-bottom:1rem}
+.badge.free{border-color:rgba(34,197,94,.4);color:var(--green)}
+.valor{font-family:var(--serif);font-size:3rem;line-height:1;letter-spacing:-.02em;margin:.25rem 0}
+.valor sup{font-size:1.1rem;vertical-align:top;margin-right:.15rem;color:var(--text2)}
+.valor span{font-family:var(--sans);font-size:1rem;color:var(--text2);letter-spacing:0}
+.equiv{font-size:.9rem;color:var(--text2);margin-bottom:1.25rem}
+.feats{list-style:none;margin:0 0 1.5rem;flex:1}
+.feats li{font-size:.92rem;color:var(--text2);padding:.35rem 0 .35rem 1.6rem;position:relative;line-height:1.55}
+.feats li::before{content:'✓';position:absolute;left:0;top:.35rem;color:var(--accent);font-weight:600}
+.card.plain .feats li::before{color:var(--green)}
+.feats li strong{color:var(--text);font-weight:500}
+.btn{display:block;text-align:center;background:var(--accent);color:#000;font-weight:600;font-size:1rem;text-decoration:none;padding:.9rem 1.5rem;border-radius:10px;transition:.2s}
+.btn:hover{background:#33d4ff;transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,201,255,.4)}
+.btn.ghost:hover{background:rgba(0,201,255,.08)}
+.note{font-size:.78rem;color:var(--text3);text-align:center;margin-top:.6rem}
+.garantia{display:flex;align-items:center;gap:.75rem;justify-content:center;font-size:.9rem;color:var(--text2);border:1px dashed rgba(34,197,94,.35);border-radius:12px;padding:.9rem 1.25rem;margin-bottom:3rem}
+.garantia svg{width:22px;height:22px;color:var(--green);flex-shrink:0}
+.block{margin-bottom:2.75rem}
+.block h2{font-family:var(--serif);font-size:1.5rem;font-weight:400;margin-bottom:1rem;letter-spacing:-.01em;display:flex;align-items:center;gap:.75rem}
+.block h2::before{content:'';display:block;width:24px;height:1px;background:var(--accent)}
+.block p{font-size:.95rem;color:var(--text2);line-height:1.85;margin-bottom:1rem}
+.block p strong{color:var(--text);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-weight:500}
+td:first-child{color:var(--text)}
+td{color:var(--text2)}
+td .ok{color:var(--green)}
+td .no{color:var(--text3)}
+.faq-item{border-bottom:1px solid var(--border);padding:1rem 0}
+.faq-q{font-weight:500;color:var(--text);margin-bottom:.35rem}
+.faq-a{font-size:.92rem;color:var(--text2);line-height:1.75}
+.faq-a a{color:var(--accent);text-decoration:none}
+.cta-section{text-align:center;padding:3rem 1.5rem 0;border-top:1px solid var(--border);margin-top:1rem}
+.cta-section h3{font-family:var(--serif);font-size:1.5rem;font-weight:400;margin-bottom:.5rem}
+.cta-section p{font-size:.9rem;color:var(--text2);margin-bottom:1.5rem}
+.cta-section .btn{display:inline-block}
+footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:.8rem;color:var(--text3)}
+footer a{color:var(--accent);text-decoration:none}
+.footer-links{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem;font-size:.85rem}
+.footer-links a{color:var(--text2);text-decoration:none;transition:.2s}
+.footer-links a:hover{color:var(--accent)}
+@media(max-width:700px){
+  .grid{grid-template-columns:1fr}
+  .hero{padding:3rem 1rem 1.5rem}
+  .wrap{padding:0 1rem 3rem}
+  .card{padding:1.4rem}
+  .valor{font-size:2.5rem}
+}
+</style>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#00c9ff">
+</head>
+<body>
+<header>
+  <a href="https://revalidaosce.com.br" class="logo">Revalida<em>OSCE</em></a>
+  <nav class="header-nav">
+    <a href="/faq.html" class="nav-link">FAQ</a>
+    <a href="https://simulador.revalidaosce.com.br" class="nav-link primary">Acessar simulador →</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <span class="hero-tag">Planos e preços</span>
+  <h1>Comece grátis.<br>Assine <em>quando quiser</em>.</h1>
+  <p class="lead">Um único plano pago, mensal, sem fidelidade. Antes dele, 3 estações completas para você testar o simulador sem cadastrar cartão.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="grid">
+    <div class="card plain">
+      <div><span class="badge free">Teste grátis</span></div>
+      <div class="valor"><sup>R$</sup>0<span>&nbsp;· sem cartão</span></div>
+      <div class="equiv">Experimente antes de assinar</div>
+      <ul class="feats">
+        <li><strong>3 estações completas</strong> para conhecer o sistema</li>
+        <li>Paciente virtual com voz natural em português</li>
+        <li>Interação por microfone, como na prova real</li>
+        <li>Avaliação automática pelo PEP + devolutiva</li>
+        <li>Sem cartão, sem compromisso</li>
+      </ul>
+      <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn ghost">Criar conta grátis →</a>
+      <div class="note">Leva menos de 1 minuto</div>
+    </div>
+
+    <div class="card featured">
+      <div><span class="badge">✦ Acesso completo</span></div>
+      <div class="valor"><sup>R$</sup>197<span>/mês</span></div>
+      <div class="equiv">Acesso ilimitado, sem fidelidade</div>
+      <ul class="feats">
+        <li><strong>Todas as estações, sem limite</strong> de treinos por dia</li>
+        <li>Banco oficial do Revalida INEP 2020–2025</li>
+        <li>Estações inéditas curadas pela Equipe RevalidaOSCE, ampliadas continuamente</li>
+        <li>Modo Maratona: várias estações em sequência, como no dia da prova</li>
+        <li>Avaliação pelo PEP de 10 pontos + devolutiva do examinador</li>
+        <li><strong>Resumos de estudo por tema</strong>, liberados conforme você treina</li>
+        <li>Histórico de desempenho por área</li>
+        <li>Cancele quando quiser, direto na Kiwify</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/OpKRKOr" class="btn">Assinar acesso completo →</a>
+      <div class="note">Pagamento seguro via Kiwify · Pix, cartão ou boleto</div>
+    </div>
+  </div>
+
+  <div class="garantia">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+    <span>Garantia de 7 dias — se não gostar, devolvemos 100% do valor da primeira mensalidade.</span>
+  </div>
+
+  <div class="block">
+    <h2>O que muda entre os planos</h2>
+    <table>
+      <thead><tr><th>Recurso</th><th>Teste grátis</th><th>Acesso completo</th></tr></thead>
+      <tbody>
+        <tr><td>Estações disponíveis</td><td>3 estações de demonstração</td><td>Todas, incluindo as oficiais do INEP</td></tr>
+        <tr><td>Treinos avaliados</td><td>Até 3 avaliações</td><td>Ilimitados</td></tr>
+        <tr><td>Paciente por voz + impressos</td><td><span class="ok">✓</span></td><td><span class="ok">✓</span></td></tr>
+        <tr><td>Avaliação pelo PEP + devolutiva</td><td><span class="ok">✓</span></td><td><span class="ok">✓</span></td></tr>
+        <tr><td>Modo Maratona</td><td>Só com as 3 estações demo</td><td><span class="ok">✓</span> com todo o banco</td></tr>
+        <tr><td>Resumos de estudo por tema</td><td>Só dos temas das 3 estações demo</td><td><span class="ok">✓</span> de todos os temas</td></tr>
+        <tr><td>Histórico e evolução por área</td><td><span class="ok">✓</span></td><td><span class="ok">✓</span></td></tr>
+        <tr><td>Cartão para começar</td><td>Não precisa</td><td>Pix, cartão ou boleto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="block">
+    <h2>Por que um só plano</h2>
+    <p>A segunda etapa do Revalida tem data. Quem treina, treina com prazo. Por isso não vendemos pacotes de créditos nem planos anuais: você paga o mês em que está treinando e para quando não precisar mais — <strong>o acesso continua até o fim do período pago</strong>.</p>
+    <p>Para comparar: uma turma presencial de prova prática custa o equivalente a vários meses de assinatura por poucos dias de treino, e depende de agenda e de colega para simular o paciente. Aqui o paciente é uma IA por voz, disponível a qualquer hora, com nota pelo PEP em segundos.</p>
+  </div>
+
+  <div class="block">
+    <h2>Dúvidas sobre pagamento</h2>
+    <div class="faq-item">
+      <div class="faq-q">Como funciona a cobrança?</div>
+      <div class="faq-a">Mensal, via Kiwify, no cartão de crédito (renovação automática), Pix ou boleto. Sem taxa de adesão e sem fidelidade.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Como cancelo?</div>
+      <div class="faq-a">No seu painel da Kiwify, em um clique. Não há multa. O acesso permanece até o fim do mês já pago.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">E a garantia de 7 dias?</div>
+      <div class="faq-a">Se não ficar satisfeito nos primeiros 7 dias da primeira contratação, devolvemos 100% do valor. Basta enviar e-mail para <a href="mailto:revalida.osce@gmail.com">revalida.osce@gmail.com</a> com o assunto "Reembolso 7 dias". Detalhes nos <a href="/termos-de-uso.html">Termos de Uso</a>.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Preciso assinar para testar?</div>
+      <div class="faq-a">Não. Crie a conta grátis, faça as 3 estações de demonstração e só assine se fizer sentido para você.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">O acesso é individual?</div>
+      <div class="faq-a">Sim. Cada assinatura vale para uma pessoa e uma sessão ativa por vez.</div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h3>Ainda na dúvida?</h3>
+    <p>Comece pelo teste grátis. Se o simulador for útil, o plano completo está a um clique.</p>
+    <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn">Testar 3 estações grátis →</a>
+  </div>
+
+</div>
+
+<footer>
+  <nav class="footer-links" aria-label="Links institucionais">
+    <a href="https://revalidaosce.com.br">Home</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/quem-somos.html">Quem somos</a>
+    <a href="/politica-privacidade.html">Privacidade</a>
+    <a href="/termos-de-uso.html">Termos de Uso</a>
+    <a href="https://simulador.revalidaosce.com.br">Simulador</a>
+    <a href="mailto:revalida.osce@gmail.com">Contato</a>
+  </nav>
+  <p>© 2026 RevalidaOSCE · <a href="https://revalidaosce.com.br">revalidaosce.com.br</a></p>
+</footer>
+
+</body>
+</html>
