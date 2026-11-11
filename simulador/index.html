@@ -14,7 +14,7 @@
 </script>
 <!-- ═══ APP VERSION ═══ -->
 <!-- Atualizar SEMPRE que houver mudança no arquivo. Use no console: __appVersion() -->
-<meta name="app-version" content="1.6.157">
+<meta name="app-version" content="1.6.158">
 <meta name="app-deploy-date" content="2026-06-20">
 <meta name="app-notes" content="Sistema de debug log: captura completa de interações IA para diagnóstico">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -154,6 +154,7 @@ body.sim-active .app{max-width:1180px}
   body[data-screen="s-select"] .app,
   body[data-screen="s-dashboard"] .app,
   body[data-screen="s-account"] .app,
+  body[data-screen="s-messages"] .app,
   body[data-screen="s-marathon"] .app,
   body[data-screen="s-marathon-result"] .app,
   body[data-screen="s-eval"] .app,
@@ -174,6 +175,85 @@ body.sim-active .app{max-width:1180px}
   body[data-screen="s-dashboard"] .mural-card{margin-bottom:0}
 }
 .hint{font-size:.75rem;color:var(--text3);margin-top:.5rem}
+/* v1.6.158: Sua semana · Mensagens · Discordo · Como funciona · evolucao */
+.pl-prog{font-size:.9rem;color:var(--text2);margin-bottom:.45rem}
+.pl-prog b{font-family:var(--mono);font-size:1.25rem;color:var(--text);font-weight:600}
+.pl-ok{color:var(--green);font-weight:500}
+.pl-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:.6rem}
+.pl-bar > div{height:100%;background:var(--accent);border-radius:3px;transition:width .8s ease}
+.pl-dias{display:flex;gap:6px;margin-bottom:.5rem}
+.pl-dia{flex:1;max-width:34px;text-align:center;font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+.pl-dia i{display:block;height:8px;border-radius:4px;background:var(--bg3);margin-top:3px}
+.pl-dia.on i{background:var(--accent)}
+.pl-dia.hoje{color:var(--text);font-weight:600}
+.pl-streak{font-size:.78rem;color:var(--text2);margin-bottom:.35rem}
+.pl-sec{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:.85rem 0 .4rem}
+.pl-st{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-top:1px solid var(--border)}
+.pl-st:first-of-type{border-top:none}
+.pl-st-txt{flex:1;min-width:0}
+.pl-st-nm{font-size:.86rem;color:var(--text);line-height:1.35}
+.pl-st-sub{font-size:.72rem;color:var(--text3);margin-top:2px}
+.pl-go{flex-shrink:0;padding:6px 12px;font-size:.78rem;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.pl-go:hover{background:rgba(0,201,255,.08)}
+.pl-q{font-size:.88rem;color:var(--text);margin-bottom:.5rem}
+.pl-metas{display:flex;gap:.45rem;flex-wrap:wrap}
+.pl-chip{min-width:44px;padding:7px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--mono);font-size:.85rem;cursor:pointer}
+.pl-chip:hover{border-color:var(--accent);color:var(--accent)}
+.pl-hint{font-size:.72rem;color:var(--text3);margin-top:.45rem}
+.pl-link{background:none;border:none;padding:0;color:var(--text3);font-size:.72rem;text-decoration:underline;cursor:pointer}
+.msg-dot{position:absolute;left:30px;top:2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--red);color:#fff;font-family:var(--mono);font-size:.6rem;line-height:16px;text-align:center;pointer-events:none}
+.msg-count{margin-left:auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-family:var(--mono);font-size:.65rem;line-height:18px;text-align:center}
+.msg-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;margin-bottom:.65rem}
+.msg-card.nova{border-left:3px solid var(--accent)}
+.msg-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;flex-wrap:wrap}
+.msg-tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--bg3);color:var(--text2)}
+.msg-tag.t-incidente,.msg-tag.t-manutencao{background:rgba(239,68,68,.12);color:var(--red)}
+.msg-tag.t-novidade{background:rgba(34,197,94,.12);color:var(--green)}
+.msg-tag.t-contestacao{background:rgba(0,201,255,.1);color:var(--accent)}
+.msg-data{font-size:.7rem;color:var(--text3);margin-left:auto}
+.msg-nova{font-family:var(--mono);font-size:.58rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.msg-tit{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.3rem}
+.msg-corpo{font-size:.86rem;color:var(--text2);line-height:1.6}
+.msg-acao{margin-top:.6rem}
+.msg-vazio{font-size:.88rem;color:var(--text3);padding:1.5rem 0}
+.av-item + .av-item{margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--border)}
+.ct-wrap{margin-top:.45rem}
+.ct-btn{background:none;border:none;padding:0;color:var(--text3);font-size:.72rem;text-decoration:underline;cursor:pointer}
+.ct-btn:hover{color:var(--accent)}
+.ct-st{display:inline-block;font-family:var(--mono);font-size:.62rem;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--bg3);color:var(--text2)}
+.ct-st.ct-procede{background:rgba(34,197,94,.12);color:var(--green)}
+.ct-resp{font-size:.74rem;color:var(--text2);margin-top:4px;line-height:1.45}
+.ct-ov,.onb-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9000}
+.ct-box,.onb-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:520px;max-height:calc(100vh - 32px);overflow-y:auto;padding:1.25rem 1.3rem;box-shadow:0 12px 48px rgba(0,0,0,.45)}
+.ct-h{font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:.5rem}
+.ct-item{font-size:.82rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:.55rem .7rem;margin-bottom:.8rem;line-height:1.45}
+.ct-lbl{display:block;font-size:.8rem;color:var(--text2);margin-bottom:.35rem}
+.ct-box textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font:inherit;font-size:.86rem;padding:.6rem .7rem;resize:vertical}
+.ct-err{font-size:.78rem;color:var(--red);margin-top:.4rem}
+.ct-acts{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.8rem}
+.ct-note{font-size:.72rem;color:var(--text3);margin-top:.6rem;line-height:1.45}
+.onb-kick{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.onb-tit{font-size:1.2rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+.onb-sub{font-size:.84rem;color:var(--text2);margin-bottom:.9rem;line-height:1.5}
+.onb-passo{display:flex;gap:.75rem;padding:.6rem 0;border-top:1px solid var(--border)}
+.onb-n{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(0,201,255,.12);color:var(--accent);font-family:var(--mono);font-size:.75rem;display:flex;align-items:center;justify-content:center}
+.onb-pt{font-size:.88rem;font-weight:500;color:var(--text);margin-bottom:.15rem}
+.onb-pd{font-size:.8rem;color:var(--text2);line-height:1.5}
+.onb-pd q{color:var(--text);font-style:italic}
+.onb-dica{font-size:.78rem;color:var(--text2);background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:8px;padding:.55rem .7rem;margin-top:.7rem;line-height:1.5}
+.onb-mic{display:flex;align-items:center;gap:.6rem;margin-top:.8rem;flex-wrap:wrap}
+.onb-mic-bar{flex:1;min-width:100px;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.onb-mic-bar > div{height:100%;width:0;background:var(--green);transition:width .08s linear}
+.onb-mic-txt{font-size:.75rem;color:var(--text3);width:100%}
+.onb-acts{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:1rem}
+.evo-box{margin:1rem 0 0;padding:.85rem 1rem;border:1px solid var(--border);border-radius:12px;background:var(--bg2)}
+.evo-lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.3rem}
+.evo-row{font-family:var(--mono);font-size:1.15rem;color:var(--text)}
+.evo-seta{color:var(--text3);margin:0 .3rem}
+.evo-delta{font-size:.85rem;margin-left:.4rem}
+.evo-delta.up{color:var(--green)}
+.evo-delta.down{color:var(--red)}
+.evo-sub{font-size:.74rem;color:var(--text3);margin-top:.2rem}
 .lentry{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.875rem}
 .lentry:last-child{border-bottom:none}
 .ltime{font-family:var(--mono);font-size:.72rem;color:var(--text3);white-space:nowrap;padding-top:2px}
@@ -820,6 +900,7 @@ body.light .badge{color:var(--text)}
     <div style="position:relative" id="user-menu-wrap">
       <button id="btn-user-menu" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:10px;transition:.2s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'">
         <div id="user-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--text2);flex-shrink:0">?</div>
+        <span id="user-msg-dot" class="msg-dot" style="display:none" aria-label="Mensagens novas"></span>
         <span id="user-display-name" style="font-size:.8rem;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none"></span>
         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="color:var(--text3)"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
@@ -844,6 +925,7 @@ body.light .badge{color:var(--text)}
         <!-- Menu items -->
         <button id="btn-menu-account" class="btn" style="width:100%;justify-content:flex-start;padding:8px 12px;font-size:.82rem;border:none;border-radius:8px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg> Minha conta</button>
         <button id="btn-menu-history" class="btn" style="width:100%;justify-content:flex-start;padding:8px 12px;font-size:.82rem;border:none;border-radius:8px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> Histórico &amp; Desempenho</button>
+        <button id="btn-menu-messages" class="btn" style="width:100%;justify-content:flex-start;padding:8px 12px;font-size:.82rem;border:none;border-radius:8px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg> Mensagens<span id="menu-msg-count" class="msg-count" style="display:none"></span></button>
         <a id="btn-admin-link" href="https://simulador.revalidaosce.com.br/admin.html" class="btn" style="width:100%;justify-content:flex-start;padding:8px 12px;font-size:.82rem;border:none;border-radius:8px;text-decoration:none;display:none"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Gerenciar</a>
         <a id="menu-sub-link" href="https://app.kiwify.com.br" target="_blank" rel="noopener" class="btn" style="width:100%;justify-content:flex-start;padding:8px 12px;font-size:.82rem;border:none;border-radius:8px;text-decoration:none;display:none"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg> Gerenciar assinatura</a>
         <div style="height:1px;background:var(--border);margin:.375rem 0"></div>
@@ -884,6 +966,12 @@ body.light .badge{color:var(--text)}
     <div class="mural-card" id="mural-avisos">
       <div class="mural-card-h"><span class="dot"></span>Avisos</div>
       <div class="mural-card-body" id="avisos-body"><a href="https://www.instagram.com/revalida.osce?igsh=Mm9yOWRtNDUyNmlr&amp;utm_source=qr" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> Siga a gente no Instagram: <strong>@revalida.osce</strong></a> — novidades e dicas para a sua preparação.</div>
+    </div>
+
+    <!-- v1.6.158: Sua semana (meta, proxima recomendada, refazer) — preenchido por carregarPlanoSemana -->
+    <div class="mural-card" id="mural-plano" style="display:none">
+      <div class="mural-card-h"><span class="dot" style="background:var(--yellow);box-shadow:0 0 0 3px rgba(245,200,66,.15)"></span><span id="plano-h">Sua semana</span></div>
+      <div class="mural-card-body" id="plano-body"></div>
     </div>
 
     <!-- Meu desempenho -->
@@ -1126,6 +1214,8 @@ body.light .badge{color:var(--text)}
     <div class="sbar-t"><div class="sbar-f" id="sc-bar"></div></div>
     <div class="sc-perda" id="sc-perda"></div>
   </div>
+  <!-- v1.6.158: evolucao quando a estacao ja foi feita antes -->
+  <div id="eval-evolucao" class="evo-box" style="display:none"></div>
   <!-- v1.6.50: devolutiva pedagógica do examinador -->
   <div id="eval-comentario" style="display:none;margin:1.25rem 0;background:linear-gradient(135deg,rgba(79,107,237,.10),rgba(79,107,237,.03));border:1px solid rgba(79,107,237,.35);border-left:3px solid var(--accent);border-radius:12px;padding:1.1rem 1.25rem">
     <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
@@ -1526,6 +1616,19 @@ body.light .badge{color:var(--text)}
 </div>
 
 <!-- CONTA -->
+<!-- v1.6.158: MENSAGENS (avatar > Mensagens) -->
+<div id="s-messages" class="screen">
+  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <div style="flex:1;min-width:0">
+      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.35rem">Revalida &middot; OSCE</div>
+      <h1 style="font-size:clamp(1.2rem,5vw,1.6rem)">Mensagens</h1>
+      <p class="dash-sub">Avisos, respostas às suas contestações e os e-mails que enviamos para você.</p>
+    </div>
+    <button class="btn" id="btn-messages-back" style="padding:7px 12px;font-size:.82rem;flex-shrink:0"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:-2px"><path d="M15 18l-6-6 6-6"/></svg>Voltar</button>
+  </div>
+  <div id="msg-list"><p class="msg-vazio">Carregando...</p></div>
+</div>
+
 <div id="s-account" class="screen">
   <div style="margin-bottom:1.5rem">
     <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.35rem">Revalida &middot; OSCE</div>
@@ -1609,9 +1712,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.157',
-  date: '2026-11-01',
-  notes: '1.6.157 (base: 1.6.156): CORRETOR SEM TETO DE 3.000, RESERVA OPUS 5.5, SEM CACHE INUTIL. (a) max_tokens do corretor 3000 -> 8000: o raciocinio do Fable conta no teto e em 31% das correcoes o JSON saia cortado, a correcao era descartada e a nota vinha da reserva. (b) reserva Opus 4.8 -> Opus 5.5: no laboratorio, nas sessoes que cortavam, a nota guardada pelo Opus 4.8 concordava com o Fable em 67,9% dos itens e estava inflada em 1,31 ponto em media (ate 3,37); o Opus 5.5 concordou em 92,7%. (c) system do corretor e do comentador enviado como lista: o quick-api so aplica cache_control a system em texto, e esse cache era escrito e quase nunca lido. Prompt, leitura do JSON, guarda de coerencia e mapeamento de nota inalterados (mesmos 14 blocos verificados por hash no laboratorio). Ator, Maratona, acesso e trial intocados. | 1.6.156 (base: 1.6.155): SESSAO PERDIDA EM SILENCIO — saveHistory nao conferia o resultado do insert; 3 sessoes avaliadas pela IA nunca foram gravadas. Agora confere status, renova a sessao e repete uma vez, registra station_save_failed em ux_events e avisa o candidato. RETENCAO 100 -> 500 sessoes por usuario (o teto apagava historico de quem mais treina). 1.6.155 (base: 1.6.154): CI FASE 1 — 3 handlers inline expostos em window (examImgError, loadMarathonStationList, filterMarathonSearch): busca por sintese e filtro de origem da Maratona voltam a funcionar (§7/§8); meta app-version sincronizada. Sem mudanca de acesso. 1.6.154 (base: 1.6.153): GRADER — ATO FISICO e VIA-NAO-E-TERAPIA. (1) ATO FISICO: o simulador e por VOZ e nao tem corpo, manequim nem modelo para tocar; o candidato pede a manobra e a estacao devolve o achado por impresso. O prompt tratava "realiza Z"/"afere Y" como acao que so a EXECUCAO pontua (secao COMPONENTE FALTANTE, item b), entao o grader rebaixava por impossibilidade do MEIO. Caso medido (sessao 3f57eec0, 18/08, "Consulta de rotina em mulher adulta"): o candidato solicitou o exame fisico, o Chefe entregou, e ele interpretou os TRES subitens (sinais vitais/IMC, mamas, linfonodos); o grader deu 0,625 de 1,25 com a justificativa "citados, mas como leitura de resultado, nao exame ativo proprio" — nota correta 9,375 e nao 8,75. Mesma raiz do zero de 2,0 pts em "exame fisico abdominal NO MANEQUIM" (23/06). Nova secao ATO FISICO no systemPrompt: cumpre quem PEDE a manobra pelo nome e usa o achado devolvido; e PROIBIDO rebaixar por "apenas leu o resultado", "nao e exame ativo", "nao executou fisicamente" ou "nao fez no manequim". NAO e anistia: continua rebaixando quem nao pede exame fisico nenhum, quem pede "exame fisico" GENERICO onde o crit_adeq nomeia manobras (Giordano, Blumberg, Rovsing, altura uterina, BCF, edema de MMII, fundo de olho, toque, PA bilateral, IMC), e quem le achado de manobra que nunca pediu. Calibrado contra 500 sessoes reais (27/06-18/08, export do admin): das 28 rebaixas dessa familia, 1 era indevida e as demais eram legitimas por falta de nomeacao — a regra foi escrita para preservar essas. (2) evalCoherenceGuard (defesa em profundidade): novo _EVAL_MEIO_RX remove da justification, ANTES dos testes de admissao, so as clausulas que descrevem o MEIO ("apenas leu o resultado", "nao e exame ativo proprio", "nao executou no manequim", "nao palpou de fato"). Exige qualificador de MODO, entao "nao realizou exame fisico" puro NAO e removido e segue rebaixando; e "nao realizou fisicamente; e nao mencionou BCF" segue rebaixando pelo BCF. Sem isso a regra (3) conjuncao_incompleta desfaria o prompt novo. O vocabulario de admissao de falta ganhou tambem "nao nomeou/solicitou/pediu" — a secao ATO FISICO usa NOMEAR como o conceito operante, e sem esses verbos o guard ficaria cego para a propria redacao que o prompt novo induz. PROVA A/B: os 5.092 itens avaliados de 500 sessoes reais (27/06-18/08) foram replayados pelos dois guards em jsdom — 29 disparos na 1.6.153 e 29 na 1.6.154, ZERO diferencas: a excecao nao afrouxa nenhum rebaixamento historico. (3) VIA NAO E TERAPIA (REGRA DO ATO, verbo institui/prescreve/inicia): caso medido (sessao 8add1076, 17/08, "Dor abdominal intensa em homem adulto") — item binario "institui hidratacao venosa E analgesia" creditado cheio com a justificativa "instituiu acesso venoso com analgesia"; o candidato so disse "2 acessos venosos perifericos para administracao de analgesico, antibiotico e antitermico", hidratacao nunca foi dita. Acesso venoso nao e hidratacao, internacao nao e conduta, monitorizacao nao e tratamento, "antibiotico" generico nao cumpre criterio que exige espectro/classe nomeada; em criterio ligado por E cada componente precisa da propria evidencia. Prova de que nao era desconhecimento da regra: na MESMA chamada o item 12 foi rebaixado certo ("instituiu jejum mas nao mencionou sonda nasogastrica; criterio exige ambos"). (4) COMENTADOR: regra 11 — nunca repreender por "nao examinou"/"apenas leu o resultado"; o ensino legitimo e cobrar a manobra NOMEADA e a interpretacao. Sem mudanca no STT, TTS, cronometro, mic, impressos, trial ou caminho do assinante/admin. Nota anterior (1.6.152, base 1.6.151): CADEADO E PAYWALL nas estacoes listadas dentro do resumo de tema. Defeito medido em 16/08: get_tema_resumo montava a lista de estacoes com `where st.tema_id=t.id and s.status=\'active\'`, sem olhar trial_available nem o v_full que a propria funcao ja calculava. O abrirTema renderizava botao "Treinar" em TODAS e o treinarDoTema chamava loadStation direto — cujo guard (__hasActiveAccess !== true) NAO pega o trial, que tem true. Resultado: fetchStation, RLS devolve zero linhas, e o candidato recebia o alert "Estacao nao encontrada. Verifique a conexao com o Supabase.". Nos dois temas demo eram 7 de 8 e 3 de 4 estacoes bloqueadas; e como a unica abrivel do tema e justamente a demo que ele acabou de fazer (que aparece com badge "feita", sem botao), 100% dos botoes "Treinar" visiveis ao trial levavam ao erro. Mesmo modo de falha do P0 de 21/07 (§2, NAO REGREDIR: "a Maratona oferece estacoes que a RLS bloqueia ao abrir"), por uma porta criada depois. FIX: (a) SQL — get_tema_resumo devolve `bloqueada` por estacao e `plano_completo` no topo; o servidor e autoritativo porque o cliente nao consegue nem dar SELECT nessas linhas; para assinante/admin v_full e true, logo bloqueada e sempre false (payer-safe, conferido por SQL nos dois perfis). (b) abrirTema renderiza cadeado + botao "Assinar" e uma linha dizendo quantas estacoes do tema estao no plano completo, em vez de sumir com elas — paywall no pico do desejo, mesma decisao do acervo na v1.6.120. (c) treinarDoTema ganhou defesa em profundidade: id marcado como bloqueada vai para o paywall, nunca para o loadStation. (d) O botao Voltar do modo locked_station ja devolve ao resumo, porque o showAccessRequired captura a tela de origem pelo data-screen. Nenhuma leitura nova foi exposta: os nomes das estacoes do tema ja eram devolvidos antes; o que muda e o que acontece no clique. BONUS (§8, achado durante a varredura de onclick inline desta versao, nao relacionado ao cadeado): openExamsTab e closeChangePass eram chamadas de onclick inline mas NAO tinham window.X = X. Como o bloco e uma IIFE com "use strict", o onclick resolvia no escopo global e lancava ReferenceError. openExamsTab e o chip que o Chefe de estacao entrega em TODA solicitacao de impresso, com o texto "Toque para abrir na aba Exames" — o toque (e o Enter/Espaco do onkeydown) nao fazia nada desde a v1.6.54; o candidato so chegava ao impresso abrindo a aba Exames na mao, entao a falha era silenciosa. closeChangePass e o X do modal de troca de senha. Ambas expostas. Varredura completa: as 14 funcoes chamadas de onclick inline no arquivo agora resolvem no escopo global, provado em jsdom. Sem mudanca no grader, comentador, STT, TTS, cronometro, mic ou caminho do assinante/admin. Nota anterior (1.6.151): 1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
+  version: '1.6.158',
+  date: '2026-11-11',
+  notes: '1.6.158 (base: 1.6.157): ATIVACAO, RETENCAO E CONFIANCA NA NOTA. Medido em 11/11 (90 dias): 55 cadastros, 28 terminam a 1a demo, so 9 fazem as 3 e 4 pagam; a 1a nota tem mediana de 25 por cento e o novato perde ponto por formato (descrever achados do exame fisico 12 por cento, laboratorio 12, ultrassom 15). Pagantes ativos por semana desde o pagamento: 14, 8, 7, 4. (a) COMO FUNCIONA: antes da 1a estacao de quem nunca fez nenhuma, 4 passos (conversar, pedir o exame fisico pelo nome, pedir exames e interpretar em voz alta, hipotese e conduta) e teste opcional do microfone. Depois do controle de acesso e fora da Maratona; o Comecar reabre o loadStation dentro do gesto (audio iOS). (b) SUA SEMANA no mural: meta semanal (user_meta), progresso por dia, semanas seguidas, proxima estacao recomendada (area nunca treinada ou de menor media) e ate 3 estacoes para refazer (nota abaixo de 60 ha 7+ dias). RPC get_plano_semana; nao-assinante recebe so a proxima demo (trial_available), nunca id que a RLS nega. (c) EVOLUCAO: o resultado mostra a nota da tentativa anterior na mesma estacao. (d) MENSAGENS: avatar > Mensagens com contador; avisos publicados no admin (announcements), versao em produto dos e-mails ja enviados (message_template) e respostas de contestacao. O mural le os avisos do banco; a constante AVISO_INCIDENTE continua com precedencia. (e) DISCORDO DESTA CORRECAO: em cada item com perda de ponto, no resultado e no historico; contestar_item copia rotulo, nota e justificativa do eval_items no servidor. Tudo assincrono e silencioso: falha nunca quebra dashboard, resultado ou historico. Grader, comentador, ator, STT, TTS, cronometro, acesso e trial intocados. | 1.6.157 (base: 1.6.156): CORRETOR SEM TETO DE 3.000, RESERVA OPUS 5.5, SEM CACHE INUTIL. (a) max_tokens do corretor 3000 -> 8000: o raciocinio do Fable conta no teto e em 31% das correcoes o JSON saia cortado, a correcao era descartada e a nota vinha da reserva. (b) reserva Opus 4.8 -> Opus 5.5: no laboratorio, nas sessoes que cortavam, a nota guardada pelo Opus 4.8 concordava com o Fable em 67,9% dos itens e estava inflada em 1,31 ponto em media (ate 3,37); o Opus 5.5 concordou em 92,7%. (c) system do corretor e do comentador enviado como lista: o quick-api so aplica cache_control a system em texto, e esse cache era escrito e quase nunca lido. Prompt, leitura do JSON, guarda de coerencia e mapeamento de nota inalterados (mesmos 14 blocos verificados por hash no laboratorio). Ator, Maratona, acesso e trial intocados. | 1.6.156 (base: 1.6.155): SESSAO PERDIDA EM SILENCIO — saveHistory nao conferia o resultado do insert; 3 sessoes avaliadas pela IA nunca foram gravadas. Agora confere status, renova a sessao e repete uma vez, registra station_save_failed em ux_events e avisa o candidato. RETENCAO 100 -> 500 sessoes por usuario (o teto apagava historico de quem mais treina). 1.6.155 (base: 1.6.154): CI FASE 1 — 3 handlers inline expostos em window (examImgError, loadMarathonStationList, filterMarathonSearch): busca por sintese e filtro de origem da Maratona voltam a funcionar (§7/§8); meta app-version sincronizada. Sem mudanca de acesso. 1.6.154 (base: 1.6.153): GRADER — ATO FISICO e VIA-NAO-E-TERAPIA. (1) ATO FISICO: o simulador e por VOZ e nao tem corpo, manequim nem modelo para tocar; o candidato pede a manobra e a estacao devolve o achado por impresso. O prompt tratava "realiza Z"/"afere Y" como acao que so a EXECUCAO pontua (secao COMPONENTE FALTANTE, item b), entao o grader rebaixava por impossibilidade do MEIO. Caso medido (sessao 3f57eec0, 18/08, "Consulta de rotina em mulher adulta"): o candidato solicitou o exame fisico, o Chefe entregou, e ele interpretou os TRES subitens (sinais vitais/IMC, mamas, linfonodos); o grader deu 0,625 de 1,25 com a justificativa "citados, mas como leitura de resultado, nao exame ativo proprio" — nota correta 9,375 e nao 8,75. Mesma raiz do zero de 2,0 pts em "exame fisico abdominal NO MANEQUIM" (23/06). Nova secao ATO FISICO no systemPrompt: cumpre quem PEDE a manobra pelo nome e usa o achado devolvido; e PROIBIDO rebaixar por "apenas leu o resultado", "nao e exame ativo", "nao executou fisicamente" ou "nao fez no manequim". NAO e anistia: continua rebaixando quem nao pede exame fisico nenhum, quem pede "exame fisico" GENERICO onde o crit_adeq nomeia manobras (Giordano, Blumberg, Rovsing, altura uterina, BCF, edema de MMII, fundo de olho, toque, PA bilateral, IMC), e quem le achado de manobra que nunca pediu. Calibrado contra 500 sessoes reais (27/06-18/08, export do admin): das 28 rebaixas dessa familia, 1 era indevida e as demais eram legitimas por falta de nomeacao — a regra foi escrita para preservar essas. (2) evalCoherenceGuard (defesa em profundidade): novo _EVAL_MEIO_RX remove da justification, ANTES dos testes de admissao, so as clausulas que descrevem o MEIO ("apenas leu o resultado", "nao e exame ativo proprio", "nao executou no manequim", "nao palpou de fato"). Exige qualificador de MODO, entao "nao realizou exame fisico" puro NAO e removido e segue rebaixando; e "nao realizou fisicamente; e nao mencionou BCF" segue rebaixando pelo BCF. Sem isso a regra (3) conjuncao_incompleta desfaria o prompt novo. O vocabulario de admissao de falta ganhou tambem "nao nomeou/solicitou/pediu" — a secao ATO FISICO usa NOMEAR como o conceito operante, e sem esses verbos o guard ficaria cego para a propria redacao que o prompt novo induz. PROVA A/B: os 5.092 itens avaliados de 500 sessoes reais (27/06-18/08) foram replayados pelos dois guards em jsdom — 29 disparos na 1.6.153 e 29 na 1.6.154, ZERO diferencas: a excecao nao afrouxa nenhum rebaixamento historico. (3) VIA NAO E TERAPIA (REGRA DO ATO, verbo institui/prescreve/inicia): caso medido (sessao 8add1076, 17/08, "Dor abdominal intensa em homem adulto") — item binario "institui hidratacao venosa E analgesia" creditado cheio com a justificativa "instituiu acesso venoso com analgesia"; o candidato so disse "2 acessos venosos perifericos para administracao de analgesico, antibiotico e antitermico", hidratacao nunca foi dita. Acesso venoso nao e hidratacao, internacao nao e conduta, monitorizacao nao e tratamento, "antibiotico" generico nao cumpre criterio que exige espectro/classe nomeada; em criterio ligado por E cada componente precisa da propria evidencia. Prova de que nao era desconhecimento da regra: na MESMA chamada o item 12 foi rebaixado certo ("instituiu jejum mas nao mencionou sonda nasogastrica; criterio exige ambos"). (4) COMENTADOR: regra 11 — nunca repreender por "nao examinou"/"apenas leu o resultado"; o ensino legitimo e cobrar a manobra NOMEADA e a interpretacao. Sem mudanca no STT, TTS, cronometro, mic, impressos, trial ou caminho do assinante/admin. Nota anterior (1.6.152, base 1.6.151): CADEADO E PAYWALL nas estacoes listadas dentro do resumo de tema. Defeito medido em 16/08: get_tema_resumo montava a lista de estacoes com `where st.tema_id=t.id and s.status=\'active\'`, sem olhar trial_available nem o v_full que a propria funcao ja calculava. O abrirTema renderizava botao "Treinar" em TODAS e o treinarDoTema chamava loadStation direto — cujo guard (__hasActiveAccess !== true) NAO pega o trial, que tem true. Resultado: fetchStation, RLS devolve zero linhas, e o candidato recebia o alert "Estacao nao encontrada. Verifique a conexao com o Supabase.". Nos dois temas demo eram 7 de 8 e 3 de 4 estacoes bloqueadas; e como a unica abrivel do tema e justamente a demo que ele acabou de fazer (que aparece com badge "feita", sem botao), 100% dos botoes "Treinar" visiveis ao trial levavam ao erro. Mesmo modo de falha do P0 de 21/07 (§2, NAO REGREDIR: "a Maratona oferece estacoes que a RLS bloqueia ao abrir"), por uma porta criada depois. FIX: (a) SQL — get_tema_resumo devolve `bloqueada` por estacao e `plano_completo` no topo; o servidor e autoritativo porque o cliente nao consegue nem dar SELECT nessas linhas; para assinante/admin v_full e true, logo bloqueada e sempre false (payer-safe, conferido por SQL nos dois perfis). (b) abrirTema renderiza cadeado + botao "Assinar" e uma linha dizendo quantas estacoes do tema estao no plano completo, em vez de sumir com elas — paywall no pico do desejo, mesma decisao do acervo na v1.6.120. (c) treinarDoTema ganhou defesa em profundidade: id marcado como bloqueada vai para o paywall, nunca para o loadStation. (d) O botao Voltar do modo locked_station ja devolve ao resumo, porque o showAccessRequired captura a tela de origem pelo data-screen. Nenhuma leitura nova foi exposta: os nomes das estacoes do tema ja eram devolvidos antes; o que muda e o que acontece no clique. BONUS (§8, achado durante a varredura de onclick inline desta versao, nao relacionado ao cadeado): openExamsTab e closeChangePass eram chamadas de onclick inline mas NAO tinham window.X = X. Como o bloco e uma IIFE com "use strict", o onclick resolvia no escopo global e lancava ReferenceError. openExamsTab e o chip que o Chefe de estacao entrega em TODA solicitacao de impresso, com o texto "Toque para abrir na aba Exames" — o toque (e o Enter/Espaco do onkeydown) nao fazia nada desde a v1.6.54; o candidato so chegava ao impresso abrindo a aba Exames na mao, entao a falha era silenciosa. closeChangePass e o X do modal de troca de senha. Ambas expostas. Varredura completa: as 14 funcoes chamadas de onclick inline no arquivo agora resolvem no escopo global, provado em jsdom. Sem mudanca no grader, comentador, STT, TTS, cronometro, mic ou caminho do assinante/admin. Nota anterior (1.6.151): 1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
 };
 
 // Função global pra inspeção via console
@@ -1661,7 +1764,7 @@ function show(id){
   if(id!=='s-sim'){ document.body.classList.remove('sim-reading'); if(typeof readInt!=='undefined' && readInt){ clearInterval(readInt); readInt = null; } }   // v1.6.102: sair do s-sim encerra a fase de leitura
   var nav = document.getElementById('mobile-nav');
   if(nav){
-    var hubs = ['s-dashboard','s-select','s-history','s-hist-detail','s-marathon','s-account'];
+    var hubs = ['s-dashboard','s-select','s-history','s-hist-detail','s-marathon','s-account','s-messages'];
     nav.classList.toggle('nav-hidden', hubs.indexOf(id) < 0);
     document.body.classList.toggle('has-mobile-nav', hubs.indexOf(id) >= 0);
     // v1.6.84: barra global de topo nas mesmas telas-hub
@@ -3611,6 +3714,8 @@ async function renderDashboard(){
   renderStationOfDay();
   renderAvisos();
   loadSubscriptionInfo();
+  carregarPlanoSemana();   // v1.6.158: Sua semana (silencioso se falhar)
+  carregarMensagens();     // v1.6.158: contador de Mensagens + avisos do mural
 }
 
 // Próxima prova INEP — prova prática (2ª etapa).
@@ -3768,11 +3873,423 @@ function renderAvisos(){
   }
   // Avisos editáveis — por enquanto vem do localStorage; admin pode editar pelo console
   // Futuro: criar tabela 'announcements' no Supabase
+  // v1.6.158: avisos publicados pelo admin (tabela announcements, via get_minhas_mensagens).
+  // Precedencia: incidente da constante acima > avisos do banco > rv_avisos legado > oculto.
+  if(_muralCache && _muralCache.length){
+    if(card) card.style.display='';
+    body.innerHTML = _muralCache.slice(0, 2).map(function(a){
+      var corpo = String(a.corpo || '');
+      if(corpo.length > 280) corpo = corpo.slice(0, 277) + '...';
+      return '<div class="av-item"><strong>' + esc(a.titulo || '') + '</strong><br>'
+        + esc(corpo).replace(/\n/g, '<br>')
+        + (a.acao ? '<div class="msg-acao"><button type="button" class="pl-go" data-msg-acao="' + esc(a.acao) + '">' + esc(a.acao_rotulo || 'Abrir') + '</button></div>' : '')
+        + '</div>';
+    }).join('');
+    return;
+  }
   var custom = localStorage.getItem('rv_avisos');
   if(custom){ if(card) card.style.display=''; body.textContent = custom; return; }
   // Default
   // Pedido para seguir o Instagram + QR (v1.6.35)
   if(card) card.style.display='none';  // sem aviso ativo -> oculta (IG foi pro rodapé, v1.6.41)
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// v1.6.158 — ATIVACAO, RETENCAO E CONFIANCA NA NOTA
+// Tudo aqui e best-effort: qualquer falha de rede ou RPC deixa o card/tela oculto
+// e nunca quebra o dashboard, o resultado ou o historico que hospedam o recurso.
+// Nenhum onclick inline: os cliques chegam por delegacao em containers estaticos.
+// ════════════════════════════════════════════════════════════════════════════
+var _muralCache = [];        // avisos do mural (announcements com no_mural=true)
+var _msgCache = null;        // ultima resposta de get_minhas_mensagens
+var _planoCache = null;      // ultima resposta de get_plano_semana
+var _planoEscolhendo = false;
+var _onbLiberado = false;    // "Como funciona" ja foi decidido nesta pagina
+
+function _kiwifyLink(medium){
+  var base = (typeof ACCESS_CONFIG !== 'undefined' && ACCESS_CONFIG.kiwify_link) ? ACCESS_CONFIG.kiwify_link : 'https://pay.kiwify.com.br/OpKRKOr';
+  return base + '?utm_source=app&utm_medium=' + encodeURIComponent(medium || 'mensagens') + '&utm_campaign=in_app';
+}
+
+// ── SUA SEMANA ───────────────────────────────────────────────────────────────
+async function carregarPlanoSemana(){
+  var card = $('mural-plano');
+  if(!card) return;
+  try{
+    if(!supabaseClient || !currentUser){ card.style.display = 'none'; return; }
+    var r = await supabaseClient.rpc('get_plano_semana');
+    if(r.error || !r.data || r.data.erro){ card.style.display = 'none'; return; }
+    _planoCache = r.data;
+    _planoEscolhendo = false;
+    renderPlanoSemana();
+  }catch(e){ card.style.display = 'none'; }
+}
+
+function _planoLinha(st, sub, tipo, rotulo){
+  return '<div class="pl-st"><div class="pl-st-txt"><div class="pl-st-nm">' + esc(st.name || '') + '</div>'
+    + '<div class="pl-st-sub">' + sub + '</div></div>'
+    + '<button type="button" class="pl-go" data-plano-start="' + esc(st.id) + '" data-plano-tipo="' + tipo + '">' + rotulo + '</button></div>';
+}
+
+function renderPlanoSemana(){
+  var card = $('mural-plano'), body = $('plano-body'), h = $('plano-h');
+  var d = _planoCache;
+  if(!card || !body) return;
+  if(!d){ card.style.display = 'none'; return; }
+  var html = '';
+  if(!d.plano_completo){
+    // Nao-assinante: so a proxima demo (o servidor ja devolve apenas trial_available)
+    if(!d.recomendada){ card.style.display = 'none'; return; }
+    if(h) h.textContent = 'Sua próxima demo';
+    html += '<div class="pl-q">Você ainda tem esta estação grátis para fazer.</div>';
+    html += _planoLinha(d.recomendada, esc(d.recomendada.area || ''), 'rec', 'Fazer agora');
+  } else {
+    if(h) h.textContent = 'Sua semana';
+    if(d.meta == null || _planoEscolhendo){
+      html += '<div class="pl-q">Quantas estações por semana você quer fazer?</div><div class="pl-metas">'
+        + [3, 5, 7, 10].map(function(n){
+            return '<button type="button" class="pl-chip" data-plano-meta="' + n + '">' + n + '</button>';
+          }).join('')
+        + '</div><div class="pl-hint">' + (d.meta == null ? 'Quem treina com meta volta mais vezes. Dá para mudar depois.' : 'Meta atual: ' + d.meta + ' por semana.') + '</div>';
+    } else {
+      var feitas = d.feitas_semana || 0, meta = d.meta || 1;
+      var pct = Math.min(100, Math.round(feitas / meta * 100));
+      html += '<div class="pl-prog"><b>' + feitas + '</b> de ' + meta + (meta === 1 ? ' estação' : ' estações') + ' nesta semana'
+        + (feitas >= meta ? ' · <span class="pl-ok">meta cumprida</span>' : '') + '</div>';
+      html += '<div class="pl-bar"><div style="width:' + pct + '%"></div></div>';
+      var dias = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+      var hoje = (new Date().getDay() + 6) % 7;   // segunda = 0
+      var pd = Array.isArray(d.por_dia) ? d.por_dia : [];
+      html += '<div class="pl-dias">' + dias.map(function(l, i){
+        return '<div class="pl-dia' + ((pd[i] || 0) > 0 ? ' on' : '') + (i === hoje ? ' hoje' : '') + '" title="' + (pd[i] || 0) + ' estação(ões)">' + l + '<i></i></div>';
+      }).join('') + '</div>';
+      if((d.semanas_seguidas || 0) >= 2){
+        html += '<div class="pl-streak">' + d.semanas_seguidas + ' semanas seguidas cumprindo a meta</div>';
+      }
+      html += '<button type="button" class="pl-link" data-plano-mudar="1">Mudar meta</button>';
+    }
+    if(d.recomendada){
+      var mot = d.recomendada.motivo === 'nao_treinada'
+        ? 'Você não treinou ' + esc(d.recomendada.area || '') + ' nos últimos 90 dias'
+        : 'Sua área com menor média: ' + esc(d.recomendada.area || '') + (d.recomendada.area_media != null ? ' (' + d.recomendada.area_media + '%)' : '');
+      html += '<div class="pl-sec">Próxima recomendada</div>' + _planoLinha(d.recomendada, mot, 'rec', 'Treinar');
+    }
+    if(Array.isArray(d.refazer) && d.refazer.length){
+      html += '<div class="pl-sec">Vale refazer</div>' + d.refazer.map(function(rf){
+        return _planoLinha(rf, 'Você fez ' + rf.nota + '% há ' + rf.dias + ' dias', 'refazer', 'Refazer');
+      }).join('');
+    }
+  }
+  body.innerHTML = html;
+  card.style.display = '';
+}
+
+async function planoClique(e){
+  var t = e.target;
+  if(!t || !t.closest) return;
+  var chip = t.closest('[data-plano-meta]');
+  if(chip){
+    var n = parseInt(chip.getAttribute('data-plano-meta'), 10);
+    chip.disabled = true;
+    try{
+      var r = await supabaseClient.rpc('set_meta_semanal', { p_meta: n });
+      if(!r.error){ logUx('plano_meta_set', { meta: n }); }
+    }catch(_){}
+    carregarPlanoSemana();
+    return;
+  }
+  if(t.closest('[data-plano-mudar]')){ _planoEscolhendo = true; renderPlanoSemana(); return; }
+  var go = t.closest('[data-plano-start]');
+  if(go){
+    var tipo = go.getAttribute('data-plano-tipo');
+    logUx(tipo === 'refazer' ? 'plano_refazer_click' : 'plano_rec_click', { station: go.getAttribute('data-plano-start') });
+    loadStation(go.getAttribute('data-plano-start'), true, true);
+  }
+}
+
+// ── EVOLUCAO NA MESMA ESTACAO ────────────────────────────────────────────────
+async function mostrarEvolucao(stationId, histId, pctAtual){
+  var box = $('eval-evolucao');
+  if(!box) return;
+  box.style.display = 'none';
+  box.innerHTML = '';
+  try{
+    if(!stationId || !currentUser || pctAtual == null) return;
+    // RLS de sim_history devolve so as sessoes do proprio usuario
+    var res = await supaFetch('/rest/v1/sim_history?select=id,score_pct,created_at&station_id=eq.'
+      + encodeURIComponent(stationId) + '&order=created_at.desc&limit=12');
+    if(!res || !res.ok) return;
+    var rows = (await res.json() || []).filter(function(x){ return x && x.id !== histId && x.score_pct != null; });
+    if(!rows.length) return;
+    var ant = rows[0];
+    var dias = Math.max(0, Math.round((Date.now() - new Date(ant.created_at).getTime()) / 86400000));
+    var delta = Math.round(pctAtual - ant.score_pct);
+    box.innerHTML = '<div class="evo-lbl">Sua evolução nesta estação</div>'
+      + '<div class="evo-row">' + Math.round(ant.score_pct) + '%<span class="evo-seta">→</span>' + Math.round(pctAtual) + '%'
+      + '<span class="evo-delta ' + (delta >= 0 ? 'up' : 'down') + '">(' + (delta > 0 ? '+' : '') + delta + ')</span></div>'
+      + '<div class="evo-sub">Tentativa anterior ' + (dias === 0 ? 'hoje' : 'há ' + dias + (dias === 1 ? ' dia' : ' dias'))
+      + ' · ' + (rows.length + 1) + ' tentativas nesta estação</div>';
+    box.style.display = '';
+  }catch(e){ box.style.display = 'none'; }
+}
+
+// ── MENSAGENS ────────────────────────────────────────────────────────────────
+async function carregarMensagens(){
+  try{
+    if(!supabaseClient || !currentUser) return;
+    var r = await supabaseClient.rpc('get_minhas_mensagens', { p_limit: 60 });
+    if(r.error || !r.data || r.data.erro) return;
+    _msgCache = r.data;
+    _muralCache = Array.isArray(r.data.mural) ? r.data.mural : [];
+    atualizarContadorMensagens(r.data.nao_lidas || 0);
+    renderAvisos();
+  }catch(e){}
+}
+
+function atualizarContadorMensagens(n){
+  var dot = $('user-msg-dot'), cnt = $('menu-msg-count');
+  var txt = n > 9 ? '9+' : String(n);
+  if(dot){ dot.textContent = txt; dot.style.display = n > 0 ? '' : 'none'; }
+  if(cnt){ cnt.textContent = txt; cnt.style.display = n > 0 ? '' : 'none'; }
+}
+
+var _MSG_TAG = { aviso:'Aviso', novidade:'Novidade', incidente:'Incidente', manutencao:'Manutenção', email:'E-mail', contestacao:'Contestação' };
+
+function renderMensagens(){
+  var list = $('msg-list');
+  if(!list) return;
+  var msgs = (_msgCache && Array.isArray(_msgCache.mensagens)) ? _msgCache.mensagens : null;
+  if(!msgs){ list.innerHTML = '<p class="msg-vazio">Não foi possível carregar suas mensagens agora.</p>'; return; }
+  if(!msgs.length){ list.innerHTML = '<p class="msg-vazio">Nenhuma mensagem por enquanto. Avisos e respostas da equipe aparecem aqui.</p>'; return; }
+  list.innerHTML = msgs.map(function(m){
+    var dt = '';
+    try{ dt = new Date(m.data).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }); }catch(_){}
+    return '<div class="msg-card' + (m.lida ? '' : ' nova') + '">'
+      + '<div class="msg-top"><span class="msg-tag t-' + esc(m.tipo || '') + '">' + esc(_MSG_TAG[m.tipo] || 'Aviso') + '</span>'
+      + (m.lida ? '' : '<span class="msg-nova">nova</span>')
+      + '<span class="msg-data">' + esc(dt) + '</span></div>'
+      + '<div class="msg-tit">' + esc(m.titulo || '') + '</div>'
+      + '<div class="msg-corpo">' + esc(m.corpo || '').replace(/\n/g, '<br>') + '</div>'
+      + (m.acao ? '<div class="msg-acao"><button type="button" class="pl-go" data-msg-acao="' + esc(m.acao) + '">' + esc(m.acao_rotulo || 'Abrir') + '</button></div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+async function abrirMensagens(){
+  show('s-messages');
+  var list = $('msg-list');
+  if(list && !_msgCache) list.innerHTML = '<p class="msg-vazio">Carregando...</p>';
+  await carregarMensagens();
+  renderMensagens();   // as novas aparecem marcadas nesta abertura
+  logUx('msg_open', { nao_lidas: (_msgCache && _msgCache.nao_lidas) || 0 });
+  try{
+    if(_msgCache && _msgCache.nao_lidas > 0){
+      var r = await supabaseClient.rpc('marcar_todas_lidas');
+      if(!r.error){ _msgCache.nao_lidas = 0; atualizarContadorMensagens(0); }
+    }
+  }catch(_){}
+}
+
+function msgAcao(acao){
+  if(acao === 'acervo'){ show('s-select'); renderStations(); return; }
+  if(acao === 'assinar'){ window.open(_kiwifyLink('mensagens'), '_blank', 'noopener'); return; }
+  if(acao === 'depoimento'){ if(window.openTestimonial) window.openTestimonial(); return; }
+  if(acao === 'conta'){ renderAccountScreen(); return; }
+}
+
+// ── DISCORDO DESTA CORRECAO ──────────────────────────────────────────────────
+var _CT_ERRO = {
+  motivo_curto: 'Escreva um pouco mais (mínimo 5 caracteres).',
+  ja_contestado: 'Você já contestou este item.',
+  limite_diario: 'Você chegou ao limite de contestações por hoje. Tente amanhã.',
+  sessao_nao_encontrada: 'Não encontramos esta sessão no seu histórico.',
+  item_nao_encontrado: 'Este item não está na correção salva.'
+};
+
+async function montarContestar(tbody, histId){
+  try{
+    if(!tbody || !histId || !supabaseClient || !currentUser) return;
+    if(!/^[0-9a-f-]{36}$/i.test(String(histId))) return;    // sessao so local (sem id do banco)
+    var rows = tbody.querySelectorAll('tr.pep-loss[data-item-id]');
+    if(!rows.length) return;
+    var mapa = {};
+    try{
+      var r = await supabaseClient.rpc('minhas_contestacoes', { p_sim_history_id: histId });
+      if(!r.error && Array.isArray(r.data)) r.data.forEach(function(c){ mapa[c.item_id] = c; });
+    }catch(_){}
+    for(var i = 0; i < rows.length; i++){
+      var tr = rows[i];
+      var old = tr.querySelector('.ct-wrap'); if(old) old.parentNode.removeChild(old);
+      var itemId = tr.getAttribute('data-item-id');
+      var c = mapa[itemId];
+      var w = document.createElement('div');
+      w.className = 'ct-wrap';
+      if(c){
+        var st = c.status === 'aberta' ? 'Contestado · em análise'
+               : c.status === 'procede' ? 'Contestação procedente' : 'Contestação analisada · nota mantida';
+        w.innerHTML = '<span class="ct-st ct-' + esc(c.status) + '">' + st + '</span>'
+          + (c.resposta ? '<div class="ct-resp">' + esc(c.resposta) + '</div>' : '');
+      } else {
+        w.innerHTML = '<button type="button" class="ct-btn" data-contest="' + esc(itemId) + '" data-hist="' + esc(histId) + '">Discordo desta correção</button>';
+      }
+      var td = tr.querySelector('td');
+      if(td) td.appendChild(w);
+    }
+  }catch(e){}
+}
+
+function contestarClique(e){
+  var b = e.target && e.target.closest ? e.target.closest('[data-contest]') : null;
+  if(!b) return;
+  var tr = b.closest('tr');
+  var tdTxt = tr ? tr.querySelector('td') : null;
+  var titulo = '';
+  if(tdTxt){
+    // o texto do item, sem o proprio bloco do Discordo (que tambem vive nesta celula)
+    var cl = tdTxt.cloneNode(true);
+    var cw = cl.querySelector('.ct-wrap'); if(cw) cw.parentNode.removeChild(cw);
+    var f = cl.querySelector('div') || cl;   // s-eval: 1o div e o titulo; historico: texto direto na celula
+    titulo = (f.textContent || '').trim();
+  }
+  abrirContestacao(b.getAttribute('data-hist'), b.getAttribute('data-contest'), titulo, tr ? tr.parentNode : null);
+}
+
+function abrirContestacao(histId, itemId, itemTxt, tbody){
+  var ov = document.createElement('div');
+  ov.className = 'ct-ov';
+  ov.innerHTML = '<div class="ct-box" role="dialog" aria-modal="true" aria-labelledby="ct-h">'
+    + '<div class="ct-h" id="ct-h">Discordo desta correção</div>'
+    + '<div class="ct-item">' + esc(itemTxt || ('Item ' + itemId)) + '</div>'
+    + '<label class="ct-lbl" for="ct-txt">Por que a correção errou neste item? Se puder, diga o que você falou e em que momento.</label>'
+    + '<textarea id="ct-txt" maxlength="800" rows="5" placeholder="Ex.: pedi o ultrassom e disse que mostrava cálculo com parede espessada, perto dos 6 minutos."></textarea>'
+    + '<div class="ct-err" style="display:none"></div>'
+    + '<div class="ct-acts"><button type="button" class="btn" data-ct="cancel">Cancelar</button>'
+    + '<button type="button" class="btn btn-p" data-ct="send">Enviar</button></div>'
+    + '<div class="ct-note">A equipe revê o item com a sua transcrição. A resposta chega em Mensagens.</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  var ta = ov.querySelector('#ct-txt');
+  try{ ta.focus(); }catch(_){}
+  function fechar(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }
+  ov.addEventListener('click', async function(e){
+    if(e.target === ov){ fechar(); return; }
+    var act = e.target.closest ? e.target.closest('[data-ct]') : null;
+    if(!act) return;
+    if(act.getAttribute('data-ct') === 'cancel'){ fechar(); return; }
+    var err = ov.querySelector('.ct-err');
+    var motivo = (ta.value || '').trim();
+    if(motivo.length < 5){ err.textContent = _CT_ERRO.motivo_curto; err.style.display = ''; return; }
+    act.disabled = true; act.textContent = 'Enviando...';
+    try{
+      var r = await supabaseClient.rpc('contestar_item', { p_sim_history_id: histId, p_item_id: String(itemId), p_motivo: motivo });
+      if(r.error || !r.data || !r.data.ok){
+        var code = r.data && r.data.erro;
+        err.textContent = _CT_ERRO[code] || 'Não foi possível enviar agora. Tente de novo em instantes.';
+        err.style.display = '';
+        act.disabled = false; act.textContent = 'Enviar';
+        return;
+      }
+      logUx('contest_submit', { item: String(itemId) });
+      fechar();
+      if(tbody) montarContestar(tbody, histId);
+    }catch(_e){
+      err.textContent = 'Não foi possível enviar agora. Tente de novo em instantes.';
+      err.style.display = '';
+      act.disabled = false; act.textContent = 'Enviar';
+    }
+  });
+}
+
+// ── COMO FUNCIONA (antes da 1a estacao) ──────────────────────────────────────
+async function onbPrecisa(){
+  try{ if(localStorage.getItem('rv_onb_ok') === '1') return false; }catch(_){}
+  if(!currentUser) return false;
+  var res = await supaFetch('/rest/v1/sim_history?select=id&limit=1');
+  if(!res || !res.ok) return false;      // na duvida, nao atrapalha
+  var rows = await res.json();
+  if(Array.isArray(rows) && rows.length){
+    try{ localStorage.setItem('rv_onb_ok', '1'); }catch(_){}
+    return false;
+  }
+  return true;
+}
+
+function mostrarOnboarding(aoComecar){
+  logUx('onboarding_view', null);
+  var ov = document.createElement('div');
+  ov.className = 'onb-ov';
+  ov.innerHTML = '<div class="onb-box" role="dialog" aria-modal="true" aria-labelledby="onb-tit">'
+    + '<div class="onb-kick">Antes da sua primeira estação</div>'
+    + '<div class="onb-tit" id="onb-tit">Como funciona uma estação</div>'
+    + '<div class="onb-sub">São 10 minutos, por voz, como na prova. A nota segue o PEP do INEP, item por item.</div>'
+    + '<div class="onb-passo"><div class="onb-n">1</div><div><div class="onb-pt">Converse com o paciente</div>'
+    + '<div class="onb-pd">Apresente-se e faça a anamnese falando normalmente. O cronômetro começa quando a estação abre.</div></div></div>'
+    + '<div class="onb-passo"><div class="onb-n">2</div><div><div class="onb-pt">Peça o exame físico pelo nome</div>'
+    + '<div class="onb-pd">Não há corpo para examinar. Diga a manobra, por exemplo <q>vou aferir a pressão e examinar o abdome, com a manobra de Murphy</q>. O Chefe de estação entrega o resultado.</div></div></div>'
+    + '<div class="onb-passo"><div class="onb-n">3</div><div><div class="onb-pt">Peça os exames e interprete em voz alta</div>'
+    + '<div class="onb-pd"><q>Solicito hemograma e ultrassom de abdome.</q> O impresso chega na aba Exames. Diga o que ele mostra: <q>o ultrassom mostra cálculo com parede espessada</q>.</div></div></div>'
+    + '<div class="onb-passo"><div class="onb-n">4</div><div><div class="onb-pt">Feche com hipótese e conduta</div>'
+    + '<div class="onb-pd">Diga o diagnóstico e o que vai fazer: tratamento, encaminhamento e orientação ao paciente.</div></div></div>'
+    + '<div class="onb-dica">Na primeira estação, quase todo mundo perde ponto nos passos 2 e 3: pede o exame, mas não diz o que ele mostra. Só conta o que você fala.</div>'
+    + '<div class="onb-mic"><button type="button" class="btn" data-onb="mic" style="padding:6px 12px;font-size:.8rem">Testar meu microfone</button>'
+    + '<div class="onb-mic-bar"><div></div></div><div class="onb-mic-txt"></div></div>'
+    + '<div class="onb-acts"><button type="button" class="pl-link" data-onb="pular">Pular</button>'
+    + '<button type="button" class="btn btn-p" data-onb="comecar">Começar a estação</button></div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  var stream = null, raf = null, ctx = null;
+  function pararMic(){
+    try{ if(raf) cancelAnimationFrame(raf); }catch(_){}
+    try{ if(stream) stream.getTracks().forEach(function(t){ t.stop(); }); }catch(_){}
+    try{ if(ctx && ctx.close) ctx.close(); }catch(_){}
+    stream = null; raf = null; ctx = null;
+  }
+  function seguir(evento){
+    pararMic();
+    try{ localStorage.setItem('rv_onb_ok', '1'); }catch(_){}
+    logUx(evento, null);
+    if(ov.parentNode) ov.parentNode.removeChild(ov);
+    if(typeof aoComecar === 'function') aoComecar();
+  }
+  async function testarMic(btn){
+    var bar = ov.querySelector('.onb-mic-bar > div'), txt = ov.querySelector('.onb-mic-txt');
+    btn.disabled = true;
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      var an = ctx.createAnalyser(); an.fftSize = 512;
+      ctx.createMediaStreamSource(stream).connect(an);
+      var buf = new Uint8Array(an.fftSize), pico = 0, t0 = Date.now();
+      txt.textContent = 'Fale algo por 4 segundos...';
+      (function loop(){
+        an.getByteTimeDomainData(buf);
+        var m = 0; for(var i = 0; i < buf.length; i++){ var v = Math.abs(buf[i] - 128); if(v > m) m = v; }
+        pico = Math.max(pico, m);
+        bar.style.width = Math.min(100, Math.round(m / 64 * 100)) + '%';
+        if(Date.now() - t0 < 4000){ raf = requestAnimationFrame(loop); return; }
+        var ok = pico > 12;
+        txt.textContent = ok ? 'Microfone funcionando. Pode começar.' : 'Quase não captamos som. Confira se o microfone certo está selecionado.';
+        logUx('onboarding_mic_test', { ok: ok });
+        pararMic();
+        bar.style.width = '0';
+        btn.disabled = false;
+      })();
+    }catch(e){
+      txt.textContent = 'O navegador não liberou o microfone. Permita o acesso no cadeado da barra de endereço.';
+      logUx('onboarding_mic_test', { ok: false, negado: true });
+      pararMic();
+      btn.disabled = false;
+    }
+  }
+  ov.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-onb]') : null;
+    if(!b) return;
+    var a = b.getAttribute('data-onb');
+    if(a === 'comecar') seguir('onboarding_done');
+    else if(a === 'pular') seguir('onboarding_skip');
+    else if(a === 'mic') testarMic(b);
+  });
 }
 
 // ── INFO MODAL (FAQ / Contato / Quem somos) ──────────────────────────────────
@@ -4079,6 +4596,16 @@ async function loadStation(id, fromDashboard, autoStart){
     if(blocked || window.__hasActiveAccess !== true){
       return; // sem acesso — checkSubscription já tratou (login/logout)
     }
+  }
+  // v1.6.158: COMO FUNCIONA — so para quem nunca fez uma estacao, depois do controle de
+  // acesso (quem nao tem acesso ja foi para o paywall). Fora da Maratona, que tem briefing
+  // proprio e espera o loadStation terminar. O clique em Comecar e um gesto novo e chama
+  // loadStation de novo, o que destrava o audio no iOS dentro desse gesto.
+  if(!_onbLiberado && !marathonActive){
+    var _precisa = false;
+    try{ _precisa = await onbPrecisa(); }catch(_oe){ _precisa = false; }
+    _onbLiberado = true;
+    if(_precisa){ mostrarOnboarding(function(){ loadStation(id, fromDashboard, autoStart); }); return; }
   }
   var el = $('station-list');
   el.innerHTML = '<p class="small muted" style="padding:1rem 0">Carregando estação...</p>';
@@ -7880,6 +8407,7 @@ async function runEval(isReeval){
       +'<td style="text-align:right;font-family:var(--mono);font-size:.82rem;color:var(--text2);vertical-align:top">'+ei.max.toFixed(2)+'</td>';
     // v1.6.148: quem perdeu ponto fica visivel; quem acertou vai para o "PEP completo"
     tr.className = (ei.score < ei.max) ? 'pep-loss' : 'pep-ok';
+    tr.setAttribute('data-item-id', String(ei.id));   // v1.6.158: Discordo desta correcao
     tbody.appendChild(tr);
   });
 
@@ -7988,6 +8516,9 @@ async function runEval(isReeval){
 
   if(_prevHistId){ lastEvalData.id = _prevHistId; await updateHistory(lastEvalData); }
   else { await saveHistory(lastEvalData); }
+  // v1.6.158: depois de gravada a sessao (precisa do id): Discordo por item e evolucao na estacao.
+  // Assincronos e silenciosos: nunca seguram nem quebram a tela de resultado.
+  try{ if(lastEvalData && lastEvalData.id){ montarContestar($('eval-body'), lastEvalData.id); mostrarEvolucao(lastEvalData.station_id, lastEvalData.id, lastEvalData.score_pct); } }catch(_c158){}
   await refreshTrialAfterSession();  // v1.6.71 Frente B: decrementa o banner do trial
   renderEvalTranscript();
   if(marathonActive) onMarathonEvalDone();
@@ -8783,9 +9314,11 @@ function renderHistDetail(data){
       +'<td style="vertical-align:top;padding:10px 8px">'+snippetHtml+'</td>';
     // v1.6.148: mesma regra da s-eval
     tr.className = (item.score < item.max) ? 'pep-loss' : 'pep-ok';
+    tr.setAttribute('data-item-id', String(item.id));   // v1.6.158
     tbody.appendChild(tr);
   });
   pepSync('hd-pep-wrap','hd-pep-sub','hd-pep-vazio','hd-pep-toggle');   // v1.6.148
+  try{ if(data && data.id) montarContestar(tbody, data.id); }catch(_c158){}   // v1.6.158
 
   // ── Transcrição da consulta (fundida: médico c/ timestamp + paciente) — v1.2.3 ──
   var logEl = $('hd-log');
@@ -8895,6 +9428,14 @@ function renderHistDetail(data){
 // Nav buttons
 $('btn-menu-history').addEventListener('click', function(){ closeUserMenu(); renderHistory(); });
 var _bmAcct=$('btn-menu-account'); if(_bmAcct) _bmAcct.addEventListener('click', function(){ closeUserMenu(); renderAccountScreen(); });
+// v1.6.158: Mensagens, Sua semana, avisos do mural e Discordo — delegacao em containers estaticos
+var _bmMsg=$('btn-menu-messages'); if(_bmMsg) _bmMsg.addEventListener('click', function(){ closeUserMenu(); abrirMensagens(); });
+var _msgBack=$('btn-messages-back'); if(_msgBack) _msgBack.addEventListener('click', function(){ show('s-dashboard'); renderDashboard(); });
+var _msgList=$('msg-list'); if(_msgList) _msgList.addEventListener('click', function(e){ var b=e.target.closest && e.target.closest('[data-msg-acao]'); if(b) msgAcao(b.getAttribute('data-msg-acao')); });
+var _avBody=$('avisos-body'); if(_avBody) _avBody.addEventListener('click', function(e){ var b=e.target.closest && e.target.closest('[data-msg-acao]'); if(b) msgAcao(b.getAttribute('data-msg-acao')); });
+var _mPlano=$('mural-plano'); if(_mPlano) _mPlano.addEventListener('click', planoClique);
+var _evBody=$('eval-body'); if(_evBody) _evBody.addEventListener('click', contestarClique);
+var _hdBody=$('hd-cl-body'); if(_hdBody) _hdBody.addEventListener('click', contestarClique);
 
 $('btn-hd-pdf').addEventListener('click', function(){
   if(!lastEvalData){ alert('Nenhuma simulação carregada.'); return; }
