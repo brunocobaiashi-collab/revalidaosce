@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RevalidaOSCE — Simulador OSCE para o Revalida INEP</title>
+<title>Simulador OSCE da 2ª etapa do Revalida | RevalidaOSCE</title>
 <!-- Google tag (gtag.js) — Google Ads AW-18306871741 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18306871741"></script>
 <script>
@@ -50,11 +50,11 @@
   }catch(_e){}
 })();
 </script>
-<meta name="description" content="Treine para a prova prática do Revalida com estações OSCE reais, avaliação por IA e feedback instantâneo. O único simulador desenvolvido para o padrão INEP.">
+<meta name="description" content="Simulador da prova prática (2ª etapa) do Revalida: paciente virtual por voz, impressos como na prova e nota pelo PEP de 10 pontos, item a item. Teste 3 estações grátis, sem cartão.">
 <link rel="canonical" href="https://revalidaosce.com.br/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="RevalidaOSCE — Simulador OSCE para o Revalida INEP">
-<meta property="og:description" content="Treine para a prova prática do Revalida com estações OSCE reais, avaliação por IA e feedback instantâneo.">
+<meta property="og:title" content="Simulador OSCE da 2ª etapa do Revalida | RevalidaOSCE">
+<meta property="og:description" content="Treine a prova prática do Revalida falando: paciente virtual por voz, impressos e nota pelo PEP de 10 pontos. 3 estações grátis.">
 <meta property="og:url" content="https://revalidaosce.com.br/">
 <meta property="og:site_name" content="RevalidaOSCE">
 <script type="application/ld+json">
@@ -75,7 +75,7 @@
       "name": "Precisa de microfone para usar o RevalidaOSCE?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Não. Você pode digitar suas falas normalmente. O microfone é opcional e torna o treino mais realista, especialmente no celular."
+        "text": "Sim. O treino é por voz, como na prova: você fala e o paciente responde falando. Se o navegador bloquear o microfone, aparece uma caixa para digitar, para você não perder a estação."
       }
     },
     {
@@ -439,6 +439,45 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
 .perf-wrap{margin:0 auto;}
 #desempenho{background:var(--bg2)}
 .ic-flame{width:1em;height:1em;vertical-align:-.14em;margin-right:.06em;display:inline-block}
+/* 12/11/2026 — 1a dobra alinhada aos anúncios; seções Simulado e PEP */
+/* O rodapé usa <nav class="footer-links">, que herdava a regra nav{position:fixed;top:0} do cabeçalho
+   e ficava por cima dele no topo da página, escondendo o logo e o botão de preço. */
+nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:0;z-index:auto;justify-content:center}
+#hero h1.hero-title{font-size:clamp(2.2rem,4.3vw,3.7rem);line-height:1.08}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-turma{display:inline-block;margin-top:1.1rem;font-size:.86rem;color:var(--text);background:rgba(0,201,255,.08);
+  border:1px solid rgba(0,201,255,.25);border-radius:999px;padding:.35rem .9rem;line-height:1.4}
+.hero-prova{display:inline-block;margin:.5rem 0 0 .4rem;font-family:var(--mono);font-size:.78rem;color:var(--gold)}
+.hero-prova[hidden]{display:none}
+#hero .hero-sub{margin:1.1rem 0 2rem}
+#simulado{padding:3.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
+.simulado-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:2.5rem;align-items:start}
+.h2-sm{font-size:clamp(1.6rem,3vw,2.3rem)}
+.simulado-txt{font-size:1.02rem;color:var(--text2);line-height:1.75}
+.simulado-txt strong{color:var(--text);font-weight:500}
+.pep-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:3rem;align-items:start;margin-top:3rem}
+.pep-pontos{display:flex;flex-direction:column;gap:1.4rem}
+.pep-ponto-t{font-weight:600;color:var(--text);margin-bottom:.25rem}
+.pep-ponto-d{color:var(--text2);font-size:.95rem;line-height:1.65}
+.pep-card{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:1.4rem}
+.pep-card-h{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:1rem}
+.pep-card-t{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.pep-card-ex{font-family:var(--mono);font-size:.64rem;color:var(--text3);border:1px solid var(--border2);border-radius:4px;padding:1px 6px}
+.pep-item{padding:.85rem 0;border-top:1px solid var(--border)}
+.pep-item:first-of-type{border-top:none}
+.pep-item-top{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}
+.pep-item-n{font-size:.92rem;color:var(--text);line-height:1.45;min-width:0}
+.pep-item-pts{font-family:var(--mono);font-size:.8rem;color:var(--text2);white-space:nowrap}
+.pep-item-fala{font-size:.82rem;color:var(--text2);font-style:italic;margin-top:.35rem;line-height:1.5}
+.pep-item-falta{font-size:.82rem;color:var(--gold);margin-top:.35rem;line-height:1.5}
+.pep-item .badge-g,.pep-item .badge-y,.pep-item .badge-r{display:inline-block;margin-top:.4rem}
+@media(max-width:768px){
+  #hero{padding-top:5.6rem}
+  #hero h1.hero-title{font-size:2.05rem}
+  #hero .hero-sub{font-size:1.02rem;margin:.9rem 0 1.4rem;line-height:1.65}
+  .hero-turma{margin-top:.8rem;font-size:.8rem}
+  .simulado-grid,.pep-split{grid-template-columns:1fr;gap:1.5rem}
+}
 </style>
 <!-- Favicon — RevalidaOSCE -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -465,9 +504,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
   <div class="container">
     <div class="hero-grid">
       <div>
-        <div class="hero-tag">Simulador OSCE · Padrão INEP</div>
-        <h1>Passe na prova<br>prática do<br><em>Revalida</em></h1>
-        <p class="hero-sub"><strong>Converse por voz</strong> com o paciente virtual, como na prova real. Estações no padrão INEP, avaliação automática pelo Padrão Esperado de Procedimentos (PEP) e feedback imediato — no celular ou computador.</p>
+        <div class="hero-tag">Simulador OSCE · 2ª etapa · Padrão INEP</div>
+        <h1 class="hero-title">Simulador da <em>2ª etapa</em> do Revalida: treine a prova prática falando</h1>
+        <div class="hero-turma">Para quem vai fazer a 2ª etapa do Revalida 2026.2</div><span class="hero-prova" id="hero-prova" hidden></span>
+        <p class="hero-sub"><strong>Paciente virtual por voz</strong>, impressos como na prova e nota pelo PEP de 10 pontos, item a item. No celular ou no computador.</p>
         <div class="hero-btns">
           <a href="https://simulador.revalidaosce.com.br?signup=1" class="btn-primary">Testar 3 estações grátis →</a>
           <a href="#solucao" class="btn-secondary">Ver como funciona</a>
@@ -769,14 +809,25 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
   <div class="container">
     <div class="stats-grid">
       <div><div class="stat-n" style="font-size:1.6rem">2020-2025</div><div class="stat-l">Edições oficiais Revalida</div></div>
-      <!-- contagem real do banco em 16/08/2026: 236 ativas (75 INEP + 161 curadas) -->
-      <div><div class="stat-n" data-count="236">0</div><div class="stat-l">Estações no banco</div></div>
+      <!-- contagem real do banco em 12/11/2026: 251 ativas (74 INEP + 177 curadas) -->
+      <div><div class="stat-n" data-count="251">0</div><div class="stat-l">Estações no banco</div></div>
       <div><div class="stat-n" data-count="5">0</div><div class="stat-l">Áreas do Revalida</div></div>
       <div><div class="stat-n">IA</div><div class="stat-l">Avaliação automática</div></div>
       <div><div class="stat-n" data-count="100" data-suffix="%">0%</div><div class="stat-l">Padrão INEP/Revalida</div></div>
     </div>
   </div>
 </div>
+
+<!-- SIMULADO OU SIMULADOR? (12/11/2026: público da busca "simulado revalida") -->
+<section id="simulado">
+  <div class="container simulado-grid">
+    <div>
+      <div class="section-tag">Simulado ou simulador?</div>
+      <h2 class="h2-sm">Aqui você não responde questões. Você faz a estação.</h2>
+    </div>
+    <p class="simulado-txt">A 2ª etapa do Revalida é uma prova prática, e o treino tem de ser prático também. Cada estação é completa: <strong>10 minutos cronometrados</strong>, paciente que responde por voz, exame físico e exames pedidos ao Chefe de estação, <strong>impressos para interpretar</strong> e, no fim, a <strong>nota pelo PEP de 10 pontos</strong>, item a item. Faça uma por vez ou várias em sequência no Modo Maratona, no ritmo de um dia de prova.</p>
+  </div>
+</section>
 
 <!-- DORES -->
 <section id="dores">
@@ -878,8 +929,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
         <div class="feature-item">
           <div class="feature-check">✓</div>
           <div>
-            <div class="feature-title">Banco completo Revalida 2020-2025</div>
-            <div class="feature-desc">Todas as estações oficiais do INEP desde a primeira prova de habilidades clínicas — Clínica, Cirurgia, Ginecologia/Obstetrícia, Pediatria e Medicina de Família.</div>
+            <div class="feature-title">Estações das provas oficiais do INEP, de 2020 a 2025</div>
+            <div class="feature-desc">74 estações das provas de habilidades clínicas do Revalida, nas 5 áreas — Clínica, Cirurgia, Ginecologia/Obstetrícia, Pediatria e Medicina de Família —, mais as estações da curadoria no mesmo padrão.</div>
           </div>
         </div>
         <div class="feature-item">
@@ -893,7 +944,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
           <div class="feature-check">✓</div>
           <div>
             <div class="feature-title">Provas oficiais do Revalida INEP</div>
-            <div class="feature-desc">Todas as estações OSCE das edições oficiais de 2020 a 2025. Use o Modo Maratona para treinar várias estações em sequência.</div>
+            <div class="feature-desc">Estações das edições oficiais de 2020 a 2025. Use o Modo Maratona para treinar várias em sequência, como num simulado da prova.</div>
           </div>
         </div>
       </div>
@@ -916,6 +967,49 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
         <div class="eval-row"><span class="eval-item">Hipótese diagnóstica</span><span class="badge-g">Adequado</span></div>
         <div class="eval-row"><span class="eval-item">Conduta terapêutica</span><span class="badge-r">Inadequado</span></div>
         <div class="eval-row"><span class="eval-item">Orientações ao paciente</span><span class="badge-y">Parcial</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PEP (12/11/2026: públicos "pep revalida" e "pep list") -->
+<section id="pep">
+  <div class="container">
+    <div class="section-tag">PEP · Padrão Esperado de Procedimentos</div>
+    <h2>Treine o PEP falando,<br>não lendo checklist</h2>
+    <p class="section-sub">O PEP é a régua da 2ª etapa: cada item vale ponto e tem critério de adequado, parcial e inadequado. Decorar a lista ajuda. O que pontua na prova é dizer cada item em voz alta, dentro dos 10 minutos.</p>
+    <div class="pep-split reveal">
+      <div class="pep-pontos">
+        <div>
+          <div class="pep-ponto-t">Sem depender de colega</div>
+          <div class="pep-ponto-d">O paciente e o Chefe de estação estão sempre disponíveis. Você treina a hora que quiser, quantas vezes quiser, sem combinar com ninguém para fazer o papel de ator.</div>
+        </div>
+        <div>
+          <div class="pep-ponto-t">O critério de cada item, à vista</div>
+          <div class="pep-ponto-d">No resultado, cada item do PEP mostra o que era esperado, o critério de adequado e parcial e o trecho da sua fala que foi considerado.</div>
+        </div>
+        <div>
+          <div class="pep-ponto-t">O que faltou, primeiro</div>
+          <div class="pep-ponto-d">A correção abre pelos itens em que você perdeu ponto, com o motivo. É ali que está a próxima estação melhor.</div>
+        </div>
+      </div>
+      <div class="pep-card" role="figure" aria-label="Exemplo ilustrativo de itens do PEP corrigidos">
+        <div class="pep-card-h"><span class="pep-card-t">Dor em hipocôndrio direito · Cirurgia</span><span class="pep-card-ex">exemplo ilustrativo</span></div>
+        <div class="pep-item">
+          <div class="pep-item-top"><span class="pep-item-n">Pergunta sobre as características da dor</span><span class="pep-item-pts">1,0 / 1,0</span></div>
+          <span class="badge-g">Adequado</span>
+          <div class="pep-item-fala">&ldquo;A dor é em cólica ou contínua? Vai para as costas? Piora depois de comer?&rdquo;</div>
+        </div>
+        <div class="pep-item">
+          <div class="pep-item-top"><span class="pep-item-n">Solicita ultrassonografia de abdome</span><span class="pep-item-pts">1,0 / 1,0</span></div>
+          <span class="badge-g">Adequado</span>
+          <div class="pep-item-fala">&ldquo;Solicito uma ultrassonografia de abdome superior.&rdquo;</div>
+        </div>
+        <div class="pep-item">
+          <div class="pep-item-top"><span class="pep-item-n">Descreve os achados do ultrassom</span><span class="pep-item-pts">0 / 1,0</span></div>
+          <span class="badge-r">Inadequado</span>
+          <div class="pep-item-falta">Pediu o exame, mas não disse em voz alta o que o laudo mostra. Na prova, só conta o que é falado.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1010,7 +1104,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
       <div class="feat-card">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
         <div class="feat-title">Banco curado RevalidaOSCE</div>
-        <div class="feat-desc">São 161 estações curadas pela Equipe RevalidaOSCE, somadas às 75 oficiais do INEP — 236 no total, ampliadas continuamente para você treinar pontos fracos específicos antes da prova.</div>
+        <div class="feat-desc">São 177 estações criadas pela curadoria médica do RevalidaOSCE, somadas às 74 das provas oficiais do INEP — 251 no total, ampliadas continuamente para você treinar pontos fracos específicos antes da prova.</div>
       </div>
       <div class="feat-card">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div>
@@ -1070,8 +1164,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
           <div class="preco-equiv">Acesso completo, sem fidelidade</div>
           <div class="preco-features">
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Acesso ilimitado a todas as estações</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 75 estações oficiais do INEP — banco completo Revalida 2020-2025</div>
-          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 161 estações curadas pela Equipe RevalidaOSCE</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 74 estações das provas oficiais do INEP (2020 a 2025)</div>
+          <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> 177 estações criadas pela curadoria médica do RevalidaOSCE</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Modo Maratona com múltiplas estações em sequência</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Avaliação pelo PEP + devolutiva do examinador</div>
           <div class="preco-feat"><span class="preco-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> <strong>Resumos de estudo por tema</strong>, liberados conforme você treina</div>
@@ -1103,7 +1197,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 0
       </div>
       <div class="faq-item">
         <div class="faq-q">Precisa de microfone para usar?</div>
-        <div class="faq-a">Não. Você pode digitar suas falas normalmente. O microfone é opcional e torna o treino mais realista, especialmente no celular.</div>
+        <div class="faq-a">Sim. O treino é por voz, como na prova: você fala e o paciente responde falando. Se o navegador bloquear o microfone, aparece uma caixa para digitar, para você não perder a estação.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Funciona no celular?</div>
@@ -1264,6 +1358,21 @@ document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el);
     }).join('');
     sec.style.display='';
   }).catch(function(){});
+})();
+</script>
+<script>
+/* 12/11/2026 — data da prova prática (2ª etapa 2026.2). NAO preencher antes do edital do INEP.
+   Quando oficializar: PROVA_PRATICA = 'AAAA-MM-DD' e a faixa "Faltam N dias" aparece no hero. */
+(function(){
+  try{
+    var PROVA_PRATICA = null;
+    if(!PROVA_PRATICA) return;
+    var el = document.getElementById('hero-prova'); if(!el) return;
+    var dias = Math.ceil((new Date(PROVA_PRATICA + 'T08:00:00-03:00') - new Date()) / 86400000);
+    if(dias < 0) return;
+    el.textContent = dias === 0 ? 'A prova prática é hoje' : 'Faltam ' + dias + (dias === 1 ? ' dia' : ' dias') + ' para a prova prática';
+    el.hidden = false;
+  }catch(_e){}
 })();
 </script>
 </body>
