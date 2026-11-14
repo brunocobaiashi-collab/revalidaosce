@@ -14,7 +14,7 @@
 </script>
 <!-- ═══ APP VERSION ═══ -->
 <!-- Atualizar SEMPRE que houver mudança no arquivo. Use no console: __appVersion() -->
-<meta name="app-version" content="1.6.165">
+<meta name="app-version" content="1.6.166">
 <meta name="app-deploy-date" content="2026-06-20">
 <meta name="app-notes" content="Sistema de debug log: captura completa de interações IA para diagnóstico">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -574,6 +574,23 @@ body.light .badge{color:var(--text)}
 .rd td{padding:.65rem .8rem;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:top;line-height:1.6}
 .rd tr:last-child td{border-bottom:0}
 .rd td:first-child{color:#fff;font-weight:500}
+.rd .rs-hl{background:rgba(0,201,255,.10);box-shadow:inset 3px 0 0 var(--accent);border-radius:6px}
+.rd p.rs-hl,.rd li.rs-hl{padding:.15rem .5rem}
+.rd .rs-hl.rs-flash{background:rgba(0,201,255,.24);transition:background .6s}
+.rd details.rs-sec{border:1px solid var(--border);border-radius:12px;margin:.75rem 0;background:var(--bg2)}
+.rd details.rs-sec > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.8rem 1rem;font-family:var(--serif);font-size:1.05rem}
+.rd details.rs-sec > summary::-webkit-details-marker{display:none}
+.rd details.rs-sec > summary::after{content:'+';color:var(--accent);font-family:var(--mono);font-size:1rem;flex-shrink:0}
+.rd details.rs-sec[open] > summary::after{content:'\2212'}
+.rd details.rs-sec .rs-min{font-family:var(--mono);font-size:.68rem;color:var(--text3);margin-left:auto;white-space:nowrap}
+.rd details.rs-sec .rs-det{padding:0 1rem .6rem}
+.rd .rs-recolhidas-tit{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.16em;margin:2rem 0 .3rem}
+.tema-foco{background:rgba(0,119,204,.08);border:1px solid rgba(0,201,255,.28);border-radius:14px;padding:1rem 1.15rem;margin-bottom:1.25rem}
+.tema-foco-tit{font-family:var(--mono);font-size:.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:.16em;margin-bottom:.55rem}
+.tema-foco-it{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.88rem;line-height:1.45}
+.tema-foco-it:last-child{border-bottom:0}
+.tema-foco-it button{background:transparent;border:1px solid rgba(0,201,255,.4);color:var(--accent);border-radius:8px;padding:.3rem .65rem;font-size:.76rem;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.tema-foco-nt{color:var(--text3);font-size:.76rem;flex-shrink:0;white-space:nowrap}
 .tema-stn{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.85rem 0;border-bottom:1px solid var(--border)}
 .tema-stn:last-child{border-bottom:0}
 /* v1.6.152: estação do tema fora do plano do usuário — mesmo tratamento do acervo */
@@ -1315,7 +1332,9 @@ body.light .badge{color:var(--text)}
     <h1 id="tema-nome"></h1>
     <div id="tema-meta" style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap"></div>
   </div>
+  <div id="tema-foco" class="tema-foco" style="display:none"></div>
   <div id="tema-corpo" class="rd"></div>
+  <div id="tema-fim" style="height:1px"></div>
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-top:2rem">
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.5rem">Seu progresso no tema</div>
     <div class="tema-prog"><i id="tema-prog-bar" style="width:0%"></i></div>
@@ -1755,9 +1774,9 @@ body.light .badge{color:var(--text)}
 // Verificação rápida: window.__appVersion() no console do navegador
 // ═══════════════════════════════════════════════════════════════════════════
 var APP_VERSION = {
-  version: '1.6.165',
+  version: '1.6.166',
   date: '2026-11-14',
-  notes: '1.6.165 (base: 1.6.164): TEXTOS DO LINK DE ACESSO. Com a quick-api v4.43 o link assinado do e-mail tambem loga quem nao assina (ativacao do trial), com validade de 7 dias; assinante segue com 30. A mensagem de link expirado deixa de citar 30 dias e manda abrir o e-mail mais recente; a de link invalido deixa de falar em e-mail da compra. Nenhuma mudanca de logica, acesso, trial ou caminho do assinante. | 1.6.164 (base: 1.6.163): TELA DE ANALISE E SESSAO GRAVADA CERTA. (a) CORRIDA NO RESULTADO: durante a analise (mediana 43 s, p90 63 s, 30 dias) os botoes Recomecar, Outra estacao e Inicio ficavam visiveis; o runEval le station, doctorLog, fullTranscript, examLog e simStartedAt so DEPOIS da resposta da IA, e o startSim zera esses globais. Caso real 13/11 21:10 (feelicht, demo colecistite): 15 falas, Recomecar 4 s depois do fim, a nota da 1a sessao foi gravada com o inicio, a transcricao vazia e os exames da 2a; a transcricao real se perdeu. 5 casos desde agosto. Agora o runEval copia esses dados no inicio e grava a partir da copia; se outra estacao comecou no meio, grava igual mas nao desenha nada na tela da sessao nova. (b) TELA DE ANALISE: painel com 3 etapas (correcao pelo PEP, devolutiva, salvando), tempo decorrido e aviso de que leva menos de 1 minuto; nota, PEP, devolutiva e card do resumo so aparecem quando a correcao termina; os botoes de navegacao so aparecem quando a sessao foi gravada. Se passar de 150 s, os botoes voltam com aviso, e sair passa a ser seguro porque a gravacao continua da copia. A transcricao fica disponivel durante a espera. Duracao gravada, prompt do corretor, comentador, guard de coerencia, ator, STT, TTS, acesso, trial e caminho do assinante intocados. | 1.6.163 (base: 1.6.162): CONTATO VISUAL — ESCOPO FECHADO. (a) O prompt do corretor passa a dizer explicitamente que a regra vale so para o componente nao verbal; postura empatica, acolhimento, cordialidade e escuta continuam avaliados pela fala com o mesmo rigor, e item sem componente nao verbal nao muda. (b) _EVAL_MEIO_RX mais estreito: remove so a clausula do contato visual (ate a virgula), sem engolir o texto anterior, para que admissao de falta na mesma frase (nao se apresentou, contato visual nao verificavel) continue rebaixando. Replay do guard em 7.889 itens reais (120 dias): 1.6.161, 1.6.162 e 1.6.163 com o mesmo resultado. | 1.6.162 (base: 1.6.161): CORRETOR — CONTATO VISUAL NAO E OBSERVAVEL POR VOZ. Medido em 13/11: 26 estacoes ativas tem item com contato visual (inclusive a demo da caneta e as 2022/1 de MFC) e 40 perdas de ponto em 90 dias foram justificadas com contato visual nao verificavel na transcricao; na demo da caneta o item Postura perdia metade em quase toda sessao. Mesma raiz do ATO FISICO (1.6.154): punir pela impossibilidade do meio. Nova secao no prompt do corretor: componente nao verbal conta como cumprido, o nivel e decidido pelo que aparece na fala, e continua rebaixando fala rispida, interrupcao, desrespeito. Comentador ganhou a regra 12 (nao comentar contato visual nem postura fisica). Ator, STT, TTS, acesso e caminho do assinante intocados. | 1.6.161 (base: 1.6.160): (a) CTRL+P IMPRIME SO A TELA ATIVA. Desde a 1.6.128 o bloco @media print tinha perdido o {display:none} da lista de telas e passou a forcar display:block em todas: o Ctrl+P no historico saia com a tela de Configuracao legada (so placeholders, nenhuma chave real), o acervo, a estacao vazia e o resultado anterior. Agora so a .screen.active imprime, sem botoes, navegacao, banner do trial, menu do usuario e Discordo. O Gerar PDF (iframe proprio) nao muda. (b) REAVALIAR NO HISTORICO volta a ser so do admin: REEVAL_HIST_TODOS=false, a liberacao temporaria de 22/07 (caso Clara) terminou. O Reavaliar com IA do resultado degradado (s-eval) continua para todos. | 1.6.160 (base: 1.6.159): ONDE ESTAO OS SEUS PONTOS. Medido em 13/11: na 1a sessao da vida a mediana e 27 por cento na demo de colecistite (24 novatos), 39 no atraso menstrual e 46 na caneta; o novato perde ponto em itens que cobram falar em voz alta (descrever achados do exame fisico 29 por cento do item, conduta 26, ultrassom 29). Nas 3 primeiras sessoes do usuario, o resultado ganha um card que soma os pontos perdidos nesses itens (achados, hipotese, conduta) e diz como pontuar cada um. Trial com credito e 1a vez na estacao: avisa que refazer uma vez nao consome outra estacao gratis (regra do get_trial_status de 13/11). Fora da Maratona e da reavaliacao; assincrono e silencioso, falha nunca quebra a tela. Grader, comentador, ator, STT, TTS, cronometro, acesso e caminho do assinante/admin intocados. | 1.6.159 (base: 1.6.158): COMO FUNCIONA POR USUARIO. A marca de ja visto era a chave rv_onb_ok do navegador, compartilhada entre contas: quem abria uma estacao com uma conta que ja tinha sessoes gravava a marca, e qualquer conta nova no mesmo navegador pulava a tela (caso real 11/11: conta de teste criada no navegador do admin, ux_events sem onboarding_view). Agora a chave inclui o id do usuario. TEXTO: o passo 1 segue a preferencia de cronometro da Conta (ao entrar ou apos ler o card) e aponta onde mudar; o passo 2 perde a frase sobre nao haver corpo para examinar. | 1.6.158 (base: 1.6.157): ATIVACAO, RETENCAO E CONFIANCA NA NOTA. Medido em 11/11 (90 dias): 55 cadastros, 28 terminam a 1a demo, so 9 fazem as 3 e 4 pagam; a 1a nota tem mediana de 25 por cento e o novato perde ponto por formato (descrever achados do exame fisico 12 por cento, laboratorio 12, ultrassom 15). Pagantes ativos por semana desde o pagamento: 14, 8, 7, 4. (a) COMO FUNCIONA: antes da 1a estacao de quem nunca fez nenhuma, 4 passos (conversar, pedir o exame fisico pelo nome, pedir exames e interpretar em voz alta, hipotese e conduta) e teste opcional do microfone. Depois do controle de acesso e fora da Maratona; o Comecar reabre o loadStation dentro do gesto (audio iOS). (b) SUA SEMANA no mural: meta semanal (user_meta), progresso por dia, semanas seguidas, proxima estacao recomendada (area nunca treinada ou de menor media) e ate 3 estacoes para refazer (nota abaixo de 60 ha 7+ dias). RPC get_plano_semana; nao-assinante recebe so a proxima demo (trial_available), nunca id que a RLS nega. (c) EVOLUCAO: o resultado mostra a nota da tentativa anterior na mesma estacao. (d) MENSAGENS: avatar > Mensagens com contador; avisos publicados no admin (announcements), versao em produto dos e-mails ja enviados (message_template) e respostas de contestacao. O mural le os avisos do banco; a constante AVISO_INCIDENTE continua com precedencia. (e) DISCORDO DESTA CORRECAO: em cada item com perda de ponto, no resultado e no historico; contestar_item copia rotulo, nota e justificativa do eval_items no servidor. Tudo assincrono e silencioso: falha nunca quebra dashboard, resultado ou historico. Grader, comentador, ator, STT, TTS, cronometro, acesso e trial intocados. | 1.6.157 (base: 1.6.156): CORRETOR SEM TETO DE 3.000, RESERVA OPUS 5.5, SEM CACHE INUTIL. (a) max_tokens do corretor 3000 -> 8000: o raciocinio do Fable conta no teto e em 31% das correcoes o JSON saia cortado, a correcao era descartada e a nota vinha da reserva. (b) reserva Opus 4.8 -> Opus 5.5: no laboratorio, nas sessoes que cortavam, a nota guardada pelo Opus 4.8 concordava com o Fable em 67,9% dos itens e estava inflada em 1,31 ponto em media (ate 3,37); o Opus 5.5 concordou em 92,7%. (c) system do corretor e do comentador enviado como lista: o quick-api so aplica cache_control a system em texto, e esse cache era escrito e quase nunca lido. Prompt, leitura do JSON, guarda de coerencia e mapeamento de nota inalterados (mesmos 14 blocos verificados por hash no laboratorio). Ator, Maratona, acesso e trial intocados. | 1.6.156 (base: 1.6.155): SESSAO PERDIDA EM SILENCIO — saveHistory nao conferia o resultado do insert; 3 sessoes avaliadas pela IA nunca foram gravadas. Agora confere status, renova a sessao e repete uma vez, registra station_save_failed em ux_events e avisa o candidato. RETENCAO 100 -> 500 sessoes por usuario (o teto apagava historico de quem mais treina). 1.6.155 (base: 1.6.154): CI FASE 1 — 3 handlers inline expostos em window (examImgError, loadMarathonStationList, filterMarathonSearch): busca por sintese e filtro de origem da Maratona voltam a funcionar (§7/§8); meta app-version sincronizada. Sem mudanca de acesso. 1.6.154 (base: 1.6.153): GRADER — ATO FISICO e VIA-NAO-E-TERAPIA. (1) ATO FISICO: o simulador e por VOZ e nao tem corpo, manequim nem modelo para tocar; o candidato pede a manobra e a estacao devolve o achado por impresso. O prompt tratava "realiza Z"/"afere Y" como acao que so a EXECUCAO pontua (secao COMPONENTE FALTANTE, item b), entao o grader rebaixava por impossibilidade do MEIO. Caso medido (sessao 3f57eec0, 18/08, "Consulta de rotina em mulher adulta"): o candidato solicitou o exame fisico, o Chefe entregou, e ele interpretou os TRES subitens (sinais vitais/IMC, mamas, linfonodos); o grader deu 0,625 de 1,25 com a justificativa "citados, mas como leitura de resultado, nao exame ativo proprio" — nota correta 9,375 e nao 8,75. Mesma raiz do zero de 2,0 pts em "exame fisico abdominal NO MANEQUIM" (23/06). Nova secao ATO FISICO no systemPrompt: cumpre quem PEDE a manobra pelo nome e usa o achado devolvido; e PROIBIDO rebaixar por "apenas leu o resultado", "nao e exame ativo", "nao executou fisicamente" ou "nao fez no manequim". NAO e anistia: continua rebaixando quem nao pede exame fisico nenhum, quem pede "exame fisico" GENERICO onde o crit_adeq nomeia manobras (Giordano, Blumberg, Rovsing, altura uterina, BCF, edema de MMII, fundo de olho, toque, PA bilateral, IMC), e quem le achado de manobra que nunca pediu. Calibrado contra 500 sessoes reais (27/06-18/08, export do admin): das 28 rebaixas dessa familia, 1 era indevida e as demais eram legitimas por falta de nomeacao — a regra foi escrita para preservar essas. (2) evalCoherenceGuard (defesa em profundidade): novo _EVAL_MEIO_RX remove da justification, ANTES dos testes de admissao, so as clausulas que descrevem o MEIO ("apenas leu o resultado", "nao e exame ativo proprio", "nao executou no manequim", "nao palpou de fato"). Exige qualificador de MODO, entao "nao realizou exame fisico" puro NAO e removido e segue rebaixando; e "nao realizou fisicamente; e nao mencionou BCF" segue rebaixando pelo BCF. Sem isso a regra (3) conjuncao_incompleta desfaria o prompt novo. O vocabulario de admissao de falta ganhou tambem "nao nomeou/solicitou/pediu" — a secao ATO FISICO usa NOMEAR como o conceito operante, e sem esses verbos o guard ficaria cego para a propria redacao que o prompt novo induz. PROVA A/B: os 5.092 itens avaliados de 500 sessoes reais (27/06-18/08) foram replayados pelos dois guards em jsdom — 29 disparos na 1.6.153 e 29 na 1.6.154, ZERO diferencas: a excecao nao afrouxa nenhum rebaixamento historico. (3) VIA NAO E TERAPIA (REGRA DO ATO, verbo institui/prescreve/inicia): caso medido (sessao 8add1076, 17/08, "Dor abdominal intensa em homem adulto") — item binario "institui hidratacao venosa E analgesia" creditado cheio com a justificativa "instituiu acesso venoso com analgesia"; o candidato so disse "2 acessos venosos perifericos para administracao de analgesico, antibiotico e antitermico", hidratacao nunca foi dita. Acesso venoso nao e hidratacao, internacao nao e conduta, monitorizacao nao e tratamento, "antibiotico" generico nao cumpre criterio que exige espectro/classe nomeada; em criterio ligado por E cada componente precisa da propria evidencia. Prova de que nao era desconhecimento da regra: na MESMA chamada o item 12 foi rebaixado certo ("instituiu jejum mas nao mencionou sonda nasogastrica; criterio exige ambos"). (4) COMENTADOR: regra 11 — nunca repreender por "nao examinou"/"apenas leu o resultado"; o ensino legitimo e cobrar a manobra NOMEADA e a interpretacao. Sem mudanca no STT, TTS, cronometro, mic, impressos, trial ou caminho do assinante/admin. Nota anterior (1.6.152, base 1.6.151): CADEADO E PAYWALL nas estacoes listadas dentro do resumo de tema. Defeito medido em 16/08: get_tema_resumo montava a lista de estacoes com `where st.tema_id=t.id and s.status=\'active\'`, sem olhar trial_available nem o v_full que a propria funcao ja calculava. O abrirTema renderizava botao "Treinar" em TODAS e o treinarDoTema chamava loadStation direto — cujo guard (__hasActiveAccess !== true) NAO pega o trial, que tem true. Resultado: fetchStation, RLS devolve zero linhas, e o candidato recebia o alert "Estacao nao encontrada. Verifique a conexao com o Supabase.". Nos dois temas demo eram 7 de 8 e 3 de 4 estacoes bloqueadas; e como a unica abrivel do tema e justamente a demo que ele acabou de fazer (que aparece com badge "feita", sem botao), 100% dos botoes "Treinar" visiveis ao trial levavam ao erro. Mesmo modo de falha do P0 de 21/07 (§2, NAO REGREDIR: "a Maratona oferece estacoes que a RLS bloqueia ao abrir"), por uma porta criada depois. FIX: (a) SQL — get_tema_resumo devolve `bloqueada` por estacao e `plano_completo` no topo; o servidor e autoritativo porque o cliente nao consegue nem dar SELECT nessas linhas; para assinante/admin v_full e true, logo bloqueada e sempre false (payer-safe, conferido por SQL nos dois perfis). (b) abrirTema renderiza cadeado + botao "Assinar" e uma linha dizendo quantas estacoes do tema estao no plano completo, em vez de sumir com elas — paywall no pico do desejo, mesma decisao do acervo na v1.6.120. (c) treinarDoTema ganhou defesa em profundidade: id marcado como bloqueada vai para o paywall, nunca para o loadStation. (d) O botao Voltar do modo locked_station ja devolve ao resumo, porque o showAccessRequired captura a tela de origem pelo data-screen. Nenhuma leitura nova foi exposta: os nomes das estacoes do tema ja eram devolvidos antes; o que muda e o que acontece no clique. BONUS (§8, achado durante a varredura de onclick inline desta versao, nao relacionado ao cadeado): openExamsTab e closeChangePass eram chamadas de onclick inline mas NAO tinham window.X = X. Como o bloco e uma IIFE com "use strict", o onclick resolvia no escopo global e lancava ReferenceError. openExamsTab e o chip que o Chefe de estacao entrega em TODA solicitacao de impresso, com o texto "Toque para abrir na aba Exames" — o toque (e o Enter/Espaco do onkeydown) nao fazia nada desde a v1.6.54; o candidato so chegava ao impresso abrindo a aba Exames na mao, entao a falha era silenciosa. closeChangePass e o X do modal de troca de senha. Ambas expostas. Varredura completa: as 14 funcoes chamadas de onclick inline no arquivo agora resolvem no escopo global, provado em jsdom. Sem mudanca no grader, comentador, STT, TTS, cronometro, mic ou caminho do assinante/admin. Nota anterior (1.6.151): 1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
+  notes: '1.6.166 (base: 1.6.165): RESUMO DE TEMA. (a) CARD NA 1a SESSAO DO TEMA: carregarResumoCTA era chamado antes do runEval, a sessao ainda nao estava gravada e get_resumo_da_estacao negava o card; em 108 de 295 sessoes (37 por cento, 90 dias) o card nunca apareceu. Agora carrega depois do saveHistory/updateHistory, com os itens avaliados. (b) FUNIL: resumo_card_skip, resumo_card_shown, resumo_card_click, resumo_open, resumo_secao_open, resumo_foco_click e resumo_fim via log_ux_event, com station_id explicito (na revisao do historico o global station e outra estacao). (c) RESUMO LIGADO AO ERRO: o card diz quantos itens o aluno perdeu e quantos o resumo explica (get_resumo_ancoras); a tela do resumo abre com a lista dos itens perdidos, cada um levando ao trecho, e destaca o bloco que contem cada trecho. Trecho ausente do corpo nao aparece. (d) LEITURA CURTA: abertas a secao Roteiro de 10 minutos e a Tabela ou A sequencia; as demais recolhidas com tempo de leitura; secao com trecho do aluno abre sozinha; corpo sem secoes ou sem roteiro e tabela fica todo aberto como antes. Meta com Essencial e Completo. Corrigido o plural do card (estacaoões). Sem onclick inline novo; listeners em containers estaticos com guarda. Mic, STT, ator, TTS, cronometro, corretor, acesso, trial e caminho do assinante intocados. | 1.6.165 (base: 1.6.164): TEXTOS DO LINK DE ACESSO. Com a quick-api v4.43 o link assinado do e-mail tambem loga quem nao assina (ativacao do trial), com validade de 7 dias; assinante segue com 30. A mensagem de link expirado deixa de citar 30 dias e manda abrir o e-mail mais recente; a de link invalido deixa de falar em e-mail da compra. Nenhuma mudanca de logica, acesso, trial ou caminho do assinante. | 1.6.164 (base: 1.6.163): TELA DE ANALISE E SESSAO GRAVADA CERTA. (a) CORRIDA NO RESULTADO: durante a analise (mediana 43 s, p90 63 s, 30 dias) os botoes Recomecar, Outra estacao e Inicio ficavam visiveis; o runEval le station, doctorLog, fullTranscript, examLog e simStartedAt so DEPOIS da resposta da IA, e o startSim zera esses globais. Caso real 13/11 21:10 (feelicht, demo colecistite): 15 falas, Recomecar 4 s depois do fim, a nota da 1a sessao foi gravada com o inicio, a transcricao vazia e os exames da 2a; a transcricao real se perdeu. 5 casos desde agosto. Agora o runEval copia esses dados no inicio e grava a partir da copia; se outra estacao comecou no meio, grava igual mas nao desenha nada na tela da sessao nova. (b) TELA DE ANALISE: painel com 3 etapas (correcao pelo PEP, devolutiva, salvando), tempo decorrido e aviso de que leva menos de 1 minuto; nota, PEP, devolutiva e card do resumo so aparecem quando a correcao termina; os botoes de navegacao so aparecem quando a sessao foi gravada. Se passar de 150 s, os botoes voltam com aviso, e sair passa a ser seguro porque a gravacao continua da copia. A transcricao fica disponivel durante a espera. Duracao gravada, prompt do corretor, comentador, guard de coerencia, ator, STT, TTS, acesso, trial e caminho do assinante intocados. | 1.6.163 (base: 1.6.162): CONTATO VISUAL — ESCOPO FECHADO. (a) O prompt do corretor passa a dizer explicitamente que a regra vale so para o componente nao verbal; postura empatica, acolhimento, cordialidade e escuta continuam avaliados pela fala com o mesmo rigor, e item sem componente nao verbal nao muda. (b) _EVAL_MEIO_RX mais estreito: remove so a clausula do contato visual (ate a virgula), sem engolir o texto anterior, para que admissao de falta na mesma frase (nao se apresentou, contato visual nao verificavel) continue rebaixando. Replay do guard em 7.889 itens reais (120 dias): 1.6.161, 1.6.162 e 1.6.163 com o mesmo resultado. | 1.6.162 (base: 1.6.161): CORRETOR — CONTATO VISUAL NAO E OBSERVAVEL POR VOZ. Medido em 13/11: 26 estacoes ativas tem item com contato visual (inclusive a demo da caneta e as 2022/1 de MFC) e 40 perdas de ponto em 90 dias foram justificadas com contato visual nao verificavel na transcricao; na demo da caneta o item Postura perdia metade em quase toda sessao. Mesma raiz do ATO FISICO (1.6.154): punir pela impossibilidade do meio. Nova secao no prompt do corretor: componente nao verbal conta como cumprido, o nivel e decidido pelo que aparece na fala, e continua rebaixando fala rispida, interrupcao, desrespeito. Comentador ganhou a regra 12 (nao comentar contato visual nem postura fisica). Ator, STT, TTS, acesso e caminho do assinante intocados. | 1.6.161 (base: 1.6.160): (a) CTRL+P IMPRIME SO A TELA ATIVA. Desde a 1.6.128 o bloco @media print tinha perdido o {display:none} da lista de telas e passou a forcar display:block em todas: o Ctrl+P no historico saia com a tela de Configuracao legada (so placeholders, nenhuma chave real), o acervo, a estacao vazia e o resultado anterior. Agora so a .screen.active imprime, sem botoes, navegacao, banner do trial, menu do usuario e Discordo. O Gerar PDF (iframe proprio) nao muda. (b) REAVALIAR NO HISTORICO volta a ser so do admin: REEVAL_HIST_TODOS=false, a liberacao temporaria de 22/07 (caso Clara) terminou. O Reavaliar com IA do resultado degradado (s-eval) continua para todos. | 1.6.160 (base: 1.6.159): ONDE ESTAO OS SEUS PONTOS. Medido em 13/11: na 1a sessao da vida a mediana e 27 por cento na demo de colecistite (24 novatos), 39 no atraso menstrual e 46 na caneta; o novato perde ponto em itens que cobram falar em voz alta (descrever achados do exame fisico 29 por cento do item, conduta 26, ultrassom 29). Nas 3 primeiras sessoes do usuario, o resultado ganha um card que soma os pontos perdidos nesses itens (achados, hipotese, conduta) e diz como pontuar cada um. Trial com credito e 1a vez na estacao: avisa que refazer uma vez nao consome outra estacao gratis (regra do get_trial_status de 13/11). Fora da Maratona e da reavaliacao; assincrono e silencioso, falha nunca quebra a tela. Grader, comentador, ator, STT, TTS, cronometro, acesso e caminho do assinante/admin intocados. | 1.6.159 (base: 1.6.158): COMO FUNCIONA POR USUARIO. A marca de ja visto era a chave rv_onb_ok do navegador, compartilhada entre contas: quem abria uma estacao com uma conta que ja tinha sessoes gravava a marca, e qualquer conta nova no mesmo navegador pulava a tela (caso real 11/11: conta de teste criada no navegador do admin, ux_events sem onboarding_view). Agora a chave inclui o id do usuario. TEXTO: o passo 1 segue a preferencia de cronometro da Conta (ao entrar ou apos ler o card) e aponta onde mudar; o passo 2 perde a frase sobre nao haver corpo para examinar. | 1.6.158 (base: 1.6.157): ATIVACAO, RETENCAO E CONFIANCA NA NOTA. Medido em 11/11 (90 dias): 55 cadastros, 28 terminam a 1a demo, so 9 fazem as 3 e 4 pagam; a 1a nota tem mediana de 25 por cento e o novato perde ponto por formato (descrever achados do exame fisico 12 por cento, laboratorio 12, ultrassom 15). Pagantes ativos por semana desde o pagamento: 14, 8, 7, 4. (a) COMO FUNCIONA: antes da 1a estacao de quem nunca fez nenhuma, 4 passos (conversar, pedir o exame fisico pelo nome, pedir exames e interpretar em voz alta, hipotese e conduta) e teste opcional do microfone. Depois do controle de acesso e fora da Maratona; o Comecar reabre o loadStation dentro do gesto (audio iOS). (b) SUA SEMANA no mural: meta semanal (user_meta), progresso por dia, semanas seguidas, proxima estacao recomendada (area nunca treinada ou de menor media) e ate 3 estacoes para refazer (nota abaixo de 60 ha 7+ dias). RPC get_plano_semana; nao-assinante recebe so a proxima demo (trial_available), nunca id que a RLS nega. (c) EVOLUCAO: o resultado mostra a nota da tentativa anterior na mesma estacao. (d) MENSAGENS: avatar > Mensagens com contador; avisos publicados no admin (announcements), versao em produto dos e-mails ja enviados (message_template) e respostas de contestacao. O mural le os avisos do banco; a constante AVISO_INCIDENTE continua com precedencia. (e) DISCORDO DESTA CORRECAO: em cada item com perda de ponto, no resultado e no historico; contestar_item copia rotulo, nota e justificativa do eval_items no servidor. Tudo assincrono e silencioso: falha nunca quebra dashboard, resultado ou historico. Grader, comentador, ator, STT, TTS, cronometro, acesso e trial intocados. | 1.6.157 (base: 1.6.156): CORRETOR SEM TETO DE 3.000, RESERVA OPUS 5.5, SEM CACHE INUTIL. (a) max_tokens do corretor 3000 -> 8000: o raciocinio do Fable conta no teto e em 31% das correcoes o JSON saia cortado, a correcao era descartada e a nota vinha da reserva. (b) reserva Opus 4.8 -> Opus 5.5: no laboratorio, nas sessoes que cortavam, a nota guardada pelo Opus 4.8 concordava com o Fable em 67,9% dos itens e estava inflada em 1,31 ponto em media (ate 3,37); o Opus 5.5 concordou em 92,7%. (c) system do corretor e do comentador enviado como lista: o quick-api so aplica cache_control a system em texto, e esse cache era escrito e quase nunca lido. Prompt, leitura do JSON, guarda de coerencia e mapeamento de nota inalterados (mesmos 14 blocos verificados por hash no laboratorio). Ator, Maratona, acesso e trial intocados. | 1.6.156 (base: 1.6.155): SESSAO PERDIDA EM SILENCIO — saveHistory nao conferia o resultado do insert; 3 sessoes avaliadas pela IA nunca foram gravadas. Agora confere status, renova a sessao e repete uma vez, registra station_save_failed em ux_events e avisa o candidato. RETENCAO 100 -> 500 sessoes por usuario (o teto apagava historico de quem mais treina). 1.6.155 (base: 1.6.154): CI FASE 1 — 3 handlers inline expostos em window (examImgError, loadMarathonStationList, filterMarathonSearch): busca por sintese e filtro de origem da Maratona voltam a funcionar (§7/§8); meta app-version sincronizada. Sem mudanca de acesso. 1.6.154 (base: 1.6.153): GRADER — ATO FISICO e VIA-NAO-E-TERAPIA. (1) ATO FISICO: o simulador e por VOZ e nao tem corpo, manequim nem modelo para tocar; o candidato pede a manobra e a estacao devolve o achado por impresso. O prompt tratava "realiza Z"/"afere Y" como acao que so a EXECUCAO pontua (secao COMPONENTE FALTANTE, item b), entao o grader rebaixava por impossibilidade do MEIO. Caso medido (sessao 3f57eec0, 18/08, "Consulta de rotina em mulher adulta"): o candidato solicitou o exame fisico, o Chefe entregou, e ele interpretou os TRES subitens (sinais vitais/IMC, mamas, linfonodos); o grader deu 0,625 de 1,25 com a justificativa "citados, mas como leitura de resultado, nao exame ativo proprio" — nota correta 9,375 e nao 8,75. Mesma raiz do zero de 2,0 pts em "exame fisico abdominal NO MANEQUIM" (23/06). Nova secao ATO FISICO no systemPrompt: cumpre quem PEDE a manobra pelo nome e usa o achado devolvido; e PROIBIDO rebaixar por "apenas leu o resultado", "nao e exame ativo", "nao executou fisicamente" ou "nao fez no manequim". NAO e anistia: continua rebaixando quem nao pede exame fisico nenhum, quem pede "exame fisico" GENERICO onde o crit_adeq nomeia manobras (Giordano, Blumberg, Rovsing, altura uterina, BCF, edema de MMII, fundo de olho, toque, PA bilateral, IMC), e quem le achado de manobra que nunca pediu. Calibrado contra 500 sessoes reais (27/06-18/08, export do admin): das 28 rebaixas dessa familia, 1 era indevida e as demais eram legitimas por falta de nomeacao — a regra foi escrita para preservar essas. (2) evalCoherenceGuard (defesa em profundidade): novo _EVAL_MEIO_RX remove da justification, ANTES dos testes de admissao, so as clausulas que descrevem o MEIO ("apenas leu o resultado", "nao e exame ativo proprio", "nao executou no manequim", "nao palpou de fato"). Exige qualificador de MODO, entao "nao realizou exame fisico" puro NAO e removido e segue rebaixando; e "nao realizou fisicamente; e nao mencionou BCF" segue rebaixando pelo BCF. Sem isso a regra (3) conjuncao_incompleta desfaria o prompt novo. O vocabulario de admissao de falta ganhou tambem "nao nomeou/solicitou/pediu" — a secao ATO FISICO usa NOMEAR como o conceito operante, e sem esses verbos o guard ficaria cego para a propria redacao que o prompt novo induz. PROVA A/B: os 5.092 itens avaliados de 500 sessoes reais (27/06-18/08) foram replayados pelos dois guards em jsdom — 29 disparos na 1.6.153 e 29 na 1.6.154, ZERO diferencas: a excecao nao afrouxa nenhum rebaixamento historico. (3) VIA NAO E TERAPIA (REGRA DO ATO, verbo institui/prescreve/inicia): caso medido (sessao 8add1076, 17/08, "Dor abdominal intensa em homem adulto") — item binario "institui hidratacao venosa E analgesia" creditado cheio com a justificativa "instituiu acesso venoso com analgesia"; o candidato so disse "2 acessos venosos perifericos para administracao de analgesico, antibiotico e antitermico", hidratacao nunca foi dita. Acesso venoso nao e hidratacao, internacao nao e conduta, monitorizacao nao e tratamento, "antibiotico" generico nao cumpre criterio que exige espectro/classe nomeada; em criterio ligado por E cada componente precisa da propria evidencia. Prova de que nao era desconhecimento da regra: na MESMA chamada o item 12 foi rebaixado certo ("instituiu jejum mas nao mencionou sonda nasogastrica; criterio exige ambos"). (4) COMENTADOR: regra 11 — nunca repreender por "nao examinou"/"apenas leu o resultado"; o ensino legitimo e cobrar a manobra NOMEADA e a interpretacao. Sem mudanca no STT, TTS, cronometro, mic, impressos, trial ou caminho do assinante/admin. Nota anterior (1.6.152, base 1.6.151): CADEADO E PAYWALL nas estacoes listadas dentro do resumo de tema. Defeito medido em 16/08: get_tema_resumo montava a lista de estacoes com `where st.tema_id=t.id and s.status=\'active\'`, sem olhar trial_available nem o v_full que a propria funcao ja calculava. O abrirTema renderizava botao "Treinar" em TODAS e o treinarDoTema chamava loadStation direto — cujo guard (__hasActiveAccess !== true) NAO pega o trial, que tem true. Resultado: fetchStation, RLS devolve zero linhas, e o candidato recebia o alert "Estacao nao encontrada. Verifique a conexao com o Supabase.". Nos dois temas demo eram 7 de 8 e 3 de 4 estacoes bloqueadas; e como a unica abrivel do tema e justamente a demo que ele acabou de fazer (que aparece com badge "feita", sem botao), 100% dos botoes "Treinar" visiveis ao trial levavam ao erro. Mesmo modo de falha do P0 de 21/07 (§2, NAO REGREDIR: "a Maratona oferece estacoes que a RLS bloqueia ao abrir"), por uma porta criada depois. FIX: (a) SQL — get_tema_resumo devolve `bloqueada` por estacao e `plano_completo` no topo; o servidor e autoritativo porque o cliente nao consegue nem dar SELECT nessas linhas; para assinante/admin v_full e true, logo bloqueada e sempre false (payer-safe, conferido por SQL nos dois perfis). (b) abrirTema renderiza cadeado + botao "Assinar" e uma linha dizendo quantas estacoes do tema estao no plano completo, em vez de sumir com elas — paywall no pico do desejo, mesma decisao do acervo na v1.6.120. (c) treinarDoTema ganhou defesa em profundidade: id marcado como bloqueada vai para o paywall, nunca para o loadStation. (d) O botao Voltar do modo locked_station ja devolve ao resumo, porque o showAccessRequired captura a tela de origem pelo data-screen. Nenhuma leitura nova foi exposta: os nomes das estacoes do tema ja eram devolvidos antes; o que muda e o que acontece no clique. BONUS (§8, achado durante a varredura de onclick inline desta versao, nao relacionado ao cadeado): openExamsTab e closeChangePass eram chamadas de onclick inline mas NAO tinham window.X = X. Como o bloco e uma IIFE com "use strict", o onclick resolvia no escopo global e lancava ReferenceError. openExamsTab e o chip que o Chefe de estacao entrega em TODA solicitacao de impresso, com o texto "Toque para abrir na aba Exames" — o toque (e o Enter/Espaco do onkeydown) nao fazia nada desde a v1.6.54; o candidato so chegava ao impresso abrindo a aba Exames na mao, entao a falha era silenciosa. closeChangePass e o X do modal de troca de senha. Ambas expostas. Varredura completa: as 14 funcoes chamadas de onclick inline no arquivo agora resolvem no escopo global, provado em jsdom. Sem mudanca no grader, comentador, STT, TTS, cronometro, mic ou caminho do assinante/admin. Nota anterior (1.6.151): 1.6.151 (base: 1.6.150): GRADER — guard deterministico de coerencia label×justification. Auditoria de 448 sessoes achou ~24 itens (20 sessoes, maio-agosto) em que a justification do grader ADMITE nao-cumprimento do crit_adeq ("2 itens" com crit exigindo 3-4; "nao mencionou X" em criterio conjuntivo; "nao pontua item binario adequadamente" — caso 64b49915 de HOJE, item psicologo da UBS) e o level veio na banda cheia mesmo assim: o modelo raciocina certo no texto e erra o numero, e o reforco de prompt sozinho nao segurou. Novo evalCoherenceGuard() roda apos a resposta da IA, SO REBAIXA (nunca sobe) e SO na banda cheia, com 3 regras de alta precisao: (1) justification declara nao-credito ("nao pontua", "atinge parcial", "criterio inadequado"); (2) contagem admitida abaixo do piso do crit_adeq (parse de "K de N", "K itens", "apenas K", "K+" vs primeiro numero do criterio); (3) criterio conjuntivo (todos/ambos/os N, ou lista com virgula+E, sem "ou/pelo menos") com admissao de falta ("faltou", "nao mencionou") e sem afirmacao de completude. Excecoes que evitam falso-rebaixamento (calibradas na varredura: zero FP em ~100 creditos legitimos): criterio negativo ("NAO solicita exames hormonais"), itens de escuta/interrupcao, limiar aberto atingido, justification que afirma completude ("indicou as duas condutas"). Rebaixa para parcial (3 niveis) ou 0 (binario), loga eval_coherence_downgrade no debugLog e grava coherence_downgrade no eval_item (auditavel no sim_history). Cobre ~20 dos 24 casos reais; os 4 restantes (falta sem contagem em limiar aberto) ficam para o prompt. Reeval (admin) usa o mesmo caminho. Sem mudanca no fallback regex, comentador, STT, TTS, triggers ou caminho de assinatura. Nota anterior (1.6.150): STT — formas longas de modalidade no REQUEST_VOCAB. Caso real (sessao 6ad4c135, estacao demo do trial, colecistite): candidata pediu "ultrassonografia de abdome total" e o Deepgram transcreveu "solicitam alteracoes de abdomen total" — a palavra da modalidade sumiu, nenhum trigger casou e o Chefe respondeu "Nao consta." (perda em cascata dos itens 7-11). O REQUEST_VOCAB tinha apenas as formas curtas/faladas (ultrassom, raio-x) e a forma longa so entrava como keyterm quando aparecia no TITULO do impresso — nessa estacao o titulo usa "Ultrassom", entao "ultrassonografia" nao era keyterm nenhum. Adicionados ultrassonografia, radiografia e ecografia ao vocabulario fixo (15->18 termos fixos, dentro do teto de 30; multissilabos rendem melhor no keyterm prompting da Nova-3). Complemento do lado de dados (ja aplicado direto no banco, sem codigo): trigger_keywords "abdome total"/"abdomen total" adicionados ao impresso de USG de 12 estacoes onde o USG abdominal e o unico exame de imagem. Sem mudanca no grader, no comentador, no cronometro, no TTS nem no caminho do assinante/admin. Nota anterior (1.6.149): conversao do trial. Diagnostico medido: o paywall funcionava (nenhum trial passou de 3 sessoes em 30 dias), mas dois defeitos queimavam o lead antes da venda. (1) SESSAO SEM FALA NAO E MAIS SESSAO — endSim() so avaliava/salvava se simLive; qualquer saida depois do cronometro ligar disparava runEval+saveHistory e consumia uma das 3 gratis. 12 de 86 sessoes de trial (14%) tinham conversation:[]; uma lead perdeu as 3 em 83s/23s/66s sem nunca falar com o paciente. Agora doctorLog vazio sai sem avaliar, avisa o candidato e nao gasta credito; o servidor tambem protege (get_trial_status so conta sessao com fala de quem=medico). (2) MISS DETERMINISTICO NAO VIRA MAIS "Nao consta." — o REQUEST_RX contem `pedir` mas a alternacao de verbos do buildRules nao continha, entao "Vou pedir a carga viral" era classificada como tecnica, nada casava e o Chefe NEGAVA um impresso existente (custou 3,5 pts numa sessao real de 11 min, nota 1,70). runTechRules agora devolve se casou; no miss a fala segue para a IA, que tem a lista exaustiva de impressos e ja e instruida a dizer "Nao consta." quando cabe. REQ_VERBS ganhou pedir/trouxe/preench/notific/prescrev/receit/medicar/passar/confer/aferir/medir e duas EXAM_FAMILIES novas (ficha de notificacao/ESAVI e receituario/prescricao). (3) flattenOrientAtor deixou de ser whitelist fechado: chaves fora da lista eram descartadas em silencio, apagando impressos_disponiveis (10 estacoes), duvidas_da_paciente e comportamento_da_caderneta. (4) INSTRUMENTACAO do funil de entrada: station_open, mic_permission, first_utterance, station_exit_empty, station_eval_start via RPC log_ux_event (vocabulario fechado no servidor, sem PII, best-effort — falha nunca quebra a estacao), para medir os 56% que cadastram e nunca abrem uma estacao. Sem mudanca no grader, no comentador, no cronometro, no TTS/STT nem no caminho do assinante/admin.'
 };
 
 // Função global pra inspeção via console
@@ -6973,86 +6992,232 @@ function _temaInline(s){
 }
 
 // Markdown mínimo: títulos, tabelas, listas, citação, código, regra horizontal.
-function _temaMd(md){
+// v1.6.166: `hl` (opcional) = {linha_absoluta: true}; `base` = linha absoluta da 1a linha de `md`.
+// O bloco que contém uma linha destacada (p, li, tr, h, blockquote) ganha class="rs-hl" e
+// data-hl com as linhas. Sem `hl`, o HTML é exatamente o de antes (_hlA devolve '').
+function _hlA(hl, base, a, b){
+  if(!hl) return '';
+  var ls = [];
+  for(var k = a; k <= b; k++){ if(hl[base + k]) ls.push(base + k); }
+  return ls.length ? ' class="rs-hl" data-hl="' + ls.join(' ') + '"' : '';
+}
+function _temaMd(md, hl, base){
+  base = base || 0;
   var L = String(md||'').replace(/\r/g,'').split('\n'), o = [], i = 0;
   while(i < L.length){
     var l = L[i];
     if(/^\s*$/.test(l)){ i++; continue; }
     if(/^---+\s*$/.test(l)){ o.push('<hr>'); i++; continue; }
     var m = l.match(/^(#{1,6})\s+(.*)$/);
-    if(m){ var n = m[1].length > 3 ? 3 : m[1].length; o.push('<h'+n+'>'+_temaInline(m[2])+'</h'+n+'>'); i++; continue; }
+    if(m){ var n = m[1].length > 3 ? 3 : m[1].length; o.push('<h'+n+_hlA(hl,base,i,i)+'>'+_temaInline(m[2])+'</h'+n+'>'); i++; continue; }
     if(/^\s*\|/.test(l) && i+1 < L.length && /^\s*\|[\s:|-]+\|?\s*$/.test(L[i+1])){
       var cel = function(r){ return r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(function(c){ return c.trim(); }); };
-      var hd = cel(l); i += 2; var bd = [];
-      while(i < L.length && /^\s*\|/.test(L[i])){ bd.push(cel(L[i])); i++; }
-      o.push('<div class="tw"><table><thead><tr>'
+      var hd = cel(l), hdLn = i; i += 2; var bd = [], bdLn = [];
+      while(i < L.length && /^\s*\|/.test(L[i])){ bd.push(cel(L[i])); bdLn.push(i); i++; }
+      o.push('<div class="tw"><table><thead><tr'+_hlA(hl,base,hdLn,hdLn)+'>'
         + hd.map(function(c){ return '<th>'+_temaInline(c)+'</th>'; }).join('')
         + '</tr></thead><tbody>'
-        + bd.map(function(r){ return '<tr>'+r.map(function(c){ return '<td>'+_temaInline(c)+'</td>'; }).join('')+'</tr>'; }).join('')
+        + bd.map(function(r, ri){ return '<tr'+_hlA(hl,base,bdLn[ri],bdLn[ri])+'>'+r.map(function(c){ return '<td>'+_temaInline(c)+'</td>'; }).join('')+'</tr>'; }).join('')
         + '</tbody></table></div>');
       continue;
     }
     if(/^\s*>/.test(l)){
-      var q = [];
+      var q = [], q0 = i;
       while(i < L.length && /^\s*>/.test(L[i])){ q.push(L[i].replace(/^\s*>\s?/,'')); i++; }
-      o.push('<blockquote>'+q.map(_temaInline).join('<br>')+'</blockquote>'); continue;
+      o.push('<blockquote'+_hlA(hl,base,q0,i-1)+'>'+q.map(_temaInline).join('<br>')+'</blockquote>'); continue;
     }
     if(/^\s*[-*]\s+/.test(l)){
-      var u = [];
-      while(i < L.length && /^\s*[-*]\s+/.test(L[i])){ u.push(L[i].replace(/^\s*[-*]\s+/,'')); i++; }
-      o.push('<ul>'+u.map(function(x){ return '<li>'+_temaInline(x)+'</li>'; }).join('')+'</ul>'); continue;
+      var u = [], uLn = [];
+      while(i < L.length && /^\s*[-*]\s+/.test(L[i])){ u.push(L[i].replace(/^\s*[-*]\s+/,'')); uLn.push(i); i++; }
+      o.push('<ul>'+u.map(function(x, xi){ return '<li'+_hlA(hl,base,uLn[xi],uLn[xi])+'>'+_temaInline(x)+'</li>'; }).join('')+'</ul>'); continue;
     }
     if(/^\s*\d+\.\s+/.test(l)){
-      var ol = [];
-      while(i < L.length && /^\s*\d+\.\s+/.test(L[i])){ ol.push(L[i].replace(/^\s*\d+\.\s+/,'')); i++; }
-      o.push('<ol>'+ol.map(function(x){ return '<li>'+_temaInline(x)+'</li>'; }).join('')+'</ol>'); continue;
+      var ol = [], olLn = [];
+      while(i < L.length && /^\s*\d+\.\s+/.test(L[i])){ ol.push(L[i].replace(/^\s*\d+\.\s+/,'')); olLn.push(i); i++; }
+      o.push('<ol>'+ol.map(function(x, xi){ return '<li'+_hlA(hl,base,olLn[xi],olLn[xi])+'>'+_temaInline(x)+'</li>'; }).join('')+'</ol>'); continue;
     }
-    var p = [];
+    var p = [], p0 = i;
     while(i < L.length && !/^\s*$/.test(L[i]) && !/^\s*[|>#-]/.test(L[i])){ p.push(L[i]); i++; }
-    o.push('<p>'+p.map(_temaInline).join(' ')+'</p>');
+    o.push('<p'+_hlA(hl,base,p0,i-1)+'>'+p.map(_temaInline).join(' ')+'</p>');
   }
   return o.join('');
+}
+
+// ── v1.6.166: LEITURA POR SEÇÕES ───────────────────────────────────────────────
+// Abertas: "Roteiro de 10 minutos" e depois "Tabela…"/"A sequência…". O resto vem
+// recolhido (<details>) na ordem original, com tempo de leitura. Seção com trecho
+// ligado a item perdido abre sozinha. Sem "## ", ou sem roteiro e sem tabela/sequência:
+// tudo aberto, exatamente como antes.
+function _temaPalavras(t){ var m = String(t||'').match(/[0-9A-Za-zÀ-ÿ]+/g); return m ? m.length : 0; }
+function _temaMin(pal){ return Math.max(1, Math.ceil(pal / 200)); }
+function _temaSemHrFinal(ls){ var a = ls.slice(); while(a.length && /^(\s*|---+\s*)$/.test(a[a.length-1])) a.pop(); return a; }
+function _temaRender(md, hl){
+  var txt = String(md||'').replace(/\r/g,'');
+  var L = txt.split('\n');
+  var secs = [], preFim = L.length - 1, cur = null;
+  for(var i = 0; i < L.length; i++){
+    if(/^##\s/.test(L[i])){
+      if(cur){ cur.fim = i - 1; secs.push(cur); } else { preFim = i - 1; }
+      cur = { titulo: L[i].replace(/^##\s+/, '').trim(), ini: i, fim: L.length - 1 };
+    }
+  }
+  if(cur) secs.push(cur);
+  var tipo = function(t){
+    var x = String(t||'').toLowerCase();
+    if(x.indexOf('roteiro de 10 minutos') === 0) return 'roteiro';
+    if(x.indexOf('tabela') === 0 || x.indexOf('a sequência') === 0 || x.indexOf('a sequencia') === 0) return 'tabela';
+    return 'outra';
+  };
+  var temRot = secs.some(function(sc){ return tipo(sc.titulo) === 'roteiro'; });
+  var temTab = secs.some(function(sc){ return tipo(sc.titulo) === 'tabela'; });
+  var totalPal = _temaPalavras(txt);
+  if(!secs.length || (!temRot && !temTab)){
+    return { html: _temaMd(txt, hl, 0), estruturado: false, essencial: _temaMin(totalPal), completo: _temaMin(totalPal) };
+  }
+  var temHl = function(a, b){ if(!hl) return false; for(var k = a; k <= b; k++){ if(hl[k]) return true; } return false; };
+  var o = [], palEss = 0;
+  // texto antes do 1o "## " (se houver): aberto, no topo
+  if(preFim >= 0){
+    var pre = _temaSemHrFinal(L.slice(0, preFim + 1));
+    if(pre.join('').trim()){ o.push(_temaMd(pre.join('\n'), hl, 0)); palEss += _temaPalavras(pre.join('\n')); }
+  }
+  var aberta = function(sc){
+    var ls = _temaSemHrFinal(L.slice(sc.ini, sc.fim + 1));
+    palEss += _temaPalavras(ls.join('\n'));
+    return '<section class="rs-sec rs-aberta" data-sec="' + _temaEsc(sc.titulo) + '">' + _temaMd(ls.join('\n'), hl, sc.ini) + '</section>';
+  };
+  secs.forEach(function(sc){ if(tipo(sc.titulo) === 'roteiro') o.push(aberta(sc)); });
+  secs.forEach(function(sc){ if(tipo(sc.titulo) === 'tabela') o.push(aberta(sc)); });
+  var rec = secs.filter(function(sc){ return tipo(sc.titulo) === 'outra'; });
+  if(rec.length){
+    o.push('<div class="rs-recolhidas-tit">Para aprofundar</div>');
+    rec.forEach(function(sc){
+      var corpoSec = _temaSemHrFinal(L.slice(sc.ini + 1, sc.fim + 1));
+      var pal = _temaPalavras(corpoSec.join('\n'));
+      o.push('<details class="rs-sec" data-sec="' + _temaEsc(sc.titulo) + '"' + (temHl(sc.ini, sc.fim) ? ' open' : '') + '>'
+        + '<summary><span>' + _temaInline(sc.titulo) + '</span><span class="rs-min">' + _temaMin(pal) + ' min</span></summary>'
+        + '<div class="rs-det">' + _temaMd(corpoSec.join('\n'), hl, sc.ini + 1) + '</div></details>');
+    });
+  }
+  return { html: o.join(''), estruturado: true, essencial: _temaMin(palEss), completo: _temaMin(totalPal) };
+}
+
+// Linha (0-based, sem \r) onde começa cada trecho de âncora. Trecho ausente do corpo: ignorado.
+function _temaLinhasAncora(md, ancoras){
+  var txt = String(md||'').replace(/\r/g,''), porItem = {}, hl = null;
+  (ancoras||[]).forEach(function(a){
+    if(!a || !a.trecho) return;
+    var pos = txt.indexOf(String(a.trecho).replace(/\r/g,''));
+    if(pos < 0) return;
+    var ln = txt.slice(0, pos).split('\n').length - 1;
+    hl = hl || {}; hl[ln] = true;
+    if(porItem[a.item_id] == null) porItem[a.item_id] = ln;
+  });
+  return { hl: hl, porItem: porItem };
+}
+
+// ── v1.6.166: FUNIL DO RESUMO (log_ux_event, vocabulário fechado no servidor) ──
+// station_id EXPLÍCITO: o logUx usa o global `station`, que na revisão do histórico é outra.
+function logUxResumo(event, stationId, detail){
+  try{
+    if(!supabaseClient || !currentUser) return;
+    var r = supabaseClient.rpc('log_ux_event', {
+      p_event:       event,
+      p_station_id:  stationId ? String(stationId) : null,
+      p_detail:      detail || null,
+      p_session_ref: _uxSessionRef
+    });
+    if(r && typeof r.then === 'function') r.then(function(){}, function(){});
+  }catch(e){}
+}
+function _resumoOrigem(voltarPara){ return voltarPara === 's-hist-detail' ? 'hist' : (voltarPara === 's-eval' ? 'eval' : 'outro'); }
+var _resumoCtx = {};      // por caixa: { station_id, tema_id, origem, perdidos, ancoras, detail }
+var _resumoTok = {};      // por caixa: descarta resposta velha quando o card é recarregado
+var _temaAberto = null;   // abertura atual: { tema_id, station_id, secoes:{} }
+var _temaFimObs = null;
+function _limparResumoCTA(boxId){
+  _resumoTok[boxId] = (_resumoTok[boxId] || 0) + 1;
+  delete _resumoCtx[boxId];
+  var box = document.getElementById(boxId);
+  if(box){ box.style.display = 'none'; box.innerHTML = ''; }
 }
 
 // Card do resumo. Silencioso em qualquer falha — nunca atrapalha a tela que o hospeda.
 // v1.6.147: parametrizado. Serve a s-eval (fim da estação) e a s-hist-detail (revisão
 // da sessão no histórico), que é onde o aluno volta para reler o resumo.
-async function carregarResumoCTA(stationId, boxId, voltarPara){
+async function carregarResumoCTA(stationId, boxId, voltarPara, evalItems){
   boxId      = boxId || 'eval-resumo-cta';
   voltarPara = voltarPara || 's-eval';
+  var origem = _resumoOrigem(voltarPara);
+  _limparResumoCTA(boxId);
+  var tok = _resumoTok[boxId];
   var box = document.getElementById(boxId);
   if(!box) return;
-  box.style.display = 'none';
-  box.innerHTML = '';
+  var sid = stationId || (station && station.id) || '';
+  var pular = function(motivo){ logUxResumo('resumo_card_skip', sid, { motivo: motivo, origem: origem }); };
   try{
-    var sid = stationId || (station && station.id) || '';
     if(!supabaseClient || !sid) return;
     var r = await supabaseClient.rpc('get_resumo_da_estacao', { p_station_id: sid });
-    if(r.error) return;
+    if(tok !== _resumoTok[boxId]) return;
+    if(r.error){ pular('erro'); return; }
     var d = r.data;
-    if(!d || !d.acesso || !d.tema_id) return;          // trial/grátis: não renderiza nada (§2)
-    if(!d.resumo_disponivel || !d.desbloqueado) return;
-    var cob = (d.cobertura && d.cobertura.length)
-      ? d.cobertura.slice(0,3).join(' · ')
-      : (d.escopo || '');
+    if(!d || !d.acesso){ pular('sem_acesso'); return; }
+    if(!d.tema_id){ pular('sem_tema'); return; }
+    if(!d.resumo_disponivel){ pular('sem_resumo'); return; }
+    if(!d.desbloqueado){ pular('bloqueado'); return; }
+    // v1.6.166: itens perdidos nesta sessão (score < max, max > 0) e as âncoras do resumo para eles
+    var perdidos = (Array.isArray(evalItems) ? evalItems : []).filter(function(it){
+      return it && it.id != null && Number(it.max) > 0 && Number(it.score) < Number(it.max);
+    }).slice(0, 80).map(function(it){ return { id: String(it.id), text: String(it.text || it.label || ('Item ' + it.id)) }; });
+    var ancoras = [];
+    if(perdidos.length){
+      try{
+        var ra = await supabaseClient.rpc('get_resumo_ancoras', { p_station_id: sid, p_item_ids: perdidos.map(function(x){ return x.id; }) });
+        if(!ra.error && ra.data && Array.isArray(ra.data.ancoras) && (!ra.data.tema_id || ra.data.tema_id === d.tema_id)) ancoras = ra.data.ancoras;
+      }catch(_a){ ancoras = []; }
+      if(tok !== _resumoTok[boxId]) return;
+    }
+    var cobIds = {};
+    ancoras.forEach(function(a){ if(a && a.item_id != null) cobIds[String(a.item_id)] = 1; });
+    var nPerd = perdidos.length;
+    var nCob = perdidos.filter(function(x){ return cobIds[x.id]; }).length;
+    var detail = { tema_id: d.tema_id, origem: origem, perdidos: nPerd, cobertos: nCob, lido: !!d.lido };
+    _resumoCtx[boxId] = { station_id: sid, tema_id: d.tema_id, origem: origem, perdidos: perdidos, ancoras: ancoras, detail: detail };
+    var linha;
+    if(nPerd > 0){
+      linha = 'Você perdeu pontos em ' + nPerd + (nPerd === 1 ? ' item' : ' itens')
+        + (nCob > 0 ? ' — ' + nCob + (nCob === 1 ? ' está explicado' : ' estão explicados') + ' neste resumo.' : '.');
+    } else {
+      linha = (d.cobertura && d.cobertura.length) ? d.cobertura.slice(0,3).join(' · ') : (d.escopo || '');
+    }
     var restam = Math.max(0, (d.estacoes||0) - (d.feitas||0));
     box.innerHTML =
-      '<button type="button" class="rescta" onclick="abrirTema(&quot;'+_temaEsc(d.tema_id)+'&quot;,&quot;'+_temaEsc(voltarPara)+'&quot;)">'
+      '<button type="button" class="rescta" onclick="abrirTema(&quot;'+_temaEsc(d.tema_id)+'&quot;,&quot;'+_temaEsc(voltarPara)+'&quot;,&quot;'+_temaEsc(boxId)+'&quot;)">'
       + '<div class="rescta-top"><div style="flex:1;min-width:0">'
       + '<div class="rescta-lbl">'+(d.lido ? 'Rever o resumo do tema' : 'Estude este tema')+'</div>'
       + '<div class="rescta-nm">'+_temaEsc(d.nome)+'</div>'
-      + '<div style="color:var(--text2);font-size:.86rem;line-height:1.6">'+_temaEsc(cob)+'</div>'
+      + '<div class="rescta-ln" style="color:var(--text2);font-size:.86rem;line-height:1.6">'+_temaEsc(linha)+'</div>'
       + '<div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap">'
       + '<span class="badge bb">'+(d.leitura_min||5)+' min de leitura</span>'
-      + (restam > 0 ? '<span class="badge bb">'+restam+' estação'+(restam>1?'ões':'')+' para aplicar</span>' : '')
+      + (restam > 0 ? '<span class="badge bb">'+restam+(restam>1?' estações':' estação')+' para aplicar</span>' : '')
       + '</div></div><div class="rescta-ch">&rsaquo;</div></div></button>';
     box.style.display = 'block';
-  }catch(e){ /* silencioso: o resumo nunca pode quebrar a avaliação nem o histórico */ }
+    logUxResumo('resumo_card_shown', sid, detail);
+  }catch(e){ try{ pular('erro'); }catch(_e){} /* silencioso: o resumo nunca pode quebrar a avaliação nem o histórico */ }
 }
 
-async function abrirTema(temaId, voltarPara){
+async function abrirTema(temaId, voltarPara, boxId){
   if(!supabaseClient || !temaId) return;
   _temaVoltarPara = voltarPara || 's-eval';
+  // v1.6.166: estado guardado pelo card (itens perdidos + âncoras), só se for do mesmo tema
+  var _ctx = (boxId && _resumoCtx[boxId] && _resumoCtx[boxId].tema_id === temaId) ? _resumoCtx[boxId] : null;
+  var _origem = _ctx ? _ctx.origem : _resumoOrigem(_temaVoltarPara);
+  var _sidTema = _ctx ? _ctx.station_id : null;
+  if(_ctx) logUxResumo('resumo_card_click', _sidTema, _ctx.detail);
+  _temaAberto = { tema_id: temaId, station_id: _sidTema, secoes: {} };
+  if(_temaFimObs){ try{ _temaFimObs.disconnect(); }catch(_o){} _temaFimObs = null; }
+  var foco = document.getElementById('tema-foco');
+  if(foco){ foco.style.display = 'none'; foco.innerHTML = ''; }
   var corpo = document.getElementById('tema-corpo');
   var nm = document.getElementById('tema-nome');
   var mt = document.getElementById('tema-meta');
@@ -7079,11 +7244,45 @@ async function abrirTema(temaId, voltarPara){
     if(nm) nm.textContent = d.nome || '';
     var feitas = 0, total = (d.estacoes||[]).length;
     (d.estacoes||[]).forEach(function(s){ if(s.feita) feitas++; });
+    // v1.6.166: destaque dos trechos ligados aos itens perdidos + leitura por seções
+    var _anc = _temaLinhasAncora(d.corpo_md || '', _ctx ? _ctx.ancoras : null);
+    var _rd = _temaRender(d.corpo_md || '', _anc.hl);
     if(mt){
-      mt.innerHTML = '<span class="badge bb">'+(d.leitura_min||5)+' min</span> '
+      mt.innerHTML = (_rd.estruturado
+          ? '<span class="badge bb">Essencial: '+_rd.essencial+' min · Completo: '+_rd.completo+' min</span> '
+          : '<span class="badge bb">'+(d.leitura_min||5)+' min</span> ')
         + '<span class="badge '+(feitas>=total?'bg':'bb')+'">'+feitas+' de '+total+' estações feitas</span>';
     }
-    if(corpo) corpo.innerHTML = _temaMd(d.corpo_md || '');
+    if(corpo) corpo.innerHTML = _rd.html;
+    if(foco && _ctx && _ctx.perdidos.length){
+      foco.innerHTML = '<div class="tema-foco-tit">Onde você perdeu pontos nesta estação</div>'
+        + _ctx.perdidos.map(function(it){
+            var ln = _anc.porItem[it.id];
+            return '<div class="tema-foco-it"><span>' + _temaEsc(it.text) + '</span>'
+              + (ln != null
+                  ? '<button type="button" data-foco-item="' + _temaEsc(it.id) + '" data-ln="' + ln + '">ver no resumo</button>'
+                  : '<span class="tema-foco-nt">não tratado neste resumo</span>')
+              + '</div>';
+          }).join('');
+      foco.style.display = 'block';
+    }
+    logUxResumo('resumo_open', _sidTema, { tema_id: temaId, origem: _origem, foco: !!(_ctx && _ctx.perdidos.length) });
+    try{
+      var _fim = document.getElementById('tema-fim');
+      if(_fim && typeof IntersectionObserver === 'function'){
+        var _ab = _temaAberto;
+        _temaFimObs = new IntersectionObserver(function(ents){
+          for(var k = 0; k < ents.length; k++){
+            if(ents[k].isIntersecting){
+              if(_temaFimObs){ try{ _temaFimObs.disconnect(); }catch(_d){} _temaFimObs = null; }
+              if(_ab === _temaAberto && !_ab.fim){ _ab.fim = 1; logUxResumo('resumo_fim', _ab.station_id, { tema_id: _ab.tema_id }); }
+              return;
+            }
+          }
+        });
+        _temaFimObs.observe(_fim);
+      }
+    }catch(_io){}
     if(lst){
       // v1.6.152: CADEADO nas estações fora do plano do usuário.
       // `bloqueada` vem do servidor (get_tema_resumo) porque o cliente NÃO tem
@@ -7130,6 +7329,43 @@ async function abrirTema(temaId, voltarPara){
     if(corpo) corpo.innerHTML = '<p style="color:var(--text2)">Não foi possível carregar o resumo. Tente de novo.</p>';
   }
 }
+
+// v1.6.166: delegação em containers estáticos (sem onclick inline novo; listeners com guarda)
+(function(){
+  var corpoEl = document.getElementById('tema-corpo');
+  if(corpoEl) corpoEl.addEventListener('click', function(ev){
+    try{
+      var sm = ev.target && ev.target.closest ? ev.target.closest('summary') : null;
+      if(!sm) return;
+      var det = sm.parentNode;
+      if(!det || det.tagName !== 'DETAILS' || det.open) return;   // só quando vai ABRIR
+      var sec = det.getAttribute('data-sec') || '';
+      if(!_temaAberto || _temaAberto.secoes[sec]) return;            // 1x por seção por abertura
+      _temaAberto.secoes[sec] = 1;
+      logUxResumo('resumo_secao_open', _temaAberto.station_id, { tema_id: _temaAberto.tema_id, secao: sec });
+    }catch(e){}
+  });
+  var focoEl = document.getElementById('tema-foco');
+  if(focoEl) focoEl.addEventListener('click', function(ev){
+    try{
+      var b = ev.target && ev.target.closest ? ev.target.closest('[data-foco-item]') : null;
+      if(!b) return;
+      var ln = b.getAttribute('data-ln');
+      var alvo = null, cands = document.querySelectorAll('#tema-corpo [data-hl]');
+      for(var k = 0; k < cands.length; k++){
+        if((' ' + cands[k].getAttribute('data-hl') + ' ').indexOf(' ' + ln + ' ') >= 0){ alvo = cands[k]; break; }
+      }
+      if(alvo){
+        var dt = alvo.closest ? alvo.closest('details') : null;
+        if(dt && !dt.open) dt.open = true;
+        if(alvo.scrollIntoView) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alvo.classList.add('rs-flash');
+        setTimeout(function(){ try{ alvo.classList.remove('rs-flash'); }catch(_r){} }, 1600);
+      }
+      if(_temaAberto) logUxResumo('resumo_foco_click', _temaAberto.station_id, { tema_id: _temaAberto.tema_id, item_id: b.getAttribute('data-foco-item') });
+    }catch(e){}
+  });
+})();
 
 function voltarDoTema(){
   show(_temaVoltarPara || 's-eval');
@@ -7222,7 +7458,7 @@ function endSim(){
   logUx('station_eval_start', { t: (typeof timeLeft === 'number' ? 600 - timeLeft : null),
                                 turnos: doctorLog.length });
   show('s-eval');
-  carregarResumoCTA();   // v1.6.146: card do resumo do tema (silencioso se indisponivel)
+  _limparResumoCTA('eval-resumo-cta');   // v1.6.166: card carrega no runEval, DEPOIS do save (1a sessao do tema)
   // Render transcript IMMEDIATELY — don't depend on runEval finishing
   renderEvalTranscript();
   runEval();
@@ -8749,6 +8985,9 @@ async function _runEvalCore(isReeval, _S){
   // Assincronos e silenciosos: nunca seguram nem quebram a tela de resultado.
   var _vigente = !_evalStale(_S);   // v1.6.164: sessão velha grava, mas não desenha na tela da nova
   try{ if(_vigente && _led && _led.id){ montarContestar($('eval-body'), _led.id); mostrarEvolucao(_led.station_id, _led.id, _led.score_pct); } }catch(_c158){}
+  // v1.6.166: card do resumo DEPOIS do save. Antes era chamado antes do runEval, a sessao atual
+  // ainda nao existia e get_resumo_da_estacao negava o card na 1a estacao do tema (37% das sessoes).
+  if(_vigente){ try{ carregarResumoCTA(_led.station_id, 'eval-resumo-cta', 's-eval', _led.eval_items); }catch(_c166){} }
   await refreshTrialAfterSession();  // v1.6.71 Frente B: decrementa o banner do trial
   // v1.6.160: depois do refresh do trial (le o credito atualizado). Esconde sozinho quando nao se aplica.
   if(_vigente){
@@ -9521,7 +9760,7 @@ function renderHistDetail(data){
 
   // v1.6.147: card do resumo do tema, logo abaixo da devolutiva. Volta para cá ao sair.
   // station_id de sim_history é TEXT; a RPC recebe uuid e o PostgREST faz o cast.
-  carregarResumoCTA(data.station_id || '', 'hd-resumo-cta', 's-hist-detail');
+  carregarResumoCTA(data.station_id || '', 'hd-resumo-cta', 's-hist-detail', data.eval_items || []);   // v1.6.166: itens da sessão revista
 
   // Checklist comparison
   var tbody = $('hd-cl-body');
