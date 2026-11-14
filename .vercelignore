@@ -1,1 +1,7 @@
-
+/ci
+/.github
+/.claude
+/instrucoes
+/supabase
+CLAUDE.md
+*.md
