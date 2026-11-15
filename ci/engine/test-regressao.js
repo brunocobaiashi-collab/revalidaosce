@@ -2,7 +2,7 @@
 // preValidate de uma estação de exemplo têm de sair byte a byte idênticos aos da
 // referência.
 //
-// Parte A — referência = última versão publicada (baselines/station-engine.1.4.2.js).
+// Parte A — referência = última versão publicada (baselines/station-engine.1.4.3.js).
 //   Divergência só é aceita se a função estiver em PERMITIDAS, com a versão e o
 //   motivo. Mudar prompt exige pedido explícito do Bruno; a entrada em PERMITIDAS
 //   é a prova, no diff do pull request, de que a mudança foi intencional.
@@ -14,7 +14,8 @@
 //   mudou de propósito na 1.4.0 (11/08) e o buildSys2 na 1.4.1/1.4.2 (15/11, bloco
 //   do binário conjuntivo, aprovado pelo Bruno): os dois ficam fora desta parte. O
 //   buildSys2 continua provado como "1.4.0 + o bloco, e nada além" em
-//   test-binario-conjuntivo.js.
+//   test-binario-conjuntivo.js, e o ancorado da 1.4.3 como "1.4.2 + o trecho do
+//   diagnóstico do gabarito" em test-diagnostico-gabarito.js.
 //
 // Parte A também compara os três prompts ANCORADOS (1.4.3). A chave do ancorado é
 //   separada ('buildSys2(ancorado)'): permitir o ancorado não afrouxa o sem âncora.
@@ -30,11 +31,9 @@ function load(path) {
 }
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
-const PERMITIDAS = {
-  'buildSys2(ancorado)': '1.4.3 — item de interpretação: crit_adeq conclui pelo diagnosis_truth com o mesmo nome; proibido juntar diagnósticos distintos com "/" ou "ou" (aprovado pelo Bruno em 15/11)',
-};
+const PERMITIDAS = {};
 
-const REF = load(P.base('1.4.2'));
+const REF = load(P.base('1.4.3'));
 const PRE = load(P.base('pre-1.1.0'));
 const NEW = load(P.ENGINE);
 
@@ -74,7 +73,7 @@ const st = {
   exams: [{ title: 'EXAME FISICO', rows: ['PA: 120x80 mmHg'], images: [], trigger_keywords: ['exame fisico','fisico geral','sinais vitais'] }]
 };
 
-console.log('--- Parte A: contra a 1.4.2 publicada ---');
+console.log('--- Parte A: contra a 1.4.3 publicada ---');
 for (const [area, nivel, few, dif] of casos) {
   cmp('buildSys1(' + JSON.stringify([area, nivel, dif]) + ')',
       REF.buildSys1(area, nivel, few, dif), NEW.buildSys1(area, nivel, few, dif), PERMITIDAS);

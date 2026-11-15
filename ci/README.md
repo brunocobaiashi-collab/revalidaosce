@@ -53,7 +53,7 @@ também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
 
 | Suíte | Cobre |
 |---|---|
-| `test-regressao.js` | Prompts sem âncora e ancorados (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.2.js`); `buildSys1` e `buildSysAudit` de Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
+| `test-regressao.js` | Prompts sem âncora e ancorados (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.3.js`); `buildSys1` e `buildSysAudit` de Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
 | `test-ancora.js` | Modo ancorado em imagem |
 | `test-audit-budget.js` | `maxTokensAudit` e auditoria truncada |
 | `test-area-canonica.js` | Áreas canônicas, `eixosDaArea`, `canonArea` |
