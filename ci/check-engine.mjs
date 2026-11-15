@@ -30,6 +30,7 @@ const BASELINES = {
   'station-engine.1.2.0.js':     '01192bdf150abd378dc6455b26476656634344055561dcccf8f2beb7ab3bbae6', // 3ace155
   'station-engine.1.4.0.js':     'dfda051a614c25404ede7f4627f20c3be9de1aa26be28452895c2b48f4c13617', // c7c3f5b
   'station-engine.1.4.2.js':     '166360945018979da91afb0ef7b5e938522a4115418bf18e797908a2d45e85c0', // d904515
+  'station-engine.1.4.3.js':     'dc4492215b759ee47b85f1b2f5350db569c56f1692e3145497890b5af0ae93da', // c393d13
 };
 
 const erros = [];
