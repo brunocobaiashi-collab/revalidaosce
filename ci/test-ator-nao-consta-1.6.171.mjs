@@ -74,6 +74,30 @@ confere(/Nao tenho doenca nenhuma que eu saiba/.test(pAdulta), 'adulta: fala do 
 const pPed = novo.montar(PEDIATRICA);
 conferirNovo(pPed, 'pediatrica');
 confere(/VOCE INTERPRETA O ACOMPANHANTE/.test(pPed), 'pediatrica: caminho do acompanhante');
+
+// Precedencia com sinonimo (replay de 15/11, caso Benedito).
+confere(/Antes de responder "Nao consta\.", procure nos seus dados qualquer resposta sobre o assunto perguntado, mesmo com outras palavras/.test(pAdulta)
+  && /"pressao alta" responde "tem doenca cardiovascular\?"/.test(pAdulta), 'adulta: procurar resposta do mesmo assunto com outras palavras');
+
+// renderReply: ramo do paciente acentua "nao consta" na tela e na voz, na bolha PACIENTE.
+function conferirFala(reply, esperado, rotulo) {
+  const r = novo.renderReply(ADULTA, reply);
+  const tela = r.msgs.map((m) => m.type + '|' + m.text), voz = r.falas.map((f) => f.who + '|' + f.text);
+  confere(tela.length === 1 && tela[0] === 'actor|' + esperado && voz.length === 1 && voz[0] === 'actor|' + esperado,
+    `renderReply: ${rotulo}`, JSON.stringify(r));
+}
+conferirFala('Paciente: Nao consta.', 'N\u00e3o consta.', '"Paciente: Nao consta." -> "Nao consta." acentuado, bolha PACIENTE');
+conferirFala('Paciente: Febre n\u00e3o tive. O resto nao consta.', 'Febre n\u00e3o tive. O resto n\u00e3o consta.', 'mista: "O resto nao consta." acentuado, bolha PACIENTE');
+conferirFala('Febre n\u00e3o tive. O resto nao consta.', 'Febre n\u00e3o tive. O resto n\u00e3o consta.', 'mista sem prefixo: acentuada, bolha PACIENTE');
+conferirFala('Paciente: Tenho pressao alta.', 'Tenho pressao alta.', 'fala sem "nao consta" sai igual');
+conferirFala('Paciente: N\u00e3o consta.', 'N\u00e3o consta.', 'ja acentuado continua igual');
+// Ramo do Chefe: intocado (continua normalizando como na 1.6.170).
+const rc = novo.renderReply(ADULTA, 'Chefe de estacao: Nao consta.');
+confere(rc.msgs.length === 1 && rc.msgs[0].type === 'chief' && rc.msgs[0].text === 'N\u00e3o consta.' && rc.falas[0].who === 'chief',
+  'renderReply: Chefe "Nao consta." continua no Chefe', JSON.stringify(rc));
+const rp = novo.renderReply(ADULTA, 'Nao consta.');
+confere(rp.msgs.length === 1 && rp.msgs[0].type === 'chief' && rp.msgs[0].text === 'N\u00e3o consta.',
+  'renderReply: resposta pura "Nao consta." continua com o Chefe (muda so na 1.6.172)', JSON.stringify(rp));
 for (const e of novo.erros) { falhas++; console.log('   FALHA excecao em runtime (novo): ' + e); }
 novo.fechar();
 

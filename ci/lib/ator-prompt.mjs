@@ -22,6 +22,17 @@ const GANCHO = `
       return buildActorSystem(p, actorInstr);
     } finally { station = antes; }
   };
+  // Chama renderReply com a estacao dada e devolve o que foi para a tela (addMsg) e para a voz
+  // (speak). addMsg e speak sao dublados SO durante a chamada e restaurados no fim.
+  window.__renderReplyCapturado = function(est, reply){
+    var antes = station, addOrig = addMsg, speakOrig = speak, msgs = [], falas = [];
+    station = est;
+    addMsg = function(type, text){ msgs.push({ type: type, text: text }); return { remove: function(){} }; };
+    speak = function(text, who){ falas.push({ text: text, who: who }); };
+    try{ renderReply(reply); }
+    finally { addMsg = addOrig; speak = speakOrig; station = antes; }
+    return JSON.stringify({ msgs: msgs, falas: falas });
+  };
 }catch(e){ window.__GANCHO_ERRO__ = String(e && e.message || e); }
 `;
 
@@ -102,6 +113,7 @@ export async function carregarMontador(html, dir = 'simulador') {
   return {
     // JSON ida e volta: a estacao entra no realm do jsdom como objeto simples.
     montar: (estacao) => w.__montarPromptAtor(w.JSON.parse(JSON.stringify(estacao))),
+    renderReply: (estacao, reply) => JSON.parse(w.__renderReplyCapturado(w.JSON.parse(JSON.stringify(estacao)), reply)),
     erros,
     fechar: () => dom.window.close(),
   };
