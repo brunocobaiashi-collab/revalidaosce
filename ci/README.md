@@ -29,7 +29,7 @@ então uma rodada mostra todos os problemas de uma vez.
 | 3 | `check-runtime.mjs` | O arquivo **executa** num DOM montado (jsdom) e as funções críticas existem no fim | P0 21/07 — `$()` nulo abortou o script e derrubou o login |
 | 4 | `check-listeners.mjs` | Nenhum `addEventListener` em id inexistente | P0 21/07 — `btn-hd-back` órfão |
 | 5 | `check-onclick.mjs` | Toda função chamada de handler inline está em `window` | `openExamsTab` morto da v1.6.54 à v1.6.152, em silêncio |
-| 6 | `check-engine.mjs` | `station-engine.js`: `ENGINE_VERSION` registrada no cabeçalho e incrementada quando o arquivo muda; baselines intactas (sha256); as suítes de `ci/engine/` passam | Só o portão 1 olhava o gerador; a 1.4.1 (19/08) nunca foi publicada e nada avisou |
+| 6 | `check-engine.mjs` | `station-engine.js`: `ENGINE_VERSION` registrada no cabeçalho e maior que a da `main` quando o arquivo difere do da `main` (na própria `main`, compara com o commit anterior); baselines intactas (sha256); as suítes de `ci/engine/` passam | Só o portão 1 olhava o gerador; a 1.4.1 (19/08) nunca foi publicada e nada avisou |
 
 ### Por que o portão 3 usa sonda em vez de olhar `window`
 
@@ -53,7 +53,7 @@ também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
 
 | Suíte | Cobre |
 |---|---|
-| `test-regressao.js` | Prompts sem âncora (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.0.js`); Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
+| `test-regressao.js` | Prompts sem âncora (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.2.js`); `buildSys1` e `buildSysAudit` de Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
 | `test-ancora.js` | Modo ancorado em imagem |
 | `test-audit-budget.js` | `maxTokensAudit` e auditoria truncada |
 | `test-area-canonica.js` | Áreas canônicas, `eixosDaArea`, `canonArea` |

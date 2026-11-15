@@ -2,7 +2,7 @@
 // preValidate de uma estação de exemplo têm de sair byte a byte idênticos aos da
 // referência.
 //
-// Parte A — referência = última versão publicada (baselines/station-engine.1.4.0.js).
+// Parte A — referência = última versão publicada (baselines/station-engine.1.4.2.js).
 //   Divergência só é aceita se a função estiver em PERMITIDAS, com a versão e o
 //   motivo. Mudar prompt exige pedido explícito do Bruno; a entrada em PERMITIDAS
 //   é a prova, no diff do pull request, de que a mudança foi intencional.
@@ -10,8 +10,11 @@
 //   lista volta a ficar vazia.
 //
 // Parte B — histórica: Intermediário e Avançado sem âncora seguem idênticos ao
-//   arquivo anterior à 1.1.0 (d0e4f62). O Básico mudou de propósito na 1.4.0
-//   (11/08) e por isso fica fora desta parte.
+//   arquivo anterior à 1.1.0 (d0e4f62) no buildSys1 e no buildSysAudit. O Básico
+//   mudou de propósito na 1.4.0 (11/08) e o buildSys2 na 1.4.1/1.4.2 (15/11, bloco
+//   do binário conjuntivo, aprovado pelo Bruno): os dois ficam fora desta parte. O
+//   buildSys2 continua provado como "1.4.0 + o bloco, e nada além" em
+//   test-binario-conjuntivo.js.
 const fs = require('fs');
 const vm = require('vm');
 const P = require('./_paths');
@@ -24,11 +27,9 @@ function load(path) {
 }
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
-const PERMITIDAS = {
-  'buildSys2()': '1.4.1 e 1.4.2 — bloco do binário conjuntivo e a exceção do item de 0.25, aditivos (aprovados pelo Bruno, 15/11)',
-};
+const PERMITIDAS = {};
 
-const REF = load(P.base('1.4.0'));
+const REF = load(P.base('1.4.2'));
 const PRE = load(P.base('pre-1.1.0'));
 const NEW = load(P.ENGINE);
 
@@ -68,7 +69,7 @@ const st = {
   exams: [{ title: 'EXAME FISICO', rows: ['PA: 120x80 mmHg'], images: [], trigger_keywords: ['exame fisico','fisico geral','sinais vitais'] }]
 };
 
-console.log('--- Parte A: contra a 1.4.0 publicada ---');
+console.log('--- Parte A: contra a 1.4.2 publicada ---');
 for (const [area, nivel, few, dif] of casos) {
   cmp('buildSys1(' + JSON.stringify([area, nivel, dif]) + ')',
       REF.buildSys1(area, nivel, few, dif), NEW.buildSys1(area, nivel, few, dif), PERMITIDAS);
@@ -90,7 +91,6 @@ for (const [area, nivel, few, dif] of casos) {
 for (const dif of ['Intermediário', 'Avançado']) {
   cmp('pre: buildSysAudit(' + JSON.stringify(dif) + ')', PRE.buildSysAudit(dif), NEW.buildSysAudit(dif), PERMITIDAS_PRE());
 }
-cmp('pre: buildSys2()', PRE.buildSys2(), NEW.buildSys2(), PERMITIDAS_PRE());
 
 // Na parte B, uma função permitida na parte A também é aceita (o mesmo motivo vale).
 function PERMITIDAS_PRE() {
