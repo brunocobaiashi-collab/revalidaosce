@@ -1,6 +1,10 @@
 // Portão 6 — gerador (simulador/station-engine.js).
 // (a) ENGINE_VERSION declarada e registrada no comentário do topo;
-// (b) se o arquivo mudou em relação ao commit anterior, ENGINE_VERSION tem de ter subido;
+// (b) se o arquivo difere do da main (origin/main), ENGINE_VERSION tem de ser maior que a da
+//     main. Comparar com a main, e não com o commit anterior, deixa a branch ter quantos commits
+//     quiser numa versão só (15/11: o segundo commit da 1.4.1 reprovaria o check do push). Se o
+//     arquivo é igual ao da main (a própria main, depois do merge), compara com o commit anterior,
+//     o que cobre push direto na main. Sem origin/main disponível, cai no commit anterior com aviso;
 // (c) as baselines de ci/engine/baselines/ são as cópias exatas dos commits da main
 //     (sha256 fixo aqui) — baseline alterada anularia a regressão;
 // (d) roda as suítes de ci/engine/, cada uma em processo próprio, contra o arquivo
@@ -25,6 +29,7 @@ const BASELINES = {
   'station-engine.1.1.0.js':     '066e535816b1f3d7340bc07b1d78db041d07bfccd183fff37c143ca7d56feb2a', // 90cc0f8
   'station-engine.1.2.0.js':     '01192bdf150abd378dc6455b26476656634344055561dcccf8f2beb7ab3bbae6', // 3ace155
   'station-engine.1.4.0.js':     'dfda051a614c25404ede7f4627f20c3be9de1aa26be28452895c2b48f4c13617', // c7c3f5b
+  'station-engine.1.4.2.js':     '166360945018979da91afb0ef7b5e938522a4115418bf18e797908a2d45e85c0', // d904515
 };
 
 const erros = [];
@@ -43,11 +48,11 @@ function maiorQue(a, b) {
   }
   return false;
 }
-function anterior() {
+function naRef(ref) {
   try {
-    return execSync(`git show HEAD~1:${ARQUIVO}`, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+    return execSync(`git show ${ref}:${ARQUIVO}`, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } catch {
-    return null; // primeiro commit, ou histórico raso
+    return null; // ref ausente (clone sem origin/main) ou histórico raso
   }
 }
 
@@ -65,13 +70,20 @@ if (!versao) {
 }
 
 // (b)
-const ant = anterior();
-if (ant === null) {
-  avisos.push(`${ARQUIVO}: sem commit anterior para comparar (histórico raso) — incremento não verificado`);
-} else if (versao && ant !== atual) {
-  const va = versaoDe(ant);
+const daMain = naRef('origin/main');
+let ref = null, rotulo = '';
+if (daMain !== null && daMain !== atual) {
+  ref = daMain; rotulo = 'da main';
+} else {
+  ref = naRef('HEAD~1'); rotulo = 'do commit anterior';
+  if (daMain === null) avisos.push(`${ARQUIVO}: origin/main indisponível — comparando com o commit anterior`);
+}
+if (ref === null) {
+  avisos.push(`${ARQUIVO}: sem referência para comparar (histórico raso) — incremento não verificado`);
+} else if (versao && ref !== atual) {
+  const va = versaoDe(ref);
   if (va && !maiorQue(versao, va)) {
-    erros.push(`${ARQUIVO}: conteúdo mudou mas ENGINE_VERSION não subiu (${va} → ${versao})`);
+    erros.push(`${ARQUIVO}: difere ${rotulo} mas ENGINE_VERSION não subiu (${va} → ${versao})`);
   }
 }
 

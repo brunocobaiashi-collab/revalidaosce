@@ -29,6 +29,11 @@ jobs:
         with:
           fetch-depth: 2   # o portão 2 compara a versão com o commit anterior
 
+      # O portão 6 compara o station-engine.js com o da main (origin/main), não com o
+      # commit anterior: assim a branch pode ter vários commits numa versão só.
+      - name: Buscar a main para o portão 6
+        run: git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
