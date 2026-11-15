@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "commonjs",
+  "description": "Suites do station-engine.js. CommonJS de proposito: o ci/package.json e module, e as suites usam require. Rodadas pelo portao 6 (ci/check-engine.mjs)."
+}
