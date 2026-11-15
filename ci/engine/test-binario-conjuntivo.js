@@ -1,4 +1,4 @@
-// Testes da 1.4.1 — binário conjuntivo (doc de 19/08, refeita em 15/11).
+// Testes da 1.4.1 e 1.4.2 — binário conjuntivo (doc de 19/08, refeita em 15/11) e a exceção do item de 0.25.
 //  A) buildSys2: a 1.4.1 é a 1.4.0 MAIS o bloco novo, e nada além — tirando o bloco, o prompt volta
 //     a ser byte a byte o da 1.4.0 (com e sem âncora). buildSys1 e buildSysAudit: test-regressao.js.
 //  B) aviso binario_conjuntivo: os exemplos do doc de 19/08 disparam; alternativa, item de 3 faixas
@@ -16,7 +16,7 @@ function ok(cond, nome, extra) {
   else { fail++; console.log('FAIL ' + nome + (extra ? ' — ' + extra : '')); }
 }
 
-const VER = P.expect('1.4.1');
+const VER = P.expect('1.4.2');
 ok(SE.ENGINE_VERSION === VER, 'ENGINE_VERSION = ' + VER, 'veio ' + SE.ENGINE_VERSION);
 
 // ── A) buildSys2 = 1.4.0 + bloco ────────────────────────────────────────────
@@ -28,6 +28,9 @@ const BLOCO = [
   'ter 3 faixas, com crit_parc dizendo o limiar parcial. Binario conjuntivo da ZERO a quem cumpre 4 de 5,',
   'igual a quem nao fez nada.',
   'ALTERNATIVA NAO E CONJUNCAO: "A ou B", "e/ou", "ao menos dois de" continuam podendo ser binarios.',
+  'EXCECAO — ITEM DE 0.25: nao cabe parcial (0.125 fica fora da granularidade). Ou o item passa a',
+  'valer 0.5 com 3 faixas [0, 0.25, 0.5], ou continua binario com limiar aberto no crit_adeq',
+  '("ao menos N dos M").',
   '',
 ].join('\n') + '\n';
 

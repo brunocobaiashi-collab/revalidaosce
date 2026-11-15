@@ -156,13 +156,19 @@
      • softWarnings: 'binario_conjuntivo' (WARN, nao bloqueia — separar conjuncao de alternativa por
        texto e heuristico). Le crit_adeq + subitens; qualquer marca de alternativa desliga o aviso.
      • ENGINE_VERSION 1.4.1. Export novo: binarioConjuntivo.
+   EXCECAO DO ITEM DE 0.25 (2026-11-15, texto aprovado pelo Bruno):
+     • buildSys2: uma linha a mais no fim do bloco do binario conjuntivo. Item de 0.25 nao tem
+       parcial valido (0.125 fica fora da granularidade): ou passa a valer 0.5 com 3 faixas
+       [0, 0.25, 0.5], ou continua binario com limiar aberto no crit_adeq ("ao menos N dos M").
+       Sem a linha, a regra de 3 faixas deixava o modelo sem saida valida nesse caso.
+     • Nada mais mudou. ENGINE_VERSION 1.4.2.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.4.1'; // 2026-11-15 — binario conjuntivo (buildSys2 + aviso binario_conjuntivo)
+  var ENGINE_VERSION = '1.4.2'; // 2026-11-15 — excecao do item de 0.25 no bloco do binario conjuntivo
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -450,6 +456,9 @@
       'ter 3 faixas, com crit_parc dizendo o limiar parcial. Binario conjuntivo da ZERO a quem cumpre 4 de 5,',
       'igual a quem nao fez nada.',
       'ALTERNATIVA NAO E CONJUNCAO: "A ou B", "e/ou", "ao menos dois de" continuam podendo ser binarios.',
+      'EXCECAO — ITEM DE 0.25: nao cabe parcial (0.125 fica fora da granularidade). Ou o item passa a',
+      'valer 0.5 com 3 faixas [0, 0.25, 0.5], ou continua binario com limiar aberto no crit_adeq',
+      '("ao menos N dos M").',
       '',
       '⚠️ DECOMPONHA DIAGNOSTICOS E CONDUTAS INDEPENDENTES EM ITENS SEPARADOS:',
       'Se o caso tem DOIS diagnosticos/hipoteses independentes, ou DUAS condutas independentes, cada um',
