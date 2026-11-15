@@ -65,6 +65,7 @@ w.rpcAdmin = async (fn, body) => {
   return typeof r === 'function' ? r(body) : JSON.parse(JSON.stringify(r));
 };
 let previas = 0, modoPrevia = 'ok';
+const hyperLog = [], hyperResp = {};   // parte B: ancora_importar / ancora_retirar
 w.fetch = async (url, opts) => {
   const corpo = opts && opts.body ? JSON.parse(opts.body) : {};
   if (corpo.action === 'ancora_previa') {
@@ -72,6 +73,11 @@ w.fetch = async (url, opts) => {
     if (modoPrevia === '429') return { ok: false, status: 429, headers: { get: () => 'application/json' },
       json: async () => ({ error: 'fonte_limite_429', mensagem: 'A fonte pediu para esperar 60 s' }) };
     return { ok: true, status: 200, headers: { get: () => 'image/png' }, blob: async () => new w.Blob(['png'], { type: 'image/png' }) };
+  }
+  if (corpo.action === 'ancora_importar' || corpo.action === 'ancora_retirar') {
+    hyperLog.push(corpo);
+    const [status, body] = hyperResp[corpo.action];
+    return { ok: status >= 200 && status < 300, status, headers: { get: () => 'application/json' }, json: async () => JSON.parse(JSON.stringify(body)) };
   }
   return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
 };
@@ -231,6 +237,183 @@ const revAntes = revogadas;
 w.switchTab('pendentes');
 await espera();
 confere(revogadas === revAntes + 1 && det().style.display === 'none', 'sair da aba revoga o object URL');
+
+
+// ══ PARTE B (v1.6.58) ══════════════════════════════════════════════════════
+console.log('   ── parte B');
+const alertas = [];
+w.alert = (m) => { alertas.push(String(m)); };
+const BASE = w.eval('STATION_IMAGES_BASE');
+const ARQ_B = 'ancora-b1-abcd1234.webp';
+const ANC = { image_file: ARQ_B, modality: 'Radiografia de tórax', incidence: 'PA', finding_truth: 'Consolidação em LID',
+  diagnosis_truth: 'Pneumonia', area: 'Clínica Médica',
+  image_credits: { author: 'Silva A', article: 'A case', journal: 'J', year: 2021, license: 'CC BY 4.0', source_url: 'https://x.org', pmcid: 'PMC1', modified: false } };
+const B_SEM = Object.assign({}, LINHAS[0], { id: 'b1', estado: 'aprovada', arquivo_bucket: null, marcacoes: 'nenhuma' });
+const B_COM = Object.assign({}, B_SEM, { arquivo_bucket: ARQ_B });
+
+// modificacao_nao_permitida corrigida
+confere(w.eval('AN_MOTIVOS.modificacao_nao_permitida[1]').includes('marcada como modificada') && !w.eval('AN_MOTIVOS.modificacao_nao_permitida[1]').includes('licença'), 'mensagem de modificacao_nao_permitida corrigida');
+
+// B1. importar com sucesso
+respostas.admin_ancora_list = [B_SEM];
+w.filtrarAncoras('aprovada');
+await espera(60);
+await w.abrirAncora('b1');
+await espera(60);
+confere(!!botao(det(), 'Importar imagem') && !botao(det(), 'Gerar estação'), 'aprovada sem arquivo: só Importar');
+hyperResp.ancora_importar = [200, { ok: true, id: 'b1', arquivo: ARQ_B, bytes: 1234 }];
+respostas.admin_ancora_get = { ok: true, ancora: B_COM };
+const prevB = previas;
+botao(det(), 'Importar imagem').click();
+await espera(120);
+confere(hyperLog.length === 1 && hyperLog[0].action === 'ancora_importar' && hyperLog[0].id === 'b1' && Object.keys(hyperLog[0]).length === 2, 'importar manda só action e id');
+confere(d.getElementById('an-msg').textContent.includes(ARQ_B), 'importar mostra o nome do arquivo');
+confere([...det().querySelectorAll('img')].every((i) => i.getAttribute('src') === BASE + ARQ_B) && previas === prevB, 'linha recarregada: imagem vem do bucket, sem prévia');
+confere(!!botao(det(), 'Gerar estação com esta imagem') && !!botao(det(), 'Retirar'), 'aprovada com arquivo: Gerar e Retirar');
+
+// B2. importar recusado (409 e 429)
+respostas.admin_ancora_list = [B_SEM];
+w.filtrarAncoras('aprovada');
+await espera(60);
+await w.abrirAncora('b1');
+await espera(60);
+hyperResp.ancora_importar = [409, { error: 'estado_invalido', estado: 'aprovada', tem_arquivo: true }];
+botao(det(), 'Importar imagem').click();
+await espera(60);
+const info = () => det().querySelector('.an-info');
+confere(visivel(info()) && info().textContent.includes('estado: aprovada') && info().textContent.includes('já tem arquivo'), 'importar recusado (409) explica em português');
+hyperResp.ancora_importar = [503, { error: 'fonte_limite_429', mensagem: 'Espere 2 minutos' }];
+const nImp = hyperLog.length;
+botao(det(), 'Importar imagem').click();
+await espera(300);
+confere(hyperLog.length === nImp + 1 && info().textContent.includes('Espere 2 minutos') && info().textContent.includes('Nada foi repetido'), 'importar com 429: mostra a mensagem e não repete');
+
+// B3. gerar preenche e NÃO dispara
+let disparos = 0;
+w.runGenStation = async () => { disparos++; };
+respostas.admin_ancora_list = [B_COM];
+w.filtrarAncoras('aprovada');
+await espera(60);
+await w.abrirAncora('b1');
+await espera(60);
+respostas.admin_ancora_para_engine = { ok: true, ancora_id: 'b1', imageAnchor: ANC };
+d.getElementById('gen-model').value = 'claude-sonnet-4-6';
+d.getElementById('gen-instrucoes').value = 'sobra de outra geração';
+botao(det(), 'Gerar estação com esta imagem').click();
+await espera(60);
+let aj = null; try { aj = JSON.parse(d.getElementById('gen-anchor-json').value); } catch (_) {}
+confere(ultima('admin_ancora_para_engine')[1].p_id === 'b1', 'gerar chama admin_ancora_para_engine');
+confere(aj && aj.image_file === ARQ_B && aj.image_credits.license === 'CC BY 4.0' && d.getElementById('gen-anchor-chk').checked, 'gen-anchor-json com o imageAnchor e gen-anchor-chk marcado');
+confere(d.getElementById('gen-area').value === 'Clínica Médica' && d.getElementById('gen-tema').value === 'Pneumonia' && d.getElementById('gen-model').value === 'claude-opus-4-8' && d.getElementById('gen-instrucoes').value === '', 'área, tema e modelo padrão do assistente ancorado');
+confere(d.getElementById('modal-gen').classList.contains('open') && d.getElementById('gen-step-1').style.display === 'block', 'modal de geração aberto no passo 1');
+confere(disparos === 0, 'gerar NÃO dispara a geração');
+confere(w.__anEmUso && w.__anEmUso.id === 'b1' && w.__anEmUso.image_file === ARQ_B, 'guarda a âncora em uso (id e image_file)');
+
+// salvar: preenche o form como o fluxo real (fillFormFromAI) e chama saveStation
+const ESTACAO = (imgs) => ({ name: 'Estação teste', area: 'Clínica Médica', caso: 'Caso clínico', pNome: 'Ator', __anchored: true, fonte: 'ia_curada',
+  exams: [{ title: 'EXAME DE IMAGEM — RADIOGRAFIA', rows: ['Radiografia de tórax PA'], images: imgs, image_credits: [ANC.image_credits] }],
+  checklist: [{ id: '1', item: 'Item', scores: [0, 10], crit_adeq: 'x' }] });
+const salvos = [], apagados = [];
+w.saveStationDB = async (obj) => { salvos.push(obj); return { id: 'st-' + salvos.length }; };
+w.deleteStationDB = async (id) => { apagados.push(id); };
+async function preencherESalvar(imgs) {
+  w.closeModal('modal-gen');
+  w.fillFormFromAI(ESTACAO(imgs));
+  await espera(300);
+  w.__lastSaveStationTs = 0;
+  await w.saveStation();
+  await espera(60);
+}
+
+// B4. salvar chama marcar_usada com o id salvo
+respostas.admin_ancora_marcar_usada = { ok: true, estado: 'usada' };
+alertas.length = 0;
+await preencherESalvar([ARQ_B]);
+const mu = ultima('admin_ancora_marcar_usada');
+confere(salvos.length === 1, 'estação nova salva (saveStationDB chamado uma vez)' + (alertas.length ? ' — alertas: ' + alertas.join(' / ') : ''));
+confere(mu && mu[1].p_id === 'b1' && mu[1].p_station_id === 'st-1', 'salvar chama admin_ancora_marcar_usada com o id da estação salva');
+confere(alertas.some((a) => a.includes('Uso da âncora registrado')) && w.__anEmUso === null, 'sucesso avisa e limpa a âncora em uso');
+
+// B5. falha do marcar_usada avisa e não apaga nada
+respostas.admin_ancora_list = [B_COM];
+w.filtrarAncoras('aprovada'); await espera(60);
+await w.abrirAncora('b1'); await espera(60);
+botao(det(), 'Gerar estação com esta imagem').click(); await espera(60);
+respostas.admin_ancora_marcar_usada = { ok: false, erro: 'estacao_nao_pending', status: 'active' };
+alertas.length = 0;
+await preencherESalvar([ARQ_B]);
+const msgFalha = alertas.find((a) => a.includes('mas o uso da âncora não foi registrado')) || '';
+confere(msgFalha.includes('A estação foi salva (id st-2)') && msgFalha.includes('não está pending') && msgFalha.includes('Não gere outra estação com esta imagem antes de resolver'), 'falha do marcar_usada avisa com clareza');
+confere(apagados.length === 0 && salvos.length === 2 && w.__anUsoPendente && w.__anUsoPendente.station_id === 'st-2', 'falha não apaga nada e guarda a pendência');
+await w.abrirAncora('b1'); await espera(60);
+confere(!!det().querySelector('.an-uso-pendente') && det().querySelector('.an-uso-pendente').textContent.includes('st-2'), 'linha mostra o uso pendente');
+respostas.admin_ancora_marcar_usada = { ok: true, estado: 'usada' };
+botao(det(), 'Registrar o uso de novo').click(); await espera(60);
+confere(ultima('admin_ancora_marcar_usada')[1].p_station_id === 'st-2' && w.__anUsoPendente === null, 'registrar de novo usa o id salvo');
+
+// B6. descartar não registra uso
+respostas.admin_ancora_list = [B_COM];
+w.filtrarAncoras('aprovada'); await espera(60);
+await w.abrirAncora('b1'); await espera(60);
+botao(det(), 'Gerar estação com esta imagem').click(); await espera(60);
+w.descartarGeracao();
+const nMu = n('admin_ancora_marcar_usada');
+await preencherESalvar([ARQ_B]);
+confere(w.__anEmUso === null && n('admin_ancora_marcar_usada') === nMu, 'descartar não registra uso');
+botao(det(), 'Gerar estação com esta imagem').click(); await espera(60);
+w.closeModal('modal-gen');
+w.openGenModal();
+confere(w.__anEmUso === null, 'iniciar outra geração limpa a âncora em uso');
+botao(det(), 'Gerar estação com esta imagem').click(); await espera(60);
+w.closeModal('modal-form');
+confere(w.__anEmUso === null, 'fechar o formulário sem salvar limpa a âncora em uso');
+botao(det(), 'Gerar estação com esta imagem').click(); await espera(60);
+alertas.length = 0;
+await preencherESalvar(['outra-imagem.webp']);
+confere(n('admin_ancora_marcar_usada') === nMu && alertas.some((a) => a.includes('nenhum impresso cita')), 'impresso sem o arquivo da âncora não registra uso e avisa');
+
+// B7. retirar
+respostas.admin_ancora_list = [B_COM];
+w.filtrarAncoras('aprovada'); await espera(60);
+await w.abrirAncora('b1'); await espera(60);
+const nRet = hyperLog.length;
+botao(det(), 'Retirar').click(); await espera();
+confere(hyperLog.length === nRet && visivel(erroDe('motivo_retirar')), 'retirar sem motivo não chama nada');
+det().querySelector('textarea[data-campo="motivo_retirar"]').value = 'Imagem trocada';
+hyperResp.ancora_retirar = [409, { error: 'arquivo_citado_em_estacoes', arquivo: ARQ_B, estacoes: [
+  { id: 'st-9', status: 'pending', nome: 'Pneumonia <script>window.__xss3=1</script>' }, { id: 'st-10', status: 'active', nome: 'Outra "estação"' }] }];
+botao(det(), 'Retirar').click(); await espera(60);
+const lis = [...det().querySelectorAll('.an-citadas li')];
+confere(hyperLog[hyperLog.length - 1].motivo === 'Imagem trocada', 'retirar manda o motivo');
+confere(lis.length === 2 && lis[0].textContent.includes('<script>') && lis[0].textContent.includes('pending') && lis[1].textContent.includes('active') && !det().querySelector('.an-citadas script') && w.__xss3 === undefined, 'retirar recusado lista as estações como texto');
+hyperResp.ancora_retirar = [502, { error: 'remocao_falhou', pendente: true }];
+botao(det(), 'Retirar').click(); await espera(60);
+confere(info().textContent.includes('pendente') && !!botao(det(), 'Repetir a retirada'), 'retirada pendente oferece repetir');
+hyperResp.ancora_retirar = [200, { ok: true, id: 'b1', estado: 'rejeitada', arquivo_removido: true }];
+botao(det(), 'Repetir a retirada').click(); await espera(60);
+confere(!('motivo' in hyperLog[hyperLog.length - 1]) && d.getElementById('an-msg').textContent.includes('retirada'), 'repetir a retirada vai sem motivo e conclui');
+
+// B8. rejeitada com arquivo_retirado: concluir retirada
+respostas.admin_ancora_list = [Object.assign({}, B_SEM, { estado: 'rejeitada', motivo_rejeicao: 'Imagem trocada', arquivo_retirado: ARQ_B })];
+w.filtrarAncoras('rejeitada'); await espera(60);
+confere(!!d.querySelector('#an-list .an-selo-pendente'), 'lista mostra o selo retirada pendente');
+await w.abrirAncora('b1'); await espera(60);
+confere(!!det().querySelector('.an-selo-pendente') && !!botao(det(), 'Concluir retirada'), 'linha mostra o selo e Concluir retirada');
+botao(det(), 'Concluir retirada').click(); await espera(60);
+const ultRet = hyperLog[hyperLog.length - 1];
+confere(ultRet.action === 'ancora_retirar' && !('motivo' in ultRet) && d.getElementById('an-msg').textContent.includes('retirada'), 'concluir retirada chama ancora_retirar sem motivo');
+
+// B9. usada: liberar com e sem sucesso
+respostas.admin_ancora_list = [Object.assign({}, B_COM, { estado: 'usada', station_id_usada: 'st-1' })];
+w.filtrarAncoras('usada'); await espera(60);
+await w.abrirAncora('b1'); await espera(60);
+confere(det().textContent.includes('Ligada à estação') && det().textContent.includes('st-1') && !!botao(det(), 'Liberar'), 'usada mostra a estação ligada e Liberar');
+respostas.admin_ancora_liberar = { ok: false, erro: 'estacao_ainda_vale', status: 'pending' };
+botao(det(), 'Liberar').click(); await espera(60);
+confere(det().querySelector('.an-geral').textContent.includes('ainda vale (status: pending)'), 'liberar recusado explica que a estação ainda vale');
+respostas.admin_ancora_liberar = { ok: true, estado: 'aprovada', estacao: 'st-1' };
+botao(det(), 'Liberar').click(); await espera(60);
+confere(d.getElementById('an-msg').textContent.includes('liberada') && ultima('admin_ancora_liberar')[1].p_id === 'b1', 'liberar com sucesso');
 
 confere(erros.length === 0, 'nenhuma exceção em runtime' + (erros.length ? ' — ' + erros.join(' | ') : ''));
 console.log(`\n   ${ok} OK / ${falhas} FAIL`);
