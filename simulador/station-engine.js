@@ -172,7 +172,14 @@
        a ate 0.006 de max/2 e cravada em max/2; parcial escolhida diferente da metade
        (ex.: [0, 0.75, 1.25]) nao e tocada.
      • Nao muda: o maximo de cada item, a soma 10.0, a quantizacao em 0.25 dos maximos, a excecao do
-       item de 0.25. Prompts intocados. ENGINE_VERSION 1.4.3.
+       item de 0.25.
+   DIAGNOSTICO DO GABARITO NO ITEM DE INTERPRETACAO (2026-11-15, texto aprovado pelo Bruno) — caso
+   real: o crit_adeq da mesma estacao disse "fratura bimaleolar/pilao tibial" para o gabarito
+   "Fratura da tibia distal (pilao tibial) e da fibula distal"; com o "/" o corretor aceitaria as duas.
+     • buildSys2 ANCORADO (anchorSys2Block): crit_adeq conclui pelo diagnosis_truth com o mesmo nome;
+       proibicao nova de aceitar diagnostico diferente do gabarito ou juntar diagnosticos distintos
+       com "/" ou "ou"; a hipotese premiada pelo PEP passa de "coerente com" para "o" diagnosis_truth.
+     • Prompts sem ancora, buildSys1 e buildSysAudit intocados. ENGINE_VERSION 1.4.3.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -1092,8 +1099,8 @@
       '  • diagnostico real (diagnosis_truth): ' + anchor.diagnosis_truth,
       'Crie EXATAMENTE UM item de interpretacao, com 3 niveis [0, X/2, X] (peso sugerido 1.5-2.5):',
       '  text: "Interpreta a ' + anchor.modality + ' e reconhece o achado"',
-      '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pela hipotese/',
-      '             diagnostico compativel',
+      '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pelo',
+      '             diagnostico do gabarito (diagnosis_truth), com o mesmo nome',
       '  crit_parc: descreve o achado OU cita a alteracao correta sem concluir a interpretacao',
       '  crit_inad: nao interpreta ou descreve achado incompativel com a imagem',
       'PROIBICOES ABSOLUTAS neste item:',
@@ -1101,8 +1108,11 @@
       '  • NAO exigir medida quantitativa que a imagem nao permite (ex.: indice cardiotoracico sem regua/',
       '    calibracao, percentual de colapso, medida em cm)',
       '  • NAO criar subitem que recite dado pronto (nao ha dado pronto — a imagem e crua)',
+      '  • NAO aceitar no criterio diagnostico diferente do gabarito, nem juntar diagnosticos distintos',
+      '    com "/" ou "ou" (ex.: "fratura bimaleolar/pilao tibial"). Sinonimo so quando for a mesma doenca.',
       'PODE existir tambem um item binario de SOLICITAR o exame de imagem (desenho valido).',
-      'A hipotese diagnostica premiada pelo PEP deve ser coerente com o diagnosis_truth acima.'
+      'A hipotese diagnostica premiada pelo PEP deve ser o diagnosis_truth acima, com o mesmo nome;',
+      'vale a mesma proibicao de juntar diagnosticos diferentes.'
     ];
   }
 

@@ -53,12 +53,13 @@ também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
 
 | Suíte | Cobre |
 |---|---|
-| `test-regressao.js` | Prompts sem âncora (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.2.js`); `buildSys1` e `buildSysAudit` de Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
+| `test-regressao.js` | Prompts sem âncora e ancorados (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.2.js`); `buildSys1` e `buildSysAudit` de Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
 | `test-ancora.js` | Modo ancorado em imagem |
 | `test-audit-budget.js` | `maxTokensAudit` e auditoria truncada |
 | `test-area-canonica.js` | Áreas canônicas, `eixosDaArea`, `canonArea` |
 | `test-binario-conjuntivo.js` | 1.4.1: `buildSys2` = 1.4.0 + o bloco do binário conjuntivo, e nada além; aviso `binario_conjuntivo` |
 | `test-parcial-exata.js` | 1.4.3: parcial = metade exata do máximo (colapso, expansão, reescala, piso, ajuste da soma); rede que crava `max/2` em parcial arredondada; parcial escolhida diferente da metade intacta; soma 10,0 |
+| `test-diagnostico-gabarito.js` | 1.4.3: `buildSys2` ancorado = 1.4.2 + o trecho do diagnóstico do gabarito (crit_adeq com o mesmo nome do `diagnosis_truth`, proibição de juntar diagnósticos com "/" ou "ou"), e nada além; sem âncora idêntico |
 
 **Mudança intencional de prompt** (só com pedido explícito do Bruno): a função entra
 em `PERMITIDAS`, no topo do `test-regressao.js`, com a versão e o motivo. Depois que a
