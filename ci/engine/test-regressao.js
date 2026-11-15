@@ -25,7 +25,7 @@ function load(path) {
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
 const PERMITIDAS = {
-  'buildSys2()': '1.4.1 — regra do binário conjuntivo, bloco aditivo (pedido do Bruno, 15/11)',
+  'buildSys2()': '1.4.1 e 1.4.2 — bloco do binário conjuntivo e a exceção do item de 0.25, aditivos (aprovados pelo Bruno, 15/11)',
 };
 
 const REF = load(P.base('1.4.0'));
