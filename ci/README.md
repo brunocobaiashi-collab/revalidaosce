@@ -29,6 +29,7 @@ então uma rodada mostra todos os problemas de uma vez.
 | 3 | `check-runtime.mjs` | O arquivo **executa** num DOM montado (jsdom) e as funções críticas existem no fim | P0 21/07 — `$()` nulo abortou o script e derrubou o login |
 | 4 | `check-listeners.mjs` | Nenhum `addEventListener` em id inexistente | P0 21/07 — `btn-hd-back` órfão |
 | 5 | `check-onclick.mjs` | Toda função chamada de handler inline está em `window` | `openExamsTab` morto da v1.6.54 à v1.6.152, em silêncio |
+| 6 | `check-engine.mjs` | `station-engine.js`: `ENGINE_VERSION` registrada no cabeçalho e incrementada quando o arquivo muda; baselines intactas (sha256); as suítes de `ci/engine/` passam | Só o portão 1 olhava o gerador; a 1.4.1 (19/08) nunca foi publicada e nada avisou |
 
 ### Por que o portão 3 usa sonda em vez de olhar `window`
 
@@ -44,6 +45,23 @@ A matriz de acesso dos 3 perfis (regra 6 do FUNCIONALIDADES) precisa de conta
 real, rede e credenciais — é teste ponta a ponta contra produção, não análise
 estática. Fica para a Fase 2. Até lá, o teste em aba anônima continua sendo do
 Bruno.
+
+### Portão 6 — as suítes do gerador
+
+Ficam em `ci/engine/` (CommonJS; o `package.json` local diz isso). Cada uma roda
+também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
+
+| Suíte | Cobre |
+|---|---|
+| `test-regressao.js` | Prompts sem âncora (`buildSys1`, `buildSys2`, `buildSysAudit`) e `preValidate` idênticos, byte a byte, à última versão publicada (`baselines/station-engine.1.4.0.js`); Intermediário e Avançado idênticos também ao arquivo anterior à 1.1.0 |
+| `test-ancora.js` | Modo ancorado em imagem |
+| `test-audit-budget.js` | `maxTokensAudit` e auditoria truncada |
+| `test-area-canonica.js` | Áreas canônicas, `eixosDaArea`, `canonArea` |
+
+**Mudança intencional de prompt** (só com pedido explícito do Bruno): a função entra
+em `PERMITIDAS`, no topo do `test-regressao.js`, com a versão e o motivo. Depois que a
+versão nova for publicada, a cópia dela entra em `baselines/` (com o sha256 em
+`check-engine.mjs`) e `PERMITIDAS` volta a ficar vazia. Baseline nunca se edita.
 
 ## Manutenção
 
