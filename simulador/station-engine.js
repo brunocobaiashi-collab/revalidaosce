@@ -145,13 +145,24 @@
        bloqueiam (decisao de Bruno: FAIL falso custa 2 chamadas Opus por estacao).
      • Intermediario / Avancado / ancorado: prompts byte-a-byte IDENTICOS a 1.3.0 (verificado por teste).
      • ENGINE_VERSION 1.4.0. Export novo: nivelBasico.
+   BINARIO CONJUNTIVO (refeita em 2026-11-15 a partir do doc "claude/binario-conjuntivo-varredura-
+   20260819.md"; a entrega de 19/08 nunca foi publicada e o arquivo se perdeu):
+     • Problema: item de 2 faixas cujo criterio exige 2+ componentes obrigatorios — quem cumpre 4 de 5
+       tira zero, igual a quem nao fez nada. Varredura de 19/08: 18 itens em 17 estacoes ativas.
+     • buildSys2: regra nova — binario so para acao INDIVISIVEL; 2+ componentes obrigatorios exigem
+       3 faixas com crit_parc; alternativa ("A ou B", "e/ou", "ao menos dois de") nao e conjuncao.
+       Bloco ADITIVO, logo depois da ESTRUTURA DE FAIXAS. buildSys1 e buildSysAudit intocados (provado
+       em ci/engine/test-regressao.js).
+     • softWarnings: 'binario_conjuntivo' (WARN, nao bloqueia — separar conjuncao de alternativa por
+       texto e heuristico). Le crit_adeq + subitens; qualquer marca de alternativa desliga o aviso.
+     • ENGINE_VERSION 1.4.1. Export novo: binarioConjuntivo.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.4.0'; // 2026-08-11 — correcoes da auditoria do engine + tier FACIL/Basico (regua viva do admin)
+  var ENGINE_VERSION = '1.4.1'; // 2026-11-15 — binario conjuntivo (buildSys2 + aviso binario_conjuntivo)
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -431,6 +442,14 @@
       'PARCIAL = METADE DO MAXIMO por padrao (ex: max 1.0 -> parcial 0.5; max 1.5 -> parcial 0.75; max 2.0 -> parcial 1.0).',
       'PROIBIDO os niveis "Insuficiente" e "Totalmente adequado" (sao 4a/5a faixa, fora do padrao INEP).',
       'labels DEVE ter o MESMO numero de itens que scores. NUNCA 4 scores com 3 labels, e NUNCA 4 faixas.',
+      '',
+      '⚠️ BINARIO SO PARA ACAO INDIVISIVEL (nada de tudo-ou-nada escondido):',
+      'Item binario ([0, max]) so quando o criterio e UMA acao indivisivel (ex: "solicita radiografia de torax").',
+      'Se o crit_adeq OU os subitens exigem DOIS OU MAIS componentes OBRIGATORIOS (ex: "cumprimenta E pergunta',
+      'idade E profissao", "avalia os quatro quadrantes", "hemograma + glicemia + funcao renal"), o item TEM de',
+      'ter 3 faixas, com crit_parc dizendo o limiar parcial. Binario conjuntivo da ZERO a quem cumpre 4 de 5,',
+      'igual a quem nao fez nada.',
+      'ALTERNATIVA NAO E CONJUNCAO: "A ou B", "e/ou", "ao menos dois de" continuam podendo ser binarios.',
       '',
       '⚠️ DECOMPONHA DIAGNOSTICOS E CONDUTAS INDEPENDENTES EM ITENS SEPARADOS:',
       'Se o caso tem DOIS diagnosticos/hipoteses independentes, ou DUAS condutas independentes, cada um',
@@ -1332,6 +1351,31 @@
     return max;
   }
 
+  // BINARIO CONJUNTIVO (1.4.1, 19/08): item de 2 faixas cujo criterio exige 2+ componentes
+  // obrigatorios — quem cumpre 4 de 5 tira zero. Le crit_adeq + subitens (o caso de origem tinha a
+  // enumeracao so no subitem). Na duvida NAO avisa: qualquer marca de alternativa desliga o aviso.
+  // Armadilhas ja pagas na varredura de 19/08, evitadas aqui: (1) virgula NAO e sinal (lista de
+  // alternativas tem virgula); (2) "ou" e casado como palavra inteira, depois de engNorm; (3) o teste
+  // nunca fica so no crit_adeq.
+  var ALTERNATIVA_RX = /(^|[^a-z])(ou|e\/ou|ao menos|pelo menos|no minimo|qualquer|algum|alguma|um dos|uma das|um de|uma de)(?![a-z])/;
+  function binarioConjuntivo(it) {
+    if (!it || !Array.isArray(it.scores) || it.scores.length !== 2) return 0;
+    var bruto = String(it.crit_adeq || '') + '\n' + String(it.subitens || '');
+    var t = engNorm(bruto);
+    if (!t.trim() || ALTERNATIVA_RX.test(t)) return 0;
+    var n = Math.max(numeralCriterio(it.crit_adeq), numeralCriterio(it.subitens), contaSubitens(it.subitens));
+    if (n >= 2) return n;
+    // " E " maiusculo entre palavras e a convencao do PEP para conjuncao ("cumprimenta E pergunta");
+    // o "e" minusculo de texto clinico ("dor e febre") NAO conta.
+    var nE = (bruto.match(/[A-Za-zÀ-ÿ]\s+E\s+(?=[A-Za-zÀ-ÿ])/g) || []).length;
+    if (nE >= 1) return nE + 1;
+    var nMais = (t.match(/[a-z]\s*\+\s*[a-z]/g) || []).length;
+    if (nMais >= 1) return nMais + 1;
+    // "todas as etapas" sim; "todas as consultas" / "todas as duvidas" nao (nao e lista de componentes).
+    if (/(^|[^a-z])(todos|todas)\s+(os|as)\s+(etapas|itens|passos|componentes|exames|comandos|acoes|subitens|pontos|elementos|criterios)(?![a-z])/.test(t)) return 2;
+    return 0;
+  }
+
   // Termos que indicam que um IMPRESSO fornece imagem (laudo).
   var IMG_TERM_RX = /radiograf|tomograf|angiotomograf|angio-?tc|ultrass|\busg\b|ecograf|\bfast\b|doppler|mamograf|cintilograf|ressonanc|ecocardiogr|\becg\b|eletrocardiogr|\bimagem\b|\blaudo\b|incidencia/i;
   // Item de PEP que exige INTERPRETAR imagem: verbo de leitura ligado a um termo de imagem (na mesma linha).
@@ -1372,6 +1416,11 @@
       if (nAdeq > 0 && nParc > 0 && nParc >= nAdeq) {
         warns.push({ severity: 'warn', category: 'limiar_sobreposto',
           message: 'Item "' + rot + '": o limiar parcial (' + nParc + ') nao e MENOR que o adequado (' + nAdeq + ') — as faixas se sobrepoem e o corretor nao consegue separa-las.' });
+      }
+      var nConj = binarioConjuntivo(it);
+      if (nConj) {
+        warns.push({ severity: 'warn', category: 'binario_conjuntivo',
+          message: 'Item "' + rot + '" e binario, mas o criterio parece exigir ' + nConj + ' componentes obrigatorios — quem cumpre quase tudo recebe zero. Torne-o de 3 faixas com crit_parc; se o maximo for 0.25 (parcial fora da granularidade), use limiar aberto ("ao menos N dos M"). Aviso heuristico: alternativa ("A ou B") nao e conjuncao.' });
       }
     });
     // REFERENCIA DO orientAtor x exams[].title (invariante #6). Duas direcoes:
@@ -1641,6 +1690,7 @@
     extractText: extractText, pepTotal: pepTotal,
     normalizeAnchor: normalizeAnchor, enforceAnchorImpresso: enforceAnchorImpresso,
     canonArea: canonArea, eixosDaArea: eixosDaArea,
-    nivelBasico: nivelBasico, citaDiagnostico: citaDiagnostico, numeralCriterio: numeralCriterio
+    nivelBasico: nivelBasico, citaDiagnostico: citaDiagnostico, numeralCriterio: numeralCriterio,
+    binarioConjuntivo: binarioConjuntivo
   };
 })(typeof window !== 'undefined' ? window : this);

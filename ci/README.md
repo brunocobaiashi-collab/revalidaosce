@@ -57,6 +57,7 @@ também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
 | `test-ancora.js` | Modo ancorado em imagem |
 | `test-audit-budget.js` | `maxTokensAudit` e auditoria truncada |
 | `test-area-canonica.js` | Áreas canônicas, `eixosDaArea`, `canonArea` |
+| `test-binario-conjuntivo.js` | 1.4.1: `buildSys2` = 1.4.0 + o bloco do binário conjuntivo, e nada além; aviso `binario_conjuntivo` |
 
 **Mudança intencional de prompt** (só com pedido explícito do Bruno): a função entra
 em `PERMITIDAS`, no topo do `test-regressao.js`, com a versão e o motivo. Depois que a
