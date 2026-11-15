@@ -21,7 +21,7 @@ import { ler, relatorio } from './lib/html.mjs';
 
 const ARQUIVO = 'simulador/station-engine.js';
 const DIR = 'ci/engine';
-const SUITES = ['test-regressao.js', 'test-ancora.js', 'test-audit-budget.js', 'test-area-canonica.js', 'test-binario-conjuntivo.js'];
+const SUITES = ['test-regressao.js', 'test-ancora.js', 'test-audit-budget.js', 'test-area-canonica.js', 'test-binario-conjuntivo.js', 'test-parcial-exata.js'];
 
 // Uma linha por baseline. Baseline nova entra aqui no mesmo commit em que entra no diretório.
 const BASELINES = {
