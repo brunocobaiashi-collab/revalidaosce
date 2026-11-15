@@ -96,8 +96,9 @@ const rc = novo.renderReply(ADULTA, 'Chefe de estacao: Nao consta.');
 confere(rc.msgs.length === 1 && rc.msgs[0].type === 'chief' && rc.msgs[0].text === 'N\u00e3o consta.' && rc.falas[0].who === 'chief',
   'renderReply: Chefe "Nao consta." continua no Chefe', JSON.stringify(rc));
 const rp = novo.renderReply(ADULTA, 'Nao consta.');
-confere(rp.msgs.length === 1 && rp.msgs[0].type === 'chief' && rp.msgs[0].text === 'N\u00e3o consta.',
-  'renderReply: resposta pura "Nao consta." continua com o Chefe (muda so na 1.6.172)', JSON.stringify(rp));
+// 1.6.172: sem pedido de exame na ultima fala do medico (aqui, nenhuma), o "Nao consta." puro e do paciente.
+confere(rp.msgs.length === 1 && rp.msgs[0].type === 'actor' && rp.msgs[0].text === 'N\u00e3o consta.' && rp.falas[0].who === 'actor',
+  'renderReply: resposta pura "Nao consta." sem pedido de exame vai ao paciente (1.6.172)', JSON.stringify(rp));
 for (const e of novo.erros) { falhas++; console.log('   FALHA excecao em runtime (novo): ' + e); }
 novo.fechar();
 

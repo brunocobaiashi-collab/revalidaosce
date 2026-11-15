@@ -41,7 +41,7 @@ const GANCHO = `
   window.__T = {
     montar: function(s){ station = s; stationRules = buildRules(s); fired = {}; deliveredExams = []; examLog = []; chatHistory = []; fullTranscript = []; lastDoctorText = ''; window.__msgs.length = 0; window.__falas.length = 0; window.__ai.chamadas = 0; },
     limpar: function(){ window.__msgs.length = 0; window.__falas.length = 0; window.__ai.chamadas = 0; },
-    processInput: processInput, renderReply: renderReply,
+    processInput: processInput, renderReply: renderReply, ultimoMedico: function(t){ lastDoctorText = t; },
     entregues: function(){ return deliveredExams.map(function(d){ return d.title; }); },
     transcript: function(){ return fullTranscript.slice(); },
     REQUEST_RX: REQUEST_RX, norm: norm
@@ -204,9 +204,11 @@ confere(T.transcript().some((l) => l.quem === 'chief' && l.fala === 'Não consta
 T.montar(ESTACAO);
 T.renderReply('Chefe de estação: Não consta');
 confere(chefe().length === 1 && chefe()[0].text === 'Não consta.', '(3) forma acentuada sem ponto também sai "Não consta."');
+// 1.6.172: o "Nao consta." puro so e do Chefe depois de pedido de exame (senao e do paciente).
 T.montar(ESTACAO);
+T.ultimoMedico('Solicito uma tomografia');
 T.renderReply('Nao consta.');
-confere(chefe().length === 1 && chefe()[0].text === 'Não consta.', '(3) resposta pura "Nao consta." continua igual');
+confere(chefe().length === 1 && chefe()[0].text === 'Não consta.', '(3) resposta pura "Nao consta." depois de pedido de exame continua com o Chefe');
 
 for (const e of erros) { falhas++; console.log('   FALHA exceção em runtime: ' + e); }
 console.log(`\n   ${ok} ok, ${falhas} falha(s)`);
