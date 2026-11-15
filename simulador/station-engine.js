@@ -180,13 +180,23 @@
        proibicao nova de aceitar diagnostico diferente do gabarito ou juntar diagnosticos distintos
        com "/" ou "ou"; a hipotese premiada pelo PEP passa de "coerente com" para "o" diagnosis_truth.
      • Prompts sem ancora, buildSys1 e buildSysAudit intocados. ENGINE_VERSION 1.4.3.
+   PARCIAL SEMPRE NA METADE (2026-11-15, decisao do Bruno) — caso real: as tres estacoes ancoradas
+   geradas em 15/11 vieram com a parcial acima da metade na maioria dos itens de 3 faixas
+   ([0, 0.75, 1.25], [0, 0.5, 0.75]): o modelo copia o padrao do INEP e nao segue o prompt.
+     • normalizeChecklistItems: item de 3 faixas sai com parcial = metadeDoMax(maximo), sempre.
+       A rede de ate 0.006 da 1.4.3 vira caso particular. So vale para PEP recem-saido do modelo
+       (unico chamador: generate); estacoes do INEP e ja gravadas nao mudam.
+     • softWarnings: 'parcial_fora_granularidade' (WARN) para item de 0.25 com 3 faixas (parcial
+       0.125); a curadoria escolhe entre 0.5 com 3 faixas ou binario com limiar aberto.
+     • Nao muda: maximos, soma 10.0, quantizacao dos maximos em 0.25, itens binarios, crit_adeq e
+       crit_parc, prompts, fecharEmDez e ajuste final da soma. ENGINE_VERSION 1.4.4.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.4.3'; // 2026-11-15 — parcial = metade exata do maximo
+  var ENGINE_VERSION = '1.4.4'; // 2026-11-15 — parcial sempre na metade nos itens de 3 faixas gerados
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -756,8 +766,13 @@
         var mxP = Math.max.apply(null, scores.map(function (x) { return Number(x) || 0; }));
         if (mxP > 0) { scores = [0, metadeDoMax(mxP), mxP]; provLabels = null; }
       }
-      // REDE (1.4.3): item de 3 faixas cuja parcial e so a metade arredondada -> crava max/2.
-      if (scores.length === 3 && parcialEhMetade(scores[1], scores[2])) scores[1] = metadeDoMax(scores[2]);
+      // PARCIAL SEMPRE NA METADE (1.4.4, decisao do Bruno): item de 3 faixas de estacao gerada por IA
+      // sai com parcial = max/2, venha o que vier do modelo (ex.: [0, 0.75, 1.25] -> [0, 0.625, 1.25]).
+      // Substitui a rede de ate 0.006 da 1.4.3, que vira caso particular. Esta funcao so ve PEP recem-
+      // saido do modelo (unico chamador: generate); estacoes do INEP e ja gravadas nao passam aqui.
+      // Maximo 0.25 -> parcial 0.125, fora da granularidade: grava assim e o softWarnings avisa
+      // ('parcial_fora_granularidade'); a curadoria decide.
+      if (scores.length === 3) scores[1] = metadeDoMax(scores[2]);
       var labels = labelsForBands(scores.length, provLabels);
       // ID UNICO (2026-08-11) — REPARO. Id vazio ja virava o indice; faltava DEDUPLICAR. Id repetido faz
       // o results.find do grader casar SEMPRE o primeiro item: os demais recebem a nota do irmao ou
@@ -1461,6 +1476,13 @@
       if (nAdeq > 0 && nParc > 0 && nParc >= nAdeq) {
         warns.push({ severity: 'warn', category: 'limiar_sobreposto',
           message: 'Item "' + rot + '": o limiar parcial (' + nParc + ') nao e MENOR que o adequado (' + nAdeq + ') — as faixas se sobrepoem e o corretor nao consegue separa-las.' });
+      }
+      // ITEM DE 0.25 COM 3 FAIXAS (1.4.4): a parcial na metade (0.125) fica fora da granularidade.
+      // O codigo nao escolhe a saida (regra da 1.4.2): avisa para a curadoria decidir.
+      var scArr = Array.isArray(it.scores) ? it.scores : [];
+      if (scArr.length === 3 && Math.abs((Number(scArr[2]) || 0) - 0.25) < 1e-9) {
+        warns.push({ severity: 'warn', category: 'parcial_fora_granularidade',
+          message: 'Item "' + rot + '" vale 0.25 com 3 faixas: a parcial (metade, 0.125) fica fora da granularidade de 0.25. Curadoria: ou o item passa a valer 0.5 com 3 faixas [0, 0.25, 0.5], ou fica binario com limiar aberto no crit_adeq ("ao menos N dos M").' });
       }
       var nConj = binarioConjuntivo(it);
       if (nConj) {
