@@ -39,8 +39,35 @@ const ANCHOR = {
   finding_truth: 'hipertransparência em hemitórax direito', diagnosis_truth: 'pneumotórax',
   area: 'Clínica Médica', image_credits: { license: 'CC BY 4.0', author: 'A', year: '2024' }
 };
+// Trecho da 1.4.3 (item de interpretação do modo ancorado, aprovado pelo Bruno em 15/11): desfeito
+// antes da comparação. Cada par é [texto 1.4.3, texto 1.4.0]; test-diagnostico-gabarito.js prova que
+// a 1.4.3 é a 1.4.2 com exatamente estas trocas.
+const TRECHO_1_4_3 = [
+  ['  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pelo\n' +
+   '             diagnostico do gabarito (diagnosis_truth), com o mesmo nome\n',
+   '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pela hipotese/\n' +
+   '             diagnostico compativel\n'],
+  ['  • NAO aceitar no criterio diagnostico diferente do gabarito, nem juntar diagnosticos distintos\n' +
+   '    com "/" ou "ou" (ex.: "fratura bimaleolar/pilao tibial"). Sinonimo so quando for a mesma doenca.\n', ''],
+  ['A hipotese diagnostica premiada pelo PEP deve ser o diagnosis_truth acima, com o mesmo nome;\n' +
+   'vale a mesma proibicao de juntar diagnosticos diferentes.',
+   'A hipotese diagnostica premiada pelo PEP deve ser coerente com o diagnosis_truth acima.'],
+];
+function desfaz143(s) {
+  for (const [novo, velho] of TRECHO_1_4_3) {
+    if (s.split(novo).length !== 2) return null; // ausente ou repetido
+    s = s.replace(novo, () => velho);
+  }
+  return s;
+}
+
 for (const [rot, anc] of [['sem âncora', undefined], ['ancorado', SE.normalizeAnchor(ANCHOR)]]) {
-  const novo = SE.buildSys2(anc);
+  let novo = SE.buildSys2(anc);
+  if (anc) {
+    const d = desfaz143(novo);
+    ok(d !== null, 'buildSys2 ancorado: trecho da 1.4.3 presente uma vez');
+    novo = d || novo;
+  }
   const ref = REF.buildSys2(anc && REF.normalizeAnchor(ANCHOR));
   const i = novo.indexOf(BLOCO);
   ok(i > 0 && novo.indexOf(BLOCO, i + 1) < 0, 'buildSys2 ' + rot + ': bloco presente uma vez');

@@ -15,6 +15,9 @@
 //   do binário conjuntivo, aprovado pelo Bruno): os dois ficam fora desta parte. O
 //   buildSys2 continua provado como "1.4.0 + o bloco, e nada além" em
 //   test-binario-conjuntivo.js.
+//
+// Parte A também compara os três prompts ANCORADOS (1.4.3). A chave do ancorado é
+//   separada ('buildSys2(ancorado)'): permitir o ancorado não afrouxa o sem âncora.
 const fs = require('fs');
 const vm = require('vm');
 const P = require('./_paths');
@@ -27,7 +30,9 @@ function load(path) {
 }
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
-const PERMITIDAS = {};
+const PERMITIDAS = {
+  'buildSys2(ancorado)': '1.4.3 — item de interpretação: crit_adeq conclui pelo diagnosis_truth com o mesmo nome; proibido juntar diagnósticos distintos com "/" ou "ou" (aprovado pelo Bruno em 15/11)',
+};
 
 const REF = load(P.base('1.4.2'));
 const PRE = load(P.base('pre-1.1.0'));
@@ -78,6 +83,16 @@ cmp('buildSys2()', REF.buildSys2(), NEW.buildSys2(), PERMITIDAS);
 for (const dif of difsAudit) {
   cmp('buildSysAudit(' + JSON.stringify(dif) + ')', REF.buildSysAudit(dif), NEW.buildSysAudit(dif), PERMITIDAS);
 }
+const ANCHOR = {
+  image_file: 'exemplo_a1b2c3d4.png', modality: 'radiografia de tórax', incidence: 'PA',
+  finding_truth: 'hipertransparência em hemitórax direito', diagnosis_truth: 'pneumotórax',
+  area: 'Clínica Médica', image_credits: { license: 'CC BY 4.0', author: 'A', year: '2024' }
+};
+const ancRef = REF.normalizeAnchor(ANCHOR), ancNew = NEW.normalizeAnchor(ANCHOR);
+cmp('buildSys1(ancorado)', REF.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ancRef),
+    NEW.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ancNew), PERMITIDAS);
+cmp('buildSys2(ancorado)', REF.buildSys2(ancRef), NEW.buildSys2(ancNew), PERMITIDAS);
+cmp('buildSysAudit(ancorado)', REF.buildSysAudit('Avançado', ancRef), NEW.buildSysAudit('Avançado', ancNew), PERMITIDAS);
 cmp('preValidate(sem anchor)',
     JSON.stringify(REF.preValidate(st, { ok: true, total: 10 }, 'Intermediário')),
     JSON.stringify(NEW.preValidate(st, { ok: true, total: 10 }, 'Intermediário')), PERMITIDAS);

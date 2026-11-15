@@ -162,13 +162,31 @@
        [0, 0.25, 0.5], ou continua binario com limiar aberto no crit_adeq ("ao menos N dos M").
        Sem a linha, a regra de 3 faixas deixava o modelo sem saida valida nesse caso.
      • Nada mais mudou. ENGINE_VERSION 1.4.2.
+   PARCIAL EXATA (2026-11-15) — caso real: estacao ancorada (fratura de tibia e fibula distais) saiu
+   com o item de interpretacao em [0, 1.13, 2.25]; o certo e [0, 1.125, 2.25].
+     • Causa: a metade do maximo era arredondada para duas casas (Math.round(x/2*100)/100) no colapso
+       de 4+ faixas, na expansao de 2 para 3 faixas, no piso e no ajuste final da soma. E a reescala
+       do fecharEmDez quantizava tambem a parcial em 0.25 (1.125 virava 1.0 ou 1.25).
+     • Agora: funcao unica metadeDoMax (metade exata, multiplo de 0.125). Na reescala, parcial que era
+       a metade continua a metade do novo maximo. Rede no normalizeChecklistItems: parcial de 3 faixas
+       a ate 0.006 de max/2 e cravada em max/2; parcial escolhida diferente da metade
+       (ex.: [0, 0.75, 1.25]) nao e tocada.
+     • Nao muda: o maximo de cada item, a soma 10.0, a quantizacao em 0.25 dos maximos, a excecao do
+       item de 0.25.
+   DIAGNOSTICO DO GABARITO NO ITEM DE INTERPRETACAO (2026-11-15, texto aprovado pelo Bruno) — caso
+   real: o crit_adeq da mesma estacao disse "fratura bimaleolar/pilao tibial" para o gabarito
+   "Fratura da tibia distal (pilao tibial) e da fibula distal"; com o "/" o corretor aceitaria as duas.
+     • buildSys2 ANCORADO (anchorSys2Block): crit_adeq conclui pelo diagnosis_truth com o mesmo nome;
+       proibicao nova de aceitar diagnostico diferente do gabarito ou juntar diagnosticos distintos
+       com "/" ou "ou"; a hipotese premiada pelo PEP passa de "coerente com" para "o" diagnosis_truth.
+     • Prompts sem ancora, buildSys1 e buildSysAudit intocados. ENGINE_VERSION 1.4.3.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.4.2'; // 2026-11-15 — excecao do item de 0.25 no bloco do binario conjuntivo
+  var ENGINE_VERSION = '1.4.3'; // 2026-11-15 — parcial = metade exata do maximo
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -701,6 +719,14 @@
     return out;
   }
 
+  // PARCIAL = METADE EXATA DO MAXIMO (1.4.3). Sem arredondar para duas casas: com maximo 2.25 o
+  // arredondamento dava 1.13 em vez de 1.125. Os maximos do gerador sao multiplos de 0.25, entao a
+  // metade e multiplo de 0.125 e sai exata em ponto flutuante. Funcao UNICA para todos os caminhos.
+  function metadeDoMax(mx) { return (Number(mx) || 0) / 2; }
+  // Parcial que e so o arredondamento da metade (ex.: 1.13 para maximo 2.25). Parcial escolhida
+  // diferente da metade (ex.: [0, 0.75, 1.25], comum no INEP) fica fora da tolerancia e nao e tocada.
+  function parcialEhMetade(parc, mx) { return Math.abs((Number(parc) || 0) - metadeDoMax(mx)) <= 0.006; }
+
   // Normaliza cada item do PEP: garante 'text' (de varias chaves possiveis) e 'scores'.
   // Filtra itens sem texto ou sem pontuacao (que sumiriam silenciosamente no save).
   function normalizeChecklistItems(arr) {
@@ -718,7 +744,7 @@
       var provLabels = it.labels;
       if (scores.length > 3) {
         var mxB = Math.max.apply(null, scores.map(function (x) { return Number(x) || 0; }));
-        scores = [0, Math.round((mxB / 2) * 100) / 100, mxB];
+        scores = [0, metadeDoMax(mxB), mxB];
         provLabels = null;
       }
       // BAND-COLLAPSE (2026-08-11) — REPARO, nao reprovacao (custo zero, sem retry). Item com crit_parc
@@ -728,8 +754,10 @@
       // e nao tinha gate nenhum: o preValidate so olhava o excesso (4+ faixas), nunca o inverso.
       if (scores.length === 2 && String(it.crit_parc || '').trim()) {
         var mxP = Math.max.apply(null, scores.map(function (x) { return Number(x) || 0; }));
-        if (mxP > 0) { scores = [0, Math.round((mxP / 2) * 100) / 100, mxP]; provLabels = null; }
+        if (mxP > 0) { scores = [0, metadeDoMax(mxP), mxP]; provLabels = null; }
       }
+      // REDE (1.4.3): item de 3 faixas cuja parcial e so a metade arredondada -> crava max/2.
+      if (scores.length === 3 && parcialEhMetade(scores[1], scores[2])) scores[1] = metadeDoMax(scores[2]);
       var labels = labelsForBands(scores.length, provLabels);
       // ID UNICO (2026-08-11) — REPARO. Id vazio ja virava o indice; faltava DEDUPLICAR. Id repetido faz
       // o results.find do grader casar SEMPRE o primeiro item: os demais recebem a nota do irmao ou
@@ -771,7 +799,12 @@
     var f = 10 / t;
     clArr.forEach(function (item) {
       if (item && Array.isArray(item.scores)) {
+        // Parcial que era a metade continua a metade do maximo reescalado (1.4.3): quantizar a
+        // parcial em 0.25 levava 1.125 para 1.0 ou 1.25. Parcial escolhida diferente da metade
+        // segue a quantizacao de antes.
+        var eraMetade = item.scores.length === 3 && parcialEhMetade(item.scores[1], item.scores[2]);
         item.scores = item.scores.map(function (x) { return Math.round((Number(x) || 0) * f * 4) / 4; });
+        if (eraMetade) item.scores[1] = metadeDoMax(item.scores[2]);
       }
     });
     // PISO: a quantizacao em 0.25 pode zerar um item de peso pequeno. Item binario -> 0.25;
@@ -781,7 +814,7 @@
       var li = item.scores.length - 1;
       if (!(Number(item.scores[li]) > 0)) {
         item.scores[li] = (item.scores.length >= 3) ? 0.5 : 0.25;
-        if (item.scores.length === 3) item.scores[1] = Math.round((item.scores[li] / 2) * 100) / 100;
+        if (item.scores.length === 3) item.scores[1] = metadeDoMax(item.scores[li]);
       }
     });
     var t2 = Math.round(pepTotal(clArr) * 100) / 100;
@@ -796,7 +829,7 @@
     if (maior) {
       var lm = maior.scores.length - 1;
       maior.scores[lm] = Math.round((Number(maior.scores[lm]) + (10 - t2)) * 100) / 100;
-      if (maior.scores.length === 3) maior.scores[1] = Math.round((maior.scores[lm] / 2) * 100) / 100;
+      if (maior.scores.length === 3) maior.scores[1] = metadeDoMax(maior.scores[lm]);
     }
   }
 
@@ -1066,8 +1099,8 @@
       '  • diagnostico real (diagnosis_truth): ' + anchor.diagnosis_truth,
       'Crie EXATAMENTE UM item de interpretacao, com 3 niveis [0, X/2, X] (peso sugerido 1.5-2.5):',
       '  text: "Interpreta a ' + anchor.modality + ' e reconhece o achado"',
-      '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pela hipotese/',
-      '             diagnostico compativel',
+      '  crit_adeq: descreve o achado principal (resuma o finding_truth acima) E conclui pelo',
+      '             diagnostico do gabarito (diagnosis_truth), com o mesmo nome',
       '  crit_parc: descreve o achado OU cita a alteracao correta sem concluir a interpretacao',
       '  crit_inad: nao interpreta ou descreve achado incompativel com a imagem',
       'PROIBICOES ABSOLUTAS neste item:',
@@ -1075,8 +1108,11 @@
       '  • NAO exigir medida quantitativa que a imagem nao permite (ex.: indice cardiotoracico sem regua/',
       '    calibracao, percentual de colapso, medida em cm)',
       '  • NAO criar subitem que recite dado pronto (nao ha dado pronto — a imagem e crua)',
+      '  • NAO aceitar no criterio diagnostico diferente do gabarito, nem juntar diagnosticos distintos',
+      '    com "/" ou "ou" (ex.: "fratura bimaleolar/pilao tibial"). Sinonimo so quando for a mesma doenca.',
       'PODE existir tambem um item binario de SOLICITAR o exame de imagem (desenho valido).',
-      'A hipotese diagnostica premiada pelo PEP deve ser coerente com o diagnosis_truth acima.'
+      'A hipotese diagnostica premiada pelo PEP deve ser o diagnosis_truth acima, com o mesmo nome;',
+      'vale a mesma proibicao de juntar diagnosticos diferentes.'
     ];
   }
 
