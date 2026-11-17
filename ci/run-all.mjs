@@ -1,4 +1,4 @@
-// Roda os 7 portões em sequência e devolve um resumo.
+// Roda os 8 portões em sequência e devolve um resumo.
 // Uso (sempre a partir da RAIZ do repositório):  node ci/run-all.mjs
 //
 // Sai com código 1 se qualquer portão reprovar. Cada portão roda em processo
@@ -21,6 +21,7 @@ const PORTOES = [
   ['5 · handler inline', 'ci/check-onclick.mjs'],
   ['6 · gerador', 'ci/check-engine.mjs'],
   ['7 · números públicos', 'ci/check-numeros-publicos.mjs'],
+  ['8 · consentimento', 'ci/check-consentimento.mjs'],
 ];
 
 const reprovados = [];

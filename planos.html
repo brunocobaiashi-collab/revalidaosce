@@ -4,51 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planos e preços — RevalidaOSCE</title>
-<!-- Google tag (gtag.js) — Google Ads AW-18306871741 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18306871741"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-18306871741');
-</script>
-<script>
-/* v1.0 (06/09/2026) — mesma atribuição da landing: cookie rosce_attr (.revalidaosce.com.br, 90 dias),
-   checkout Kiwify decorado com utm_* + sck=gclid, simulador com ?gclid=. Falha silenciosa. */
-(function(){
-  try{
-    var KEYS=['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
-    var q=new URLSearchParams(location.search), fresh={}, has=false;
-    KEYS.forEach(function(k){ var v=q.get(k); if(v){ fresh[k]=v.slice(0,200); has=true; } });
-    var NAME='rosce_attr', attr=null;
-    function readCookie(){ var m=document.cookie.match(new RegExp('(?:^|; )'+NAME+'=([^;]*)')); if(!m) return null; try{ return JSON.parse(decodeURIComponent(m[1])); }catch(_e){ return null; } }
-    if(has){
-      attr=fresh; attr.ts=new Date().toISOString().slice(0,10); attr.lp=location.pathname;
-      var dom=/revalidaosce\.com\.br$/.test(location.hostname)?'; domain=.revalidaosce.com.br':'';
-      document.cookie=NAME+'='+encodeURIComponent(JSON.stringify(attr))+'; max-age=7776000; path=/'+dom+'; SameSite=Lax; Secure';
-    } else { attr=readCookie(); }
-    attr=attr||{};
-    var click=attr.gclid||attr.gbraid||attr.wbraid||'';
-    function decorate(){
-      document.querySelectorAll('a[href]').forEach(function(a){
-        var h=a.getAttribute('href')||''; if(h.indexOf('pay.kiwify.com.br')<0 && h.indexOf('simulador.revalidaosce.com.br')<0) return;
-        var u; try{ u=new URL(h); }catch(_e){ return; }
-        if(u.hostname==='pay.kiwify.com.br'){
-          if(!u.searchParams.get('utm_source')) u.searchParams.set('utm_source', click?'google_ads':(attr.utm_source||'planos'));
-          if(!u.searchParams.get('utm_medium')) u.searchParams.set('utm_medium', attr.utm_medium||'planos_cta');
-          if(!u.searchParams.get('utm_campaign')) u.searchParams.set('utm_campaign', attr.utm_campaign||'preco');
-          if(click && !u.searchParams.get('sck')) u.searchParams.set('sck', click);
-        } else {
-          if(click && !u.searchParams.get('gclid')) u.searchParams.set('gclid', click);
-          if(attr.utm_source && !u.searchParams.get('utm_source')) u.searchParams.set('utm_source', attr.utm_source);
-        }
-        a.setAttribute('href', u.toString());
-      });
-    }
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', decorate); else decorate();
-  }catch(_e){}
-})();
-</script>
+<!-- Consentimento de cookies: a tag do Google Ads só carrega depois do "Aceitar" (consent.js). -->
+<script src="/consent.js?v=1" data-atribuicao="planos"></script>
 <meta name="description" content="Quanto custa o RevalidaOSCE: teste grátis com 3 estações, sem cartão, e plano completo por R$ 197/mês com acesso ilimitado, sem fidelidade e garantia de 7 dias.">
 <link rel="canonical" href="https://revalidaosce.com.br/planos.html">
 <meta property="og:type" content="website">
@@ -292,6 +249,7 @@ footer a{color:var(--accent);text-decoration:none}
     <a href="/termos-de-uso.html">Termos de Uso</a>
     <a href="https://simulador.revalidaosce.com.br">Simulador</a>
     <a href="mailto:revalida.osce@gmail.com">Contato</a>
+    <a href="/politica-privacidade.html#cookies" data-ro-cookies>Preferências de cookies</a>
   </nav>
   <p>© 2026 RevalidaOSCE · <a href="https://revalidaosce.com.br">revalidaosce.com.br</a></p>
 </footer>
