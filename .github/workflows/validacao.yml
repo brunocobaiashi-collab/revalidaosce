@@ -12,11 +12,15 @@ on:
     paths:
       - 'simulador/**'
       - 'ci/**'
+      - '*.html'
+      - 'obrigado/**'
       - '.github/workflows/validacao.yml'
   pull_request:
     paths:
       - 'simulador/**'
       - 'ci/**'
+      - '*.html'
+      - 'obrigado/**'
   workflow_dispatch:
 
 jobs:
