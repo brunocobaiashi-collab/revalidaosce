@@ -4,7 +4,8 @@
 //
 // Regra (decisão do Bruno, 16/11/2026):
 // - Frase pública: "estações das provas oficiais do INEP". Proibido "banco completo"
-//   e "todas as estações do INEP". Proibido "PEP oficial".
+//   e "todas as estações do INEP". Proibido "PEP oficial", e PEP que "segue as
+//   provas oficiais" sem restringir a frase às estações das provas oficiais do INEP.
 // - Vitrine (index.html, planos.html) usa piso: "mais de N", N = piso do JSON.
 // - Número exato só no FAQ e no Quem somos, sempre com a data (mês e ano).
 // - Preço mensal único em todas as páginas.
@@ -138,6 +139,15 @@ export function verificar(paginas, cfg) {
 
     // 1. frases proibidas
     for (const f of FRASES_PROIBIDAS) if (a.publico.includes(f)) err(`frase proibida "${f}"`);
+
+    // 1b. PEP que "segue as provas" tem de dizer que é nas estações do INEP:
+    // o PEP das estações de curadoria não é oficial (Bruno, 16/11/2026).
+    for (const frase of a.publico.split(/[.!?;]/)) {
+      if (/\bpep\b/.test(frase) && /\bseguem?\b/.test(frase) && /(provas oficiais|do inep|caderno)/.test(frase)
+          && !frase.includes('estacoes das provas oficiais do inep')) {
+        err(`PEP que segue as provas oficiais sem restringir às estações do INEP: "…${frase.trim().slice(0, 120)}…"`);
+      }
+    }
 
     // JSON-LD precisa ser JSON válido em qualquer página
     a.jsonld.filter(b => !b.ok).forEach(b => err(`JSON-LD inválido (${b.erro})`));
