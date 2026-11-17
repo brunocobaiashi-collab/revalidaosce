@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
-import { verificar } from './lib/numeros-publicos.mjs';
+import { verificar, verificarApp } from './lib/numeros-publicos.mjs';
 
 // Trechos do index.html em dd9c4f1 (antes deste portão), copiados ao pé da letra.
 const INDEX_ANTIGO = `
@@ -82,6 +82,17 @@ export function autoteste(cfg, { silencioso = false } = {}) {
     `<h3>Quantas estações há?</h3><p>São ${FRASE_EXATA}.</p><script type="application/ld+json">` +
     JSON.stringify({ '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: 'Quantas estações há?', acceptedAnswer: { text: 'Banco com 300 questões.' } }] }) +
     '</script>'), true, ['resposta diverge']);
+  // App: paywall do simulador 1.6.172, ao pé da letra.
+  const PAYWALL_ANTIGO = "var _lockMsg = 'Esta estação faz parte do banco completo, exclusivo para assinantes. Assine para treinar sem limites — todas as estações Revalida, ator com IA e avaliação pelo PEP.';";
+  const PAYWALL_NOVO = "var _lockMsg = 'Esta estação faz parte do plano completo, exclusivo para assinantes. Assine para treinar sem limites — estações das provas oficiais do INEP e de curadoria, ator com IA e avaliação pelo PEP.';";
+  const app = (nome, texto, esperaReprovar, deveConter = []) => {
+    const erros = verificarApp('simulador/index.html', texto);
+    const ok = (erros.length > 0) === esperaReprovar && deveConter.every(t => erros.some(e => e.includes(t)));
+    log(`  ${ok ? '✓' : '✗'} ${nome}${erros.length ? ` (${erros.length} erro(s))` : ''}`);
+    if (!ok) falhas.push(`${nome}: esperado ${esperaReprovar ? 'reprovar' : 'aprovar'} | erros: ${erros.join(' ; ')}`);
+  };
+  app('paywall do app 1.6.172 reprova', PAYWALL_ANTIGO, true, ['banco completo']);
+  app('paywall do app 1.6.173 aprova', PAYWALL_NOVO, false);
   return falhas;
 }
 

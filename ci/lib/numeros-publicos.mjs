@@ -195,3 +195,13 @@ export function verificar(paginas, cfg) {
   }
   return [...new Set(erros)];
 }
+
+/**
+ * Frases proibidas no app (simulador/index.html): o paywall e as mensagens são
+ * texto público para o trial. Confere o arquivo inteiro, inclusive strings de JS,
+ * comentários e a nota de versão (por isso a nota não pode citar a frase).
+ */
+export function verificarApp(arquivo, texto) {
+  const t = norm(texto);
+  return FRASES_PROIBIDAS.filter(f => t.includes(f)).map(f => `${arquivo}: frase proibida "${f}"`);
+}
