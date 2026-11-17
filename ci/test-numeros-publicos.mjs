@@ -64,6 +64,7 @@ export function autoteste(cfg, { silencioso = false } = {}) {
   caso('landing nova aprova', pg('index.html', INDEX_BOM), false);
   caso('frase proibida reprova', pg('planos.html', '<p>Banco Completo das Edições Oficiais</p>'), true, ['banco completo']);
   caso('frase proibida em NFD reprova', pg('termos-de-uso.html', '<p>' + 'Todas as estações do INEP'.normalize('NFD') + '</p>'), true, ['todas as estacoes do inep']);
+  caso('"PEP oficial" reprova', pg('index.html', INDEX_BOM + '<div class="dor-title">Avaliação pelo PEP Oficial de 10 pontos</div>'), true, ['pep oficial']);
   caso('frase proibida em meta reprova', pg('quem-somos.html', '<meta name="description" content="banco completo INEP">'), true, ['banco completo']);
   caso('contador 260 reprova', pg('index.html', INDEX_BOM.replace('data-count="270"', 'data-count="260"')), true, ['data-count do contador = 260']);
   caso('contador sem sufixo reprova', pg('index.html', INDEX_BOM.replace(' data-suffix="+"', '')), true, ['data-suffix']);

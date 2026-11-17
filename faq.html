@@ -60,21 +60,40 @@ header{
 .nav-link.primary{color:var(--accent);border-color:rgba(0,201,255,.3)}
 /* ── HERO ── */
 .hero{
-  max-width:760px;margin:0 auto;padding:4rem 1.5rem 2.5rem;text-align:center;
+  max-width:820px;margin:0 auto;padding:4.5rem 1.5rem 2.5rem;text-align:center;
 }
 .hero-tag{
-  font-family:var(--mono);font-size:.7rem;color:var(--text3);
-  letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;display:block;
+  font-family:var(--mono);font-size:.7rem;color:var(--accent);opacity:.85;
+  letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;display:inline-block;
+  border:1px solid rgba(0,201,255,.25);border-radius:999px;padding:.3rem .8rem;
 }
 .hero h1{
-  font-family:var(--serif);font-size:clamp(2rem,6vw,3rem);
-  font-weight:400;letter-spacing:-.02em;line-height:1.15;margin-bottom:1rem;
+  font-family:var(--serif);font-size:clamp(2.1rem,6vw,3.3rem);
+  font-weight:400;letter-spacing:-.02em;line-height:1.12;margin-bottom:1.1rem;
 }
 .hero h1 em{color:var(--accent);font-style:italic}
-.hero p{font-size:1rem;color:var(--text2);max-width:520px;margin:0 auto}
+.hero p{font-size:1.08rem;color:var(--text2);max-width:600px;margin:0 auto;line-height:1.75}
+.hero-ctas{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.75rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;font-weight:600;font-size:.95rem;text-decoration:none;padding:.8rem 1.4rem;border-radius:10px;transition:.2s}
+.btn-p{background:var(--accent);color:#000}
+.btn-p:hover{background:#33d4ff;transform:translateY(-1px)}
+.btn-s{color:var(--text);border:1px solid var(--border2)}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+/* ── OSCE em 4 letras (mesma grade de números do Quem somos) ── */
+.osce-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1rem}
+.osce-grid .letter{background:var(--bg2);padding:1.3rem 1rem;text-align:center}
+.osce-grid .letter b{display:block;font-family:var(--serif);font-weight:400;font-size:2.3rem;color:var(--accent);line-height:1.05}
+.osce-grid .letter i{display:block;font-style:normal;font-family:var(--mono);font-size:.68rem;color:var(--text);letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem}
+.osce-grid .letter span{display:block;font-size:.8rem;color:var(--text2);line-height:1.5;margin-top:.35rem}
+/* ── CTA final ── */
+.cta-final{text-align:center;margin:1rem 0 0;padding:2.5rem 1.5rem;border:1px solid rgba(0,201,255,.22);border-radius:18px;
+  background:radial-gradient(ellipse 70% 90% at 50% 0%,rgba(0,201,255,.09) 0%,transparent 70%),var(--bg2)}
+.cta-final h2{font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.1rem);margin-bottom:.5rem}
+.cta-final p{font-size:.95rem;color:var(--text2);margin-bottom:1.5rem}
+.cta-final a.mail{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(0,201,255,.3)}
 /* ── OSCE CARD ── */
 .osce-card{
-  max-width:760px;margin:0 auto 3rem;padding:0 1.5rem;
+  max-width:820px;margin:0 auto 3.5rem;padding:0 1.5rem;
 }
 .osce-inner{
   background:linear-gradient(135deg,rgba(0,201,255,.08) 0%,rgba(0,119,204,.05) 100%);
@@ -101,17 +120,18 @@ header{
 .osce-acronym .letter span{font-size:.9rem;color:var(--text2)}
 .osce-desc{font-size:.875rem;color:var(--text2);line-height:1.75;border-top:1px solid var(--border);padding-top:1rem;margin-top:.25rem}
 /* ── FAQ LAYOUT ── */
-.faq-wrap{max-width:760px;margin:0 auto;padding:0 1.5rem 5rem}
-.faq-section{margin-bottom:2.5rem}
+.faq-wrap{max-width:820px;margin:0 auto;padding:0 1.5rem 5rem}
+.faq-section{margin-bottom:3rem}
+.faq-wrap{counter-reset:sec}
 .section-label{
-  font-family:var(--mono);font-size:.68rem;color:var(--accent);
-  letter-spacing:.2em;text-transform:uppercase;
-  margin-bottom:1rem;padding-left:.25rem;
-  display:flex;align-items:center;gap:.75rem;
+  font-family:var(--serif);font-size:clamp(1.45rem,3.6vw,1.85rem);font-weight:400;color:var(--text);
+  letter-spacing:-.01em;line-height:1.2;margin-bottom:1.1rem;display:block;
 }
-.section-label::after{
-  content:'';flex:1;height:1px;background:rgba(0,201,255,.15);
+.section-label::before{
+  counter-increment:sec;content:counter(sec,decimal-leading-zero);display:block;
+  font-family:var(--mono);font-size:.66rem;color:var(--accent);letter-spacing:.18em;margin-bottom:.45rem;
 }
+.section-label::after{display:none}
 /* ── FAQ ITEM ── */
 .faq-item{
   border:1px solid var(--border);border-radius:14px;
@@ -198,8 +218,10 @@ footer a{color:var(--accent);text-decoration:none}
 .back-top:hover{border-color:var(--accent);background:var(--bg3)}
 /* ── MOBILE ── */
 @media(max-width:600px){
+  .osce-grid{grid-template-columns:1fr 1fr}
   .hero{padding:3rem 1rem 2rem}
-  .osce-card,.faq-wrap{padding:0 .875rem 4rem}
+  .osce-card{padding:0 .875rem}
+  .faq-wrap{padding:0 .875rem 4rem}
   .osce-inner{padding:1.5rem}
 }
 </style>
@@ -218,6 +240,7 @@ footer a{color:var(--accent);text-decoration:none}
 <header>
   <a href="https://revalidaosce.com.br" class="logo">Revalida<em>OSCE</em></a>
   <nav class="header-nav">
+    <a href="/planos.html" class="nav-link">Planos</a>
     <a href="/quem-somos.html" class="nav-link">Quem somos</a>
     <a href="https://simulador.revalidaosce.com.br" class="nav-link primary">Acessar simulador →</a>
   </nav>
@@ -227,16 +250,20 @@ footer a{color:var(--accent);text-decoration:none}
   <span class="hero-tag">Perguntas Frequentes</span>
   <h1>Tudo que você precisa<br>saber sobre o <em>RevalidaOSCE</em></h1>
   <p>Respostas claras para começar a praticar com confiança e aproveitar ao máximo o simulador.</p>
+  <div class="hero-ctas">
+    <a href="https://simulador.revalidaosce.com.br/?signup=1" class="btn btn-p">Testar 3 estações grátis →</a>
+    <a href="/planos.html" class="btn btn-s">Ver planos</a>
+  </div>
 </div>
 <!-- O QUE É OSCE -->
 <div class="osce-card">
   <div class="osce-inner">
     <h2>O que é OSCE?</h2>
-    <div class="osce-acronym">
-      <div class="letter"><strong>O</strong><span>Objective — avaliação objetiva, baseada em critérios padronizados</span></div>
-      <div class="letter"><strong>S</strong><span>Structured — estruturada em estações com tempo e roteiro definidos</span></div>
-      <div class="letter"><strong>C</strong><span>Clinical — avalia competências clínicas práticas reais</span></div>
-      <div class="letter"><strong>E</strong><span>Examination — exame formal com pontuação e resultado</span></div>
+    <div class="osce-grid">
+      <div class="letter"><b>O</b><i>Objective</i><span>avaliação objetiva, baseada em critérios padronizados</span></div>
+      <div class="letter"><b>S</b><i>Structured</i><span>estruturada em estações com tempo e roteiro definidos</span></div>
+      <div class="letter"><b>C</b><i>Clinical</i><span>avalia competências clínicas práticas reais</span></div>
+      <div class="letter"><b>E</b><i>Examination</i><span>exame formal com pontuação e resultado</span></div>
     </div>
     <p class="osce-desc">
       O <strong>OSCE (Exame Clínico Objetivo Estruturado)</strong> é o formato da prova prática do Revalida INEP, adotado desde 2020. Nele, o médico percorre estações de atendimento com duração cronometrada, sendo avaliado por um padrão de procedimentos previamente definido — o <strong>Padrão Esperado de Procedimentos (PEP)</strong>. Cada estação simula um cenário real: o candidato interage com um ator que interpreta o paciente e deve conduzir a consulta como faria na prática clínica. O RevalidaOSCE replica fielmente este formato para que você treine como na prova real.
@@ -285,9 +312,9 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>O sistema permite <strong>uma sessão ativa por dispositivo</strong>. Você pode abrir <strong>múltiplas abas no mesmo navegador</strong> sem problema — todas compartilham a mesma sessão.</p>
-        <p>Ao fazer login em <strong>outro dispositivo</strong> (ex: do computador para o celular), a sessão anterior é automaticamente encerrada. Isso protege sua conta contra acesso não autorizado.</p>
-        <div class="note">Se você precisar trocar de dispositivo, basta fazer login normalmente — a transição é automática.</div>
+        <p>Nos planos pagos, a conta fica ativa em <strong>um dispositivo por vez</strong>. Você pode abrir várias abas no mesmo navegador sem problema: todas compartilham a mesma sessão.</p>
+        <p>Ao entrar em <strong>outro dispositivo</strong> (por exemplo, do computador para o celular), a sessão anterior é encerrada. Isso protege sua conta contra uso por terceiros. No teste grátis não há essa trava.</p>
+        <div class="note">Para trocar de dispositivo, basta fazer login normalmente: a troca é automática.</div>
       </div></div>
     </div>
   </div>
@@ -300,14 +327,14 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>Cada simulação segue o formato exato do Revalida OSCE:</p>
+        <p>Cada estação segue o formato da prova prática do Revalida:</p>
         <ul>
-          <li><strong>Briefing:</strong> você lê o caso clínico e as instruções da estação</li>
-          <li><strong>Simulação:</strong> o chefe anuncia o início; você conduz a consulta com o ator virtual</li>
-          <li><strong>Fala:</strong> use o microfone para se comunicar com o paciente como faria na prova real</li>
-          <li><strong>Avaliação:</strong> ao finalizar, sua performance é avaliada automaticamente pelo Padrão Esperado de Procedimentos (PEP)</li>
+          <li><strong>Instruções:</strong> ao abrir a estação, o caso e as tarefas ficam sempre à vista (ao lado, no computador; na aba Instruções, no celular)</li>
+          <li><strong>Atendimento:</strong> você conduz a consulta falando com o paciente; o Chefe de estação entrega os impressos que você pedir</li>
+          <li><strong>Correção:</strong> ao terminar, a IA corrige item a item pelo Padrão Esperado de Procedimentos (PEP) e mostra a justificativa de cada item</li>
+          <li><strong>Estudo:</strong> o resumo do tema aparece no resultado, ligado aos itens que você perdeu</li>
         </ul>
-        <div class="note">O timer é de 10 minutos por estação — o mesmo do Revalida INEP.</div>
+        <div class="note">O cronômetro é de 10 minutos, como no Revalida INEP. Por padrão ele começa quando a estação abre; se preferir ler antes de o tempo correr, mude em Minha conta, Preferências da estação.</div>
       </div></div>
     </div>
     <div class="faq-item">
@@ -349,8 +376,8 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>Sim. Há um campo de texto disponível caso prefira digitar suas respostas. Use <strong>Ctrl+Enter</strong> (no computador) para enviar rapidamente sem clicar no botão.</p>
-        <p>Recomendamos usar o microfone para uma experiência mais próxima da prova real, mas o texto é uma alternativa válida especialmente para estudar terminologia clínica.</p>
+        <p>A estação é por voz, como a prova: o treino que mais rende é falar em voz alta. Por isso o campo de texto fica escondido.</p>
+        <p>Se o navegador bloquear o microfone, o simulador para o cronômetro, mostra como liberar e oferece <strong>"Continuar digitando"</strong>. Aí o campo de texto aparece, para você não perder a estação (no computador, Ctrl+Enter envia).</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -362,7 +389,7 @@ footer a{color:var(--accent);text-decoration:none}
         <p>O Modo Maratona permite encadear <strong>múltiplas estações em sequência</strong>, simulando uma sessão real do Revalida OSCE.</p>
         <p>Você pode configurar:</p>
         <ul>
-          <li><strong>Fonte:</strong> estações do banco — oficiais INEP e curadas RevalidaOSCE</li>
+          <li><strong>Fonte:</strong> estações do banco — das provas oficiais do INEP e de curadoria RevalidaOSCE</li>
           <li><strong>Área médica:</strong> Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria, Medicina de Família e Comunidade ou Aleatório</li>
           <li><strong>Quantidade:</strong> quantas estações quer realizar</li>
         </ul>
@@ -380,14 +407,13 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>O <strong>Padrão Esperado de Procedimentos (PEP)</strong> é o instrumento oficial de avaliação do Revalida INEP. É uma lista de critérios que define exatamente o que o examinador espera que o médico faça em cada estação.</p>
-        <p>Cada critério tem três níveis de desempenho:</p>
+        <p>O <strong>Padrão Esperado de Procedimentos (PEP)</strong> é o instrumento de avaliação usado pelo INEP no Revalida. É uma lista de critérios que define exatamente o que o examinador espera que o médico faça em cada estação. Cada critério tem até três níveis de desempenho:</p>
         <ul>
           <li><strong>Adequado</strong> — realizou completamente e corretamente</li>
           <li><strong>Parcialmente adequado</strong> — realizou com falhas ou de forma incompleta</li>
           <li><strong>Inadequado / Não realizado</strong> — não realizou ou realizou de forma errada</li>
         </ul>
-        <p>Após cada simulação, sua performance é avaliada automaticamente contra o PEP cadastrado, indicando o <strong>trecho exato da sua fala</strong> que foi considerado em cada critério.</p>
+        <p>Depois de cada estação, a IA corrige sua atuação contra o PEP da estação e mostra a <strong>justificativa de cada item</strong>. Discordou de um item? Use <strong>"Discordo desta correção"</strong> no resultado: a revisão médica analisa.</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -396,13 +422,14 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>A pontuação é calculada como percentual do total possível:</p>
+        <p>A nota é o percentual dos pontos do PEP que você conquistou, de 0 a 100%.</p>
+        <p>Na prova, a nota de corte da 2ª etapa é definida pelo INEP a cada edição: nas edições recentes, ficou entre cerca de <strong>60 e 66 pontos de 100</strong>. Use como referência de treino:</p>
         <ul>
-          <li><strong style="color:var(--green)">≥ 60%</strong> — desempenho adequado (referência para aprovação no Revalida)</li>
-          <li><strong style="color:var(--yellow)">40–59%</strong> — desempenho parcial (precisa reforçar)</li>
-          <li><strong style="color:var(--red)">&lt; 40%</strong> — abaixo do esperado (revisar o conteúdo desta área)</li>
+          <li><strong>70% ou mais</strong> — com folga acima das notas de corte recentes</li>
+          <li><strong>60 a 69%</strong> — na faixa das notas de corte: reforce os itens perdidos</li>
+          <li><strong>Abaixo de 60%</strong> — estude o tema e refaça a estação</li>
         </ul>
-        <p>Na tela de avaliação você verá também o <strong>"Registro completo de falas"</strong> — clique em "▼ Expandir" para ver tudo que você falou durante a simulação e verificar se o sistema capturou corretamente suas respostas.</p>
+        <p>No resultado, <strong>"O que faltou"</strong> mostra só os itens em que você perdeu ponto. A transcrição completa fica recolhida no fim da tela, para você conferir se o sistema entendeu o que você falou.</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -428,9 +455,9 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>Suas simulações concluídas <strong>permanecem no histórico enquanto a sua conta existir</strong> — não há limite de quantidade. Você pode revisar a qualquer momento o que falou e a avaliação de cada estação que treinou.</p>
-        <p>Use o filtro por área no Histórico para encontrar rapidamente simulações específicas de Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria ou Medicina de Família e Comunidade.</p>
-        <p style="font-size:.82rem;color:var(--text2)">Observação: simulações abandonadas antes do fim (você sai sem finalizar) não entram no histórico — só simulações concluídas são salvas.</p>
+        <p>O histórico guarda as suas <strong>500 sessões mais recentes</strong>, com o que você falou e a correção de cada estação, para você revisar quando quiser.</p>
+        <p>Use o filtro por área no Histórico para encontrar rapidamente sessões de Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria ou Medicina de Família e Comunidade.</p>
+        <div class="note">Estações encerradas antes de você falar com o paciente não são corrigidas nem entram no histórico. No teste grátis, também não gastam estação.</div>
       </div></div>
     </div>
   </div>
@@ -443,8 +470,9 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>Sim. Ao criar sua conta você recebe um <strong>teste grátis de 3 estações completas</strong> — com ator virtual, interação por voz e avaliação pelo PEP, exatamente como na versão paga. Não pedimos cartão de crédito.</p>
-        <p>Depois de usar as 3 estações grátis, é só assinar o plano completo (R$ 197/mês) para ter acesso ilimitado a todas as estações e ao modo Maratona.</p>
+        <p>Sim. Ao criar sua conta você recebe um <strong>teste grátis de 3 estações completas</strong> — com paciente por voz, impressos e correção pelo PEP, como na versão paga. <strong>Não pedimos cartão de crédito.</strong></p>
+        <p>Repetir uma das demonstrações uma vez não consome outra estação grátis. E cada demonstração que você fizer libera o resumo do tema daquele caso.</p>
+        <p>Depois das 3 estações grátis, é só assinar o plano completo (R$ 197/mês) para ter acesso a todo o acervo e ao modo Maratona.</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -514,12 +542,12 @@ footer a{color:var(--accent);text-decoration:none}
       <div class="faq-a"><div class="faq-a-inner">
         <p>Se o microfone não responde, verifique:</p>
         <ul>
-          <li><strong>Permissão do navegador:</strong> ao clicar no mic pela primeira vez, o navegador solicita permissão. Clique em "Permitir".</li>
-          <li><strong>iOS Safari:</strong> vá em Configurações → Safari → Microfone → Permitir para revalidaosce.com.br</li>
-          <li><strong>Chrome Android:</strong> toque no ícone de cadeado na barra de endereço → Microfone → Permitir</li>
+          <li><strong>Permissão do navegador:</strong> ao abrir a primeira estação, o navegador pede permissão. Toque em "Permitir".</li>
+          <li><strong>iPhone (Safari):</strong> toque em <strong>aA</strong> na barra de endereço → Ajustes do Site → Microfone → Permitir. Ou em Ajustes → Safari → Microfone.</li>
+          <li><strong>Android (Chrome):</strong> toque no cadeado da barra de endereço → Permissões → Microfone</li>
           <li><strong>Microfone em uso:</strong> feche outros aplicativos que possam estar usando o microfone</li>
         </ul>
-        <div class="note">Se o microfone ainda não funcionar, use o campo de texto como alternativa — você pode digitar suas respostas e a avaliação funcionará normalmente.</div>
+        <p>Se o microfone for bloqueado durante uma estação, o simulador <strong>para o cronômetro</strong> e mostra esses passos. Se não conseguir liberar, toque em <strong>"Continuar digitando"</strong> para responder por texto e não perder a estação.</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -577,7 +605,7 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>O sistema oferece o <strong>banco completo das edições oficiais do Revalida INEP de 2020 a 2025</strong> — todas as estações da prova OSCE desde sua primeira aplicação. Distribuídas pelas 5 áreas do Revalida:</p>
+        <p>Hoje o acervo tem <strong>281 estações</strong>, distribuídas pelas 5 grandes áreas do Revalida:</p>
         <ul>
           <li>Clínica Médica</li>
           <li>Cirurgia Geral</li>
@@ -585,7 +613,8 @@ footer a{color:var(--accent);text-decoration:none}
           <li>Pediatria</li>
           <li>Medicina de Família e Comunidade</li>
         </ul>
-        <p>Além das estações oficiais, o RevalidaOSCE inclui <strong>161 estações curadas pela Equipe RevalidaOSCE</strong> — 236 estações no total, ampliadas continuamente com novos casos.</p>
+        <p><strong>103</strong> são das provas oficiais do Revalida INEP, de 2020 a 2025. O INEP não publica o roteiro do paciente; ele é adaptado ao simulador a partir do padrão de resposta (PEP) publicado. As outras <strong>178</strong> são de curadoria: construídas no mesmo formato, com PEP de 10 pontos, e revisadas por médicos parceiros e pela médica revalidanda. O acervo cresce continuamente.</p>
+        <div class="note">Números de novembro de 2026.</div>
       </div></div>
     </div>
     <div class="faq-item">
@@ -594,10 +623,10 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>São <strong>materiais de estudo curtos, de 5 a 8 minutos de leitura</strong>, escritos para o que a prova cobra: hipótese diagnóstica, exames que pontuam, conduta correta e os erros que mais custam ponto.</p>
-        <p>Ao terminar uma estação, o resumo do tema daquele caso aparece na tela de resultado e fica salvo no seu histórico, para você reler quando quiser. A ideia é fechar o ciclo: você treina, vê onde perdeu ponto, estuda o tema e refaz a estação.</p>
-        <p><strong>Nenhum resumo vai ao ar sem revisão clínica da nossa médica curadora.</strong> E quando uma estação muda, o resumo do tema entra automaticamente na fila para ser conferido de novo.</p>
-        <p>No teste grátis, dois resumos ficam liberados ao terminar as estações de demonstração. Nos planos pagos, você tem o resumo de todos os temas que treinar.</p>
+        <p>São materiais de estudo curtos, de poucos minutos de leitura, que ensinam o tema do caso: como reconhecer, diferenciar, investigar e conduzir.</p>
+        <p>Ao terminar uma estação, o card do resumo aparece no resultado, diz quantos dos itens que você perdeu estão explicados ali e leva direto a esses trechos. Ele fica salvo no histórico, para você reler quando quiser. A ideia é fechar o ciclo: você treina, vê onde perdeu ponto, estuda o tema e refaz a estação.</p>
+        <p><strong>Nenhum resumo vai ao ar sem revisão médica.</strong> E quando uma estação muda, o resumo do tema entra automaticamente na fila para ser conferido de novo.</p>
+        <p>No teste grátis, você recebe o resumo do tema de cada demonstração que fizer. Nos planos pagos, o resumo de todos os temas que treinar.</p>
       </div></div>
     </div>
     <div class="faq-item">
@@ -606,7 +635,7 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="faq-icon">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner">
-        <p>Sim. Todas as estações foram desenvolvidas seguindo rigorosamente o formato oficial do Revalida INEP:</p>
+        <p>Sim. Todas as estações foram desenvolvidas seguindo rigorosamente o formato das provas oficiais do INEP:</p>
         <ul>
           <li>Caso clínico apresentado antes da estação (como no edital)</li>
           <li>Ator que simula o paciente — e acompanhante para casos pediátricos</li>
@@ -614,7 +643,7 @@ footer a{color:var(--accent);text-decoration:none}
           <li>Timer de 10 minutos por estação</li>
           <li>Áreas e distribuição conforme edital vigente</li>
         </ul>
-        <div class="note">O RevalidaOSCE não é afiliado ao INEP. As estações oficiais são reproduzidas das provas públicas do Revalida; novas estações são criadas com auxílio de IA e revisadas por médica revalidanda como material complementar de estudo.</div>
+        <div class="note">O RevalidaOSCE não é afiliado ao INEP. As estações das provas oficiais do INEP são reproduzidas das provas públicas do Revalida; novas estações são criadas com auxílio de IA e revisadas por médicos parceiros e pela médica revalidanda como material complementar de estudo.</div>
       </div></div>
     </div>
     <div class="faq-item">
@@ -626,6 +655,14 @@ footer a{color:var(--accent);text-decoration:none}
         <p>Sim! Sugestões da comunidade são bem-vindas e ajudam a ampliar o banco de estações curadas.</p>
         <p>Para sugestões diretas de casos clínicos específicos, entre em contato pelo e-mail: <a href="mailto:revalida.osce@gmail.com" style="color:var(--accent)">revalida.osce@gmail.com</a></p>
       </div></div>
+    </div>
+  </div>
+  <div class="cta-final">
+    <h2>Ainda com alguma dúvida?</h2>
+    <p>Escreva para <a class="mail" href="mailto:revalida.osce@gmail.com">revalida.osce@gmail.com</a>. Ou comece agora: as 3 primeiras estações são grátis.</p>
+    <div class="hero-ctas">
+      <a href="https://simulador.revalidaosce.com.br/?signup=1" class="btn btn-p">Testar 3 estações grátis →</a>
+      <a href="/quem-somos.html" class="btn btn-s">Quem somos</a>
     </div>
   </div>
 </div><!-- /faq-wrap -->
@@ -651,7 +688,7 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "Como acesso o simulador após assinar?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Após a confirmação do pagamento, você recebe um e-mail de boas-vindas com botão de acesso direto. Também pode acessar simulador.revalidaosce.com.br e fazer login com Google ou criar uma senha."
+        "text": "Assim que seu pagamento for confirmado, você receberá um e-mail de boas-vindas com um botão de acesso direto. Ao clicar, você será autenticado automaticamente sem precisar criar senha. Se preferir, acesse simulador.revalidaosce.com.br e faça login com o Google (usando o mesmo e-mail do pagamento) ou crie uma senha na tela de cadastro. Dica: O login pelo Google é o mais rápido — um clique e você já está dentro."
       }
     },
     {
@@ -659,23 +696,55 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "Posso usar no celular e no computador?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. O simulador funciona em qualquer dispositivo com navegador moderno — computador, tablet ou celular. Otimizado para Chrome (Android e desktop) e Safari (iOS e macOS); funciona também em Firefox e Edge."
+        "text": "Sim. O simulador funciona em qualquer dispositivo com navegador moderno — computador, tablet ou celular. A experiência foi otimizada para Chrome (Android e desktop) e Safari (iOS e macOS), mas funciona também no Firefox e no Edge. O microfone funciona em todos os dispositivos. No celular, toque no botão do microfone para iniciar a gravação e toque novamente para parar e transcrever sua fala."
       }
     },
     {
       "@type": "Question",
-      "name": "Como funciona uma simulação OSCE no RevalidaOSCE?",
+      "name": "Como faço login se esqueci minha senha?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Cada simulação segue o formato do Revalida OSCE: briefing com o caso clínico, simulação cronometrada de 10 minutos com ator virtual, fala por microfone ou texto, e avaliação automática pelo Padrão Esperado de Procedimentos (PEP)."
+        "text": "Na tela de login, clique em \"Esqueci minha senha (e-mail/senha)\". Informe seu e-mail e você receberá um link para redefinir a senha. Se você usa login pelo Google, não há senha para redefinir — basta clicar em \"Entrar com Google\" a qualquer momento."
       }
     },
     {
       "@type": "Question",
-      "name": "Como funciona a interação por voz?",
+      "name": "Posso estar logado em mais de um dispositivo ao mesmo tempo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Você fala com o paciente virtual usando microfone e o ator responde em voz natural em português. A IA transcreve sua fala automaticamente, mesmo termos médicos técnicos. A dinâmica simula um atendimento clínico real."
+        "text": "Nos planos pagos, a conta fica ativa em um dispositivo por vez. Você pode abrir várias abas no mesmo navegador sem problema: todas compartilham a mesma sessão. Ao entrar em outro dispositivo (por exemplo, do computador para o celular), a sessão anterior é encerrada. Isso protege sua conta contra uso por terceiros. No teste grátis não há essa trava. Para trocar de dispositivo, basta fazer login normalmente: a troca é automática."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como funciona uma simulação?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cada estação segue o formato da prova prática do Revalida: Instruções: ao abrir a estação, o caso e as tarefas ficam sempre à vista (ao lado, no computador; na aba Instruções, no celular) Atendimento: você conduz a consulta falando com o paciente; o Chefe de estação entrega os impressos que você pedir Correção: ao terminar, a IA corrige item a item pelo Padrão Esperado de Procedimentos (PEP) e mostra a justificativa de cada item Estudo: o resumo do tema aparece no resultado, ligado aos itens que você perdeu O cronômetro é de 10 minutos, como no Revalida INEP. Por padrão ele começa quando a estação abre; se preferir ler antes de o tempo correr, mude em Minha conta, Preferências da estação."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como funciona a interação por voz com o paciente virtual?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O RevalidaOSCE replica a experiência da prova real através de interação por voz natural em português: Você fala: use o microfone do celular ou computador para se comunicar com o paciente — exatamente como faria na banca examinadora Transcrição automática: a IA transcreve sua fala com alta precisão, mesmo termos médicos técnicos Paciente responde em voz alta: o ator virtual fala em português com entonação natural, reagindo de forma contextualizada ao que você disse Conversa fluida: a dinâmica simula um atendimento clínico real, treinando sua escuta ativa e raciocínio em tempo real Dica: Treinar com voz é fundamental — a prova real exige fluência verbal, não apenas conhecimento. O treino por voz expõe pontos cegos que a leitura silenciosa não revela."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como usar o microfone corretamente?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O microfone funciona em modo toggle: 1º toque: inicia a gravação (botão fica vermelho pulsando) 2º toque: para a gravação e transcreve sua fala automaticamente (~1-2 segundos) Toque com texto já transcrito: apaga o texto e permite regravar Botão Enviar: envia a fala para o ator responder Pode fazer múltiplas gravações antes de enviar — o texto acumula. Use isso para completar sua fala em partes. Dica: Fale de forma clara e em português médico. O sistema transcreve com alta precisão mesmo termos técnicos."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso também digitar em vez de falar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A estação é por voz, como a prova: o treino que mais rende é falar em voz alta. Por isso o campo de texto fica escondido. Se o navegador bloquear o microfone, o simulador para o cronômetro, mostra como liberar e oferece \"Continuar digitando\". Aí o campo de texto aparece, para você não perder a estação (no computador, Ctrl+Enter envia)."
       }
     },
     {
@@ -683,7 +752,7 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "O que é o Modo Maratona?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O Modo Maratona permite encadear múltiplas estações em sequência, simulando uma sessão real do Revalida OSCE. Você pode escolher a área médica e a quantidade de estações."
+        "text": "O Modo Maratona permite encadear múltiplas estações em sequência, simulando uma sessão real do Revalida OSCE. Você pode configurar: Fonte: estações do banco — das provas oficiais do INEP e de curadoria RevalidaOSCE Área médica: Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria, Medicina de Família e Comunidade ou Aleatório Quantidade: quantas estações quer realizar Ao final, você recebe um resumo com pontuação de cada estação e o desempenho geral. Estratégia recomendada: comece com 3 estações da sua área mais fraca para aquecer e identificar lacunas rapidamente."
       }
     },
     {
@@ -691,31 +760,63 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "O que é o Padrão Esperado de Procedimentos (PEP)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O PEP é o instrumento oficial de avaliação do Revalida INEP. Define os critérios que o examinador espera que o médico cumpra em cada estação, com três níveis: adequado, parcialmente adequado, e inadequado/não realizado."
+        "text": "O Padrão Esperado de Procedimentos (PEP) é o instrumento de avaliação usado pelo INEP no Revalida. É uma lista de critérios que define exatamente o que o examinador espera que o médico faça em cada estação. Cada critério tem até três níveis de desempenho: Adequado — realizou completamente e corretamente Parcialmente adequado — realizou com falhas ou de forma incompleta Inadequado / Não realizado — não realizou ou realizou de forma errada Depois de cada estação, a IA corrige sua atuação contra o PEP da estação e mostra a justificativa de cada item. Discordou de um item? Use \"Discordo desta correção\" no resultado: a revisão médica analisa."
       }
     },
     {
       "@type": "Question",
-      "name": "O RevalidaOSCE tem teste grátis?",
+      "name": "Como interpretar minha pontuação?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. Ao criar sua conta você recebe um teste grátis de 3 estações completas, com ator virtual, interação por voz e avaliação pelo PEP, sem precisar de cartão de crédito. Depois é só assinar o plano completo por R$ 197/mês para acesso ilimitado."
+        "text": "A nota é o percentual dos pontos do PEP que você conquistou, de 0 a 100%. Na prova, a nota de corte da 2ª etapa é definida pelo INEP a cada edição: nas edições recentes, ficou entre cerca de 60 e 66 pontos de 100. Use como referência de treino: 70% ou mais — com folga acima das notas de corte recentes 60 a 69% — na faixa das notas de corte: reforce os itens perdidos Abaixo de 60% — estude o tema e refaça a estação No resultado, \"O que faltou\" mostra só os itens em que você perdeu ponto. A transcrição completa fica recolhida no fim da tela, para você conferir se o sistema entendeu o que você falou."
       }
     },
     {
       "@type": "Question",
-      "name": "Quanto custa a assinatura do RevalidaOSCE?",
+      "name": "O que é o gráfico de teia de aranha no Desempenho?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A assinatura é mensal no valor de R$ 197/mês, cobrada via cartão de crédito, Pix ou boleto. Você pode cancelar a qualquer momento e há garantia de 7 dias."
+        "text": "Na aba Desempenho do Histórico, você encontra um radar chart (teia de aranha) que mostra seu desempenho acumulado por área médica. Cada vértice do radar representa um critério do PEP. Quanto mais próximo da borda, melhor seu desempenho naquele item. A legenda ao lado usa cores para facilitar a leitura: Verde — dominado (≥ 70%) ~ Amarelo — parcial (40–69%) Vermelho — precisa estudar (< 40%) Use o filtro de área para ver o radar específico de Clínica Médica, Cirurgia Geral, Pediatria, etc. Os itens aparecem ordenados do pior para o melhor — foque nos vermelhos primeiro. Exemplo: Se o radar de Cirurgia Geral mostra \"Diagnóstico\" em vermelho mas \"Anamnese\" em verde, você sabe exatamente onde concentrar seus estudos."
       }
     },
     {
       "@type": "Question",
-      "name": "Posso cancelar a assinatura quando quiser?",
+      "name": "Quantas simulações são salvas no histórico?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. O cancelamento é feito diretamente no painel da Kiwify, sem fidelidade nem multa. O acesso permanece ativo até o final do período pago. Há garantia de 7 dias com devolução integral nos primeiros 7 dias após a primeira contratação."
+        "text": "O histórico guarda as suas 500 sessões mais recentes, com o que você falou e a correção de cada estação, para você revisar quando quiser. Use o filtro por área no Histórico para encontrar rapidamente sessões de Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria ou Medicina de Família e Comunidade. Estações encerradas antes de você falar com o paciente não são corrigidas nem entram no histórico. No teste grátis, também não gastam estação."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tem teste grátis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Ao criar sua conta você recebe um teste grátis de 3 estações completas — com paciente por voz, impressos e correção pelo PEP, como na versão paga. Não pedimos cartão de crédito. Repetir uma das demonstrações uma vez não consome outra estação grátis. E cada demonstração que você fizer libera o resumo do tema daquele caso. Depois das 3 estações grátis, é só assinar o plano completo (R$ 197/mês) para ter acesso a todo o acervo e ao modo Maratona."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como funciona a assinatura?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A assinatura é mensal no valor de R$ 197/mês, cobrada automaticamente. Você pode pagar via cartão de crédito, Pix ou boleto, conforme as opções disponíveis na Kiwify. Pode cancelar a qualquer momento. O acesso é liberado imediatamente após a confirmação do pagamento — sem burocracia. Em caso de Pix, o acesso é liberado em segundos após o pagamento."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso cancelar quando quiser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Você pode cancelar a qualquer momento diretamente no seu painel da Kiwify. Não há fidelidade nem multa. Após o cancelamento, seu acesso permanece ativo até o final do período já pago — você não perde nada do que já foi pago. Se tiver dificuldade no painel, escreva pra gente em revalida.osce@gmail.com que ajudamos. Mas o caminho oficial é pelo Kiwify. Oferecemos também garantia de 7 dias — se não ficar satisfeito nos primeiros 7 dias, devolvemos 100% do valor. Para solicitar, envie email com o assunto \"Reembolso 7 dias\" (veja detalhes nos Termos de Uso)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Minha assinatura está inativa mesmo após o pagamento. O que fazer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O sistema ativa a assinatura automaticamente em segundos após a confirmação do pagamento. Se isso não acontecer: Aguarde alguns minutos e tente fazer login novamente Certifique-se de estar usando o mesmo e-mail usado no pagamento Tente fazer logout e login novamente Se o problema persistir, entre em contato: revalida.osce@gmail.com"
       }
     },
     {
@@ -723,7 +824,7 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "Como excluo minha conta?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Você pode excluir sua conta diretamente no simulador, pelo menu do seu perfil → Excluir minha conta. Confirme com sua senha e você receberá um e-mail com link para reverter caso mude de ideia. A exclusão definitiva acontece em até 30 dias. Importante: excluir a conta não cancela automaticamente uma assinatura ativa — para isso, cancele também no painel da Kiwify."
+        "text": "Você pode excluir sua conta a qualquer momento, diretamente no simulador: Acesse simulador.revalidaosce.com.br e faça login Clique no menu do seu perfil (canto superior direito) Selecione \"Excluir minha conta\" Confirme com sua senha e marque a caixa de ciência Você receberá um e-mail com link para reverter, caso mude de ideia. A exclusão definitiva acontece em até 30 dias — durante esse período, basta clicar no link do e-mail para recuperar a conta. Importante: excluir a conta no simulador não cancela automaticamente uma assinatura ativa em vigor. Se você tem cobrança recorrente, cancele também no painel da Kiwify para evitar futuras cobranças. Detalhes completos sobre tratamento de dados após a exclusão estão na nossa Política de Privacidade."
       }
     },
     {
@@ -731,7 +832,31 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "O microfone não está funcionando. O que fazer?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Verifique a permissão do navegador. No iOS Safari: Configurações → Safari → Microfone → Permitir. No Chrome Android: ícone de cadeado → Microfone → Permitir. Como alternativa, você pode digitar suas respostas."
+        "text": "Se o microfone não responde, verifique: Permissão do navegador: ao abrir a primeira estação, o navegador pede permissão. Toque em \"Permitir\". iPhone (Safari): toque em aA na barra de endereço → Ajustes do Site → Microfone → Permitir. Ou em Ajustes → Safari → Microfone. Android (Chrome): toque no cadeado da barra de endereço → Permissões → Microfone Microfone em uso: feche outros aplicativos que possam estar usando o microfone Se o microfone for bloqueado durante uma estação, o simulador para o cronômetro e mostra esses passos. Se não conseguir liberar, toque em \"Continuar digitando\" para responder por texto e não perder a estação."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O áudio do ator/atriz não está tocando. Como resolver?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Se o áudio das vozes não tocar: Verifique se o volume do dispositivo está ativado No iOS, certifique-se de que o botão de silencioso (lateral) está desativado Toque em qualquer parte da tela antes de iniciar a simulação (iOS exige interação do usuário para reproduzir áudio) Verifique sua conexão com a internet — o áudio é gerado em tempo real A simulação funciona normalmente mesmo sem áudio — você pode ler as respostas do ator na tela do chat."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A resposta do ator está demorando muito. É normal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O tempo de resposta depende de dois fatores: Processamento da fala: o sistema processa sua mensagem e gera a resposta do ator em ~2-4 segundos Geração do áudio: o sistema converte a resposta em áudio em ~1-2 segundos adicionais Em condições normais, a resposta completa (texto + áudio) aparece em 3-6 segundos. Se estiver demorando mais, pode ser instabilidade momentânea de rede — aguarde alguns segundos."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Em qual navegador o sistema funciona melhor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O simulador funciona em todos os navegadores modernos. A experiência recomendada é: Desktop: Chrome ou Edge (melhor performance geral) iPhone/iPad: Safari ou Chrome para iOS Android: Chrome (recomendado) Evite navegadores muito antigos ou o navegador embutido de aplicativos de mensagens (WhatsApp, Instagram) — eles podem não suportar o microfone."
       }
     },
     {
@@ -739,7 +864,7 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "Quantas estações estão disponíveis?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Banco completo das edições oficiais do Revalida INEP de 2020 a 2025, distribuídas pelas 5 áreas do Revalida: Clínica Médica, Cirurgia Geral, Ginecologia e Obstetrícia, Pediatria e Medicina de Família e Comunidade. O RevalidaOSCE inclui ainda 161 estações curadas pela Equipe RevalidaOSCE, totalizando 236 estações, ampliadas continuamente."
+        "text": "Hoje o acervo tem 281 estações, distribuídas pelas 5 grandes áreas do Revalida: Clínica Médica Cirurgia Geral Ginecologia e Obstetrícia Pediatria Medicina de Família e Comunidade 103 são das provas oficiais do Revalida INEP, de 2020 a 2025. O INEP não publica o roteiro do paciente; ele é adaptado ao simulador a partir do padrão de resposta (PEP) publicado. As outras 178 são de curadoria: construídas no mesmo formato, com PEP de 10 pontos, e revisadas por médicos parceiros e pela médica revalidanda. O acervo cresce continuamente. Números de novembro de 2026."
       }
     },
     {
@@ -747,7 +872,7 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "O que são os resumos de tema?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "São materiais de estudo curtos, de 5 a 8 minutos de leitura, escritos para o que a prova cobra: hipótese diagnóstica, exames que pontuam, conduta correta e os erros que mais custam ponto. Ao terminar uma estação, o resumo do tema daquele caso aparece na tela de resultado e fica salvo no histórico. Nenhum resumo vai ao ar sem revisão clínica da médica curadora, e quando uma estação muda o resumo entra na fila para ser conferido de novo. No teste grátis, dois resumos ficam liberados ao terminar as estações de demonstração; nos planos pagos, o candidato tem o resumo de todos os temas que treinar."
+        "text": "São materiais de estudo curtos, de poucos minutos de leitura, que ensinam o tema do caso: como reconhecer, diferenciar, investigar e conduzir. Ao terminar uma estação, o card do resumo aparece no resultado, diz quantos dos itens que você perdeu estão explicados ali e leva direto a esses trechos. Ele fica salvo no histórico, para você reler quando quiser. A ideia é fechar o ciclo: você treina, vê onde perdeu ponto, estuda o tema e refaz a estação. Nenhum resumo vai ao ar sem revisão médica. E quando uma estação muda, o resumo do tema entra automaticamente na fila para ser conferido de novo. No teste grátis, você recebe o resumo do tema de cada demonstração que fizer. Nos planos pagos, o resumo de todos os temas que treinar."
       }
     },
     {
@@ -755,7 +880,15 @@ footer a{color:var(--accent);text-decoration:none}
       "name": "As estações seguem o padrão real do Revalida INEP?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. Todas as estações seguem o formato oficial: caso clínico apresentado antes, ator que simula o paciente, Padrão Esperado de Procedimentos (PEP) com critérios e pesos, timer de 10 minutos. O RevalidaOSCE não é afiliado ao INEP."
+        "text": "Sim. Todas as estações foram desenvolvidas seguindo rigorosamente o formato das provas oficiais do INEP: Caso clínico apresentado antes da estação (como no edital) Ator que simula o paciente — e acompanhante para casos pediátricos Padrão Esperado de Procedimentos (PEP) com critérios, pesos e níveis de desempenho Timer de 10 minutos por estação Áreas e distribuição conforme edital vigente O RevalidaOSCE não é afiliado ao INEP. As estações das provas oficiais do INEP são reproduzidas das provas públicas do Revalida; novas estações são criadas com auxílio de IA e revisadas por médicos parceiros e pela médica revalidanda como material complementar de estudo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso sugerir novos casos clínicos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim! Sugestões da comunidade são bem-vindas e ajudam a ampliar o banco de estações curadas. Para sugestões diretas de casos clínicos específicos, entre em contato pelo e-mail: revalida.osce@gmail.com"
       }
     }
   ]

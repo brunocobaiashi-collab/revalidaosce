@@ -4,13 +4,14 @@
 //
 // Regra (decisão do Bruno, 16/11/2026):
 // - Frase pública: "estações das provas oficiais do INEP". Proibido "banco completo"
-//   e "todas as estações do INEP".
+//   e "todas as estações do INEP". Proibido "PEP oficial".
 // - Vitrine (index.html, planos.html) usa piso: "mais de N", N = piso do JSON.
 // - Número exato só no FAQ e no Quem somos, sempre com a data (mês e ano).
 // - Preço mensal único em todas as páginas.
 
 export const ANTIGOS = [74, 177, 251, 236, 161];
-export const FRASES_PROIBIDAS = ['banco completo', 'todas as estacoes do inep'];
+// "PEP oficial": o PEP das estações de curadoria não é oficial (Bruno, 17/11/2026).
+export const FRASES_PROIBIDAS = ['banco completo', 'todas as estacoes do inep', 'pep oficial'];
 export const VITRINE = ['index.html', 'planos.html'];
 export const EXATO_COM_DATA = ['faq.html', 'quem-somos.html'];
 const MESES = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho',
