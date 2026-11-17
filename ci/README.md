@@ -31,6 +31,7 @@ então uma rodada mostra todos os problemas de uma vez.
 | 5 | `check-onclick.mjs` | Toda função chamada de handler inline está em `window` | `openExamsTab` morto da v1.6.54 à v1.6.152, em silêncio |
 | 6 | `check-engine.mjs` | `station-engine.js`: `ENGINE_VERSION` registrada no cabeçalho e maior que a da `main` quando o arquivo difere do da `main` (na própria `main`, compara com o commit anterior); baselines intactas (sha256); as suítes de `ci/engine/` passam | Só o portão 1 olhava o gerador; a 1.4.1 (19/08) nunca foi publicada e nada avisou |
 | 7 | `check-numeros-publicos.mjs` | Páginas públicas (todo `.html` da raiz e `obrigado/index.html`): sem frase proibida ("banco completo", "todas as estações do INEP", "PEP oficial"; sem acento e sem caixa); nenhum número antigo (74, 177, 251, 236, 161) junto de estações; vitrine (`index.html`, `planos.html`) só com piso "mais de N" e contador `data-count` = `piso_total` com `data-suffix="+"`; FAQ e Quem somos com número exato igual ao JSON e com a data; JSON-LD válido e, no FAQ, igual ao texto visível; preço `R$ N/mês` = `preco_mensal`. Números em `ci/numeros-publicos.json`; antes das páginas roda o autoteste `test-numeros-publicos.mjs` | Anúncio e páginas com números diferentes entre si e frases que prometiam "banco completo" (decisão do Bruno, 16/11/2026) |
+| 8 | `check-consentimento.mjs` | Consentimento de cookies: nenhum `.html` com a tag do Google fixa nem `gtag` definido ou configurado na página; todo `.html` da raiz, `obrigado/index.html` e `simulador/index.html` incluem o `consent.js`; nenhum script de página mexe no `rosce_attr`; conversão (`gtag('event')`) só dentro de `RoConsent.quandoAceitar` ou atrás de `RoConsent.aceito()`; no `consent.js`, `rosce_attr` e a tag só no ramo "aceito" (estático) e o comportamento num DOM montado (primeira visita, Aceitar, Recusar, revogar, telas do simulador); `simulador/consent.js` idêntico ao da raiz. Antes roda o autoteste `test-consentimento.mjs` | A política prometia banner antes de qualquer cookie de publicidade, e a tag do Google Ads e o `rosce_attr` rodavam sem consentimento (decisão do Bruno, 16/11/2026) |
 
 ### Por que o portão 3 usa sonda em vez de olhar `window`
 
@@ -88,3 +89,16 @@ Números menores que 10 ("3 estações grátis") não entram na regra de exato.
   por falta de dublê e não por defeito de verdade.
 - Portões 4 e 5: erro é reprovação, aviso é observação. Não transformar aviso em
   erro sem antes zerar a contagem, senão o CI nasce vermelho e perde a função.
+
+### Portão 8 — consentimento de cookies
+
+O `consent.js` existe em duas cópias, `consent.js` (landing) e `simulador/consent.js`
+(o simulador é outro projeto da Vercel e não enxerga a raiz). Edite as duas juntas; o
+portão reprova se forem diferentes. Enquanto `simulador/consent.js` não existir, o
+simulador é pulado com aviso.
+
+Não escreva a tag de fechamento de script dentro do `consent.js`, nem em comentário:
+os portões 3 e 8 o embutem num script inline. O autoteste roda sozinho:
+`node ci/test-consentimento.mjs`. Ele reprova de propósito as páginas da `main`
+`4d4b084` (tag fixa, conversão direta, `rosce_attr` gravado na landing) e versões
+estragadas do `consent.js`.

@@ -14,6 +14,7 @@ on:
       - 'ci/**'
       - '*.html'
       - 'obrigado/**'
+      - 'consent.js'
       - '.github/workflows/validacao.yml'
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - 'ci/**'
       - '*.html'
       - 'obrigado/**'
+      - 'consent.js'
   workflow_dispatch:
 
 jobs:

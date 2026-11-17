@@ -12,29 +12,31 @@
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<!-- Google tag (gtag.js) — Google Ads AW-18306871741 -->
-<!-- transport_type:'beacon' garante o envio do hit de conversão mesmo com o
+<!-- Consentimento de cookies: a tag do Google Ads só carrega depois do "Aceitar" (consent.js).
+     transport_type:'beacon' garante o envio do hit de conversão mesmo com o
      redirect imediato do magic link (auto-login pós-compra). -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18306871741"></script>
+<script>window.RO_GTAG_CONFIG = { 'transport_type': 'beacon' };</script>
+<script src="/consent.js?v=1"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-18306871741', { 'transport_type': 'beacon' });
-
   // ── Evento de conversão "Compra" (Google Ads) ──────────────────────────
-  // Dispara no carregamento da página (Kiwify redireciona o comprador pra cá).
+  // Só com consentimento: dispara no carregamento se a pessoa já aceitou, ou no
+  // momento em que ela clica em "Aceitar" no banner desta página (uma vez).
   // transaction_id = order da Kiwify (query string) → Google deduplica se a
   // página for recarregada ou revisitada com o mesmo pedido.
   (function(){
-    var qp = new URLSearchParams(window.location.search);
-    var txid = qp.get('order_code') || qp.get('order_ref') || qp.get('order_id') || '';
-    gtag('event', 'conversion', {
-      'send_to': 'AW-18306871741/QuYTCMHDyswcEL3jsplE',
-      'value': 197.0,  // 06/09/2026: preço novo (era 97)
-      'currency': 'BRL',
-      'transaction_id': txid
-    });
+    try{
+      if(!window.RoConsent) return;
+      window.RoConsent.quandoAceitar(function(){
+        var qp = new URLSearchParams(window.location.search);
+        var txid = qp.get('order_code') || qp.get('order_ref') || qp.get('order_id') || '';
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-18306871741/QuYTCMHDyswcEL3jsplE',
+          'value': 197.0,  // 06/09/2026: preço novo (era 97)
+          'currency': 'BRL',
+          'transaction_id': txid
+        });
+      });
+    }catch(_e){}
   })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">

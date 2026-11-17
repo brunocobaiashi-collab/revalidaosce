@@ -4,14 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Política de Privacidade — RevalidaOSCE</title>
-<!-- Google tag (gtag.js) — Google Ads AW-18306871741 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18306871741"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-18306871741');
-</script>
+<!-- Consentimento de cookies: a tag do Google Ads só carrega depois do "Aceitar" (consent.js). -->
+<script src="/consent.js?v=1"></script>
 <meta name="description" content="Como o RevalidaOSCE coleta, usa, armazena e protege seus dados pessoais. Conformidade com a LGPD.">
 <link rel="canonical" href="https://revalidaosce.com.br/politica-privacidade.html">
 <meta property="og:type" content="website">
@@ -190,7 +184,7 @@ footer a{color:var(--accent);text-decoration:none}
   <span class="hero-tag">Documento legal</span>
   <h1>Política de <em>Privacidade</em></h1>
   <p class="lead">Como o RevalidaOSCE coleta, usa, armazena e protege seus dados pessoais — em conformidade com a LGPD (Lei nº 13.709/2018).</p>
-  <p class="update-stamp">Última atualização: <strong>03 de maio de 2026</strong></p>
+  <p class="update-stamp">Última atualização: <strong>17 de novembro de 2026</strong></p>
 </div>
 
 <!-- TL;DR -->
@@ -337,6 +331,7 @@ footer a{color:var(--accent);text-decoration:none}
     <li><strong>Provedor de inteligência artificial generativa</strong> — recebe transcrições anonimizadas das suas simulações para gerar feedback (sem identificadores pessoais).</li>
     <li><strong>Provedor de transcrição de voz</strong> — converte o áudio capturado durante a simulação em texto, em tempo real.</li>
     <li><strong>Provedor de síntese de voz</strong> — gera as falas dos pacientes virtuais durante a simulação.</li>
+    <li><strong>Plataforma de publicidade (Google Ads)</strong> — só se você aceitar os cookies de mensuração e publicidade: recebe os dados da visita que a tag coleta, para medir anúncios (veja a seção 12).</li>
     <li><strong>Provedor de agendamento de tarefas</strong> — dispara rotinas internas de manutenção (limpeza de tokens expirados, exclusões agendadas).</li>
   </ul>
 
@@ -449,10 +444,32 @@ footer a{color:var(--accent);text-decoration:none}
 </div>
 
 <!-- 12. COOKIES -->
-<div class="content-block">
+<div class="content-block" id="cookies">
   <h2>12. Cookies e tecnologias similares</h2>
-  <p>Atualmente, utilizamos apenas <strong>cookies estritamente necessários</strong> para o funcionamento do simulador — manter sua sessão ativa, lembrar preferências, garantir segurança. Esses cookies não exigem consentimento prévio segundo a LGPD, pois sem eles o serviço não funciona.</p>
-  <p>Caso passemos a utilizar cookies de análise (estatísticas de uso) ou de publicidade no futuro, esta Política será atualizada e exibiremos um banner de consentimento antes de qualquer ativação.</p>
+  <p>Usamos dois grupos de cookies e de armazenamento do navegador. Na primeira visita, mostramos um aviso com os botões <strong>Aceitar</strong> e <strong>Recusar</strong>. Nada além do estritamente necessário é ativado antes da sua escolha.</p>
+
+  <h3>Estritamente necessários (sempre ativos)</h3>
+  <ul>
+    <li><strong>Sessão de login</strong>: mantém você conectado ao simulador.</li>
+    <li><strong>Preferências</strong>: guarda escolhas como o modo do cronômetro e a aparência.</li>
+    <li><strong>Segurança</strong>: a verificação humana do Cloudflare nos formulários de login, cadastro e recuperação de senha.</li>
+    <li><strong>Registro da sua escolha</strong>: o cookie <code>rosce_consent</code> guarda se você aceitou ou recusou, por até 12 meses, para não perguntarmos de novo a cada visita.</li>
+  </ul>
+  <p>Esses itens não dependem de consentimento, porque sem eles o serviço não funciona.</p>
+
+  <h3>Mensuração e publicidade (só com o seu consentimento)</h3>
+  <ul>
+    <li><strong>Tag do Google Ads</strong>: só é carregada depois do Aceitar. Mede se a visita veio de um anúncio nosso e se terminou em cadastro ou assinatura. Ela cria cookies do Google, como os que começam com <code>_gcl</code>, por até 90 dias. Não a usamos para personalizar anúncios nem para remarketing.</li>
+    <li><strong>Cookie de origem</strong> <code>rosce_attr</code>: guarda de qual anúncio ou página você veio (o identificador do clique e os parâmetros UTM), por até 90 dias. Serve para marcar os links de assinatura e do simulador com essa origem.</li>
+  </ul>
+
+  <h3>Como recusar ou mudar de ideia</h3>
+  <ul>
+    <li>Clique em <strong>Recusar</strong> no aviso. Sem consentimento, nenhum desses itens é ativado e os links funcionam normalmente.</li>
+    <li>Para mudar a escolha a qualquer momento, use o link <strong>Preferências de cookies</strong> no rodapé das páginas ou no menu do simulador.</li>
+    <li>Se você recusar depois de ter aceitado, apagamos o <code>rosce_attr</code> e os cookies do Google gravados no nosso domínio. Cookies que o Google tenha gravado no domínio dele podem ser apagados nas configurações do seu navegador.</li>
+    <li><strong>Recusar não impede nenhum uso do simulador</strong>: login, cadastro, estações, avaliação e assinatura funcionam do mesmo jeito.</li>
+  </ul>
 </div>
 
 <!-- 13. SEGURANÇA -->
@@ -513,6 +530,7 @@ footer a{color:var(--accent);text-decoration:none}
     <a href="/termos-de-uso.html">Termos de Uso</a>
     <a href="https://simulador.revalidaosce.com.br">Simulador</a>
     <a href="mailto:revalida.osce@gmail.com">Contato</a>
+    <a href="/politica-privacidade.html#cookies" data-ro-cookies>Preferências de cookies</a>
   </nav>
   <p>© 2026 RevalidaOSCE · <a href="https://revalidaosce.com.br">revalidaosce.com.br</a></p>
 </footer>
