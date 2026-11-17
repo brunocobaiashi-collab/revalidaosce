@@ -30,6 +30,7 @@ então uma rodada mostra todos os problemas de uma vez.
 | 4 | `check-listeners.mjs` | Nenhum `addEventListener` em id inexistente | P0 21/07 — `btn-hd-back` órfão |
 | 5 | `check-onclick.mjs` | Toda função chamada de handler inline está em `window` | `openExamsTab` morto da v1.6.54 à v1.6.152, em silêncio |
 | 6 | `check-engine.mjs` | `station-engine.js`: `ENGINE_VERSION` registrada no cabeçalho e maior que a da `main` quando o arquivo difere do da `main` (na própria `main`, compara com o commit anterior); baselines intactas (sha256); as suítes de `ci/engine/` passam | Só o portão 1 olhava o gerador; a 1.4.1 (19/08) nunca foi publicada e nada avisou |
+| 7 | `check-numeros-publicos.mjs` | Páginas públicas (todo `.html` da raiz e `obrigado/index.html`): sem frase proibida ("banco completo", "todas as estações do INEP"; sem acento e sem caixa); nenhum número antigo (74, 177, 251, 236, 161) junto de estações; vitrine (`index.html`, `planos.html`) só com piso "mais de N" e contador `data-count` = `piso_total` com `data-suffix="+"`; FAQ e Quem somos com número exato igual ao JSON e com a data; JSON-LD válido e, no FAQ, igual ao texto visível; preço `R$ N/mês` = `preco_mensal`. Números em `ci/numeros-publicos.json`; antes das páginas roda o autoteste `test-numeros-publicos.mjs` | Anúncio e páginas com números diferentes entre si e frases que prometiam "banco completo" (decisão do Bruno, 16/11/2026) |
 
 ### Por que o portão 3 usa sonda em vez de olhar `window`
 
@@ -65,6 +66,18 @@ também na mão, a partir da raiz: `node ci/engine/test-ancora.js`.
 em `PERMITIDAS`, no topo do `test-regressao.js`, com a versão e o motivo. Depois que a
 versão nova for publicada, a cópia dela entra em `baselines/` (com o sha256 em
 `check-engine.mjs`) e `PERMITIDAS` volta a ficar vazia. Baseline nunca se edita.
+
+### Portão 7 — números públicos
+
+Os números do dia ficam em `ci/numeros-publicos.json` (são públicos; `ci/` não vai
+ao ar). Quando o banco crescer, quem muda é o JSON, no mesmo pull request do texto
+das páginas: pisos (`piso_*`) para a vitrine, exatos (`exato`) e `data` para o FAQ e
+o Quem somos, cuja frase leva o mês e o ano da `data` (ex.: "novembro de 2026").
+O autoteste roda sozinho: `node ci/test-numeros-publicos.mjs`. Ele reprova de
+propósito o texto da landing de 12/11/2026 (commit `dd9c4f1`, 74/177/251); se o
+portão deixar de reprovar esses casos, o próprio portão reprova.
+
+Números menores que 10 ("3 estações grátis") não entram na regra de exato.
 
 ## Manutenção
 
