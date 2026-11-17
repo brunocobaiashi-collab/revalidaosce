@@ -65,6 +65,13 @@ export function autoteste(cfg, { silencioso = false } = {}) {
   caso('frase proibida reprova', pg('planos.html', '<p>Banco Completo das Edições Oficiais</p>'), true, ['banco completo']);
   caso('frase proibida em NFD reprova', pg('termos-de-uso.html', '<p>' + 'Todas as estações do INEP'.normalize('NFD') + '</p>'), true, ['todas as estacoes do inep']);
   caso('"PEP oficial" reprova', pg('index.html', INDEX_BOM + '<div class="dor-title">Avaliação pelo PEP Oficial de 10 pontos</div>'), true, ['pep oficial']);
+  // Cartão "Fidelidade ao INEP" do Quem somos em b928cb3, ao pé da letra.
+  caso('PEP segue as provas sem restringir ao INEP reprova', pg('quem-somos.html',
+    '<div class="principio"><h3>Fidelidade ao INEP</h3><p>Formato, tempo, impressos e PEP seguem as provas oficiais do INEP. Não inventamos regra de prova.</p></div>'),
+    true, ['sem restringir']);
+  caso('PEP segue as provas restrito ao INEP aprova', pg('quem-somos.html',
+    '<p>Nas estações das provas oficiais do INEP, formato, tempo, impressos e PEP seguem as provas. Não inventamos regra de prova.</p>' +
+    '<p>As estações das provas oficiais do INEP seguem o caderno e o PEP publicados pelo INEP.</p>'), false);
   caso('frase proibida em meta reprova', pg('quem-somos.html', '<meta name="description" content="banco completo INEP">'), true, ['banco completo']);
   caso('contador 260 reprova', pg('index.html', INDEX_BOM.replace('data-count="270"', 'data-count="260"')), true, ['data-count do contador = 260']);
   caso('contador sem sufixo reprova', pg('index.html', INDEX_BOM.replace(' data-suffix="+"', '')), true, ['data-suffix']);
