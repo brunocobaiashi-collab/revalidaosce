@@ -186,9 +186,8 @@
       '@media(max-width:520px){#ro-consent{left:8px;right:8px;bottom:8px;padding:12px}#ro-consent .ro-c-btns{width:100%}#ro-consent button{flex:1}}' +
       '@media print{#ro-consent,#ro-consent-espaco{display:none!important}}';
     var TEXTO =
-      'Usamos cookies necessários para o site funcionar. Com a sua permissão, também usamos os cookies do ' +
-      'Google Ads e um cookie nosso que guarda de qual anúncio ou página você veio. Recusar não muda nada no ' +
-      'uso do simulador. <a href="https://revalidaosce.com.br/politica-privacidade.html#cookies">Política de privacidade</a>';
+      'Usamos cookies para medir de qual anúncio você veio. ' +
+      '<a href="https://revalidaosce.com.br/politica-privacidade.html#cookies">Política de privacidade</a>';
 
     // No simulador o banner só aparece nas telas-hub: nunca no login, no paywall,
     // na estação nem no resultado (mesma regra do banner do trial).
