@@ -16,11 +16,11 @@
      transport_type:'beacon' garante o envio do hit de conversão mesmo com o
      redirect imediato do magic link (auto-login pós-compra). -->
 <script>window.RO_GTAG_CONFIG = { 'transport_type': 'beacon' };</script>
-<script src="/consent.js?v=1"></script>
+<script src="/consent.js?v=2" data-sem-banner></script>
 <script>
   // ── Evento de conversão "Compra" (Google Ads) ──────────────────────────
-  // Só com consentimento: dispara no carregamento se a pessoa já aceitou, ou no
-  // momento em que ela clica em "Aceitar" no banner desta página (uma vez).
+  // Só com consentimento: dispara se a pessoa já aceitou antes (o aceite vale para
+  // todo o site). Esta página não mostra banner, porque redireciona sozinha.
   // transaction_id = order da Kiwify (query string) → Google deduplica se a
   // página for recarregada ou revisitada com o mesmo pedido.
   (function(){
