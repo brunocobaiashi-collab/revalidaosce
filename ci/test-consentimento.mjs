@@ -73,7 +73,7 @@ export async function autoteste({ silencioso = false } = {}) {
   const bom = fs.readFileSync('consent.js', 'utf8');
   const estragar = (de, para) => { if (!bom.includes(de)) throw new Error('autoteste desatualizado: trecho sumiu do consent.js: ' + de); return bom.replace(de, para); };
   const mutantes = [
-    ['aceite no carregamento reprova', estragar('if (aceito()) aplicarAceite();\n    else if (!estado()) abrirBanner();', 'aplicarAceite();'), ['fora do ramo aceito', 'primeira visita já carrega a tag']],
+    ['aceite no carregamento reprova', estragar('if (aceito()) aplicarAceite();\n    else if (!estado() && !semBanner) abrirBanner();', 'aplicarAceite();'), ['fora do ramo aceito', 'primeira visita já carrega a tag']],
     ['rosce_attr fora do ramo aceito reprova', estragar('function decorar(attr) {', 'function decorar(attr) {\n      gravarCookie(ATTR, attr, 7776000);'), ['rosce_attr gravado fora', 'grava rosce_attr sem consentimento']],
     ['banner no login do simulador reprova', estragar("var HUBS = ['s-dashboard',", "var HUBS = ['s-login', 's-dashboard',"), ['banner aparece na tela de login']],
     ['links sem rótulo fixo reprova', estragar('if (modoAtribuicao && !aceito()) decorar({});', ''), ['perdeu os rótulos fixos']],

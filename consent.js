@@ -14,6 +14,8 @@
  *   nos links e, com aceite, gclid/utm (o antigo bloco v2.2 das páginas).
  *   window.RO_GTAG_CONFIG = {...}  antes do include: opções do gtag('config') da página
  *   RoConsent.quandoAceitar(fn)   roda fn uma vez, já ou quando a pessoa aceitar
+ *   script com data-sem-banner    não mostra o banner nessa página (ex.: /obrigado, que
+ *                                 redireciona sozinha); o aceite já dado continua valendo
  *   link com data-ro-cookies (Preferências de cookies)  reabre o banner
  *
  * Falha silenciosa: nada aqui pode quebrar a página, o login ou o cadastro.
@@ -30,6 +32,7 @@
     var DOMINIO = /(^|\.)revalidaosce\.com\.br$/.test(location.hostname) ? '; domain=.revalidaosce.com.br' : '';
     var script = document.currentScript;
     var modoAtribuicao = (script && script.getAttribute('data-atribuicao')) || '';
+    var semBanner = !!(script && script.hasAttribute('data-sem-banner'));
     var cfgPagina = window.RO_GTAG_CONFIG || null;
 
     /* ── cookies ─────────────────────────────────────────────────────────── */
@@ -280,6 +283,6 @@
     };
 
     if (aceito()) aplicarAceite();
-    else if (!estado()) abrirBanner();
+    else if (!estado() && !semBanner) abrirBanner();
   } catch (_e) { /* falha silenciosa */ }
 })();
