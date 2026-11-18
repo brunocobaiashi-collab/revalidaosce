@@ -107,25 +107,16 @@ h1{font-family:var(--serif);font-size:1.75rem;margin-bottom:.5rem}
     <p class="sub">Aguarde um momento.</p>
   </div>
 
-  <!-- Estado: cadastro -->
-  <div id="state-register" style="display:none">
+  <!-- Estado: acesso ainda não liberado (o webhook da Kiwify demorou) -->
+  <div id="state-pendente" style="display:none">
     <div class="check">✅</div>
-    <h1>Pagamento confirmado!</h1>
-    <p class="sub">Crie sua senha para acessar o simulador imediatamente.</p>
+    <h1>Obrigado pela sua compra!</h1>
+    <p class="sub">Seu acesso será liberado em instantes. Use o link do e-mail de boas-vindas ou fale com o suporte.</p>
     <div class="divider"></div>
-    <div class="form-section">
-      <div class="form-title">Criar sua conta</div>
-      <div id="reg-error" class="error"></div>
-      <div id="reg-success" class="success"></div>
-      <label class="ilabel">Seu nome</label>
-      <input type="text" id="reg-name" class="tinput" placeholder="Como devemos te chamar?">
-      <label class="ilabel">E-mail</label>
-      <input type="email" id="reg-email" class="tinput" placeholder="seu@email.com" readonly style="opacity:.7">
-      <label class="ilabel">Crie uma senha</label>
-      <input type="password" id="reg-pass" class="tinput" placeholder="Mínimo 8 caracteres">
-      <button class="btn" id="btn-register" onclick="doRegister()">Criar conta e acessar →</button>
-      <div class="already-user">Já tem conta? <a href="https://simulador.revalidaosce.com.br/">Fazer login</a></div>
-    </div>
+    <a href="https://simulador.revalidaosce.com.br/" class="btn" style="display:block;text-decoration:none;text-align:center;padding:12px">
+      Acessar o simulador →
+    </a>
+    <div class="already-user">Não recebeu o e-mail? Escreva para <a href="mailto:revalida.osce@gmail.com">revalida.osce@gmail.com</a></div>
   </div>
 
   <!-- Estado: já tem conta -->
@@ -156,7 +147,7 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var client = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 function show(id){
-  ['state-checking','state-register','state-existing','state-error'].forEach(function(s){
+  ['state-checking','state-pendente','state-existing','state-error'].forEach(function(s){
     document.getElementById(s).style.display = 'none';
   });
   document.getElementById(id).style.display = 'block';
@@ -213,63 +204,13 @@ async function checkAndSetup(){
 
   // ── FALLBACK: order_id ausente ou webhook demorou demais ──────────────────
   // O e-mail de boas-vindas traz um link de acesso imediato (canal seguro por
-  // posse do e-mail). Mostramos também o cadastro/login como alternativa.
+  // posse do e-mail). Esta página NÃO cria conta nem escreve em profiles/subscriptions:
+  // só o webhook ativa assinatura. Se faltar acesso, a pessoa fala com o suporte.
   if(email){
-    document.getElementById('reg-email').value = email;
-    show('state-register');
+    show('state-pendente');
   } else {
     show('state-existing');
   }
-}
-
-async function doRegister(){
-  var name  = document.getElementById('reg-name').value.trim();
-  var email = document.getElementById('reg-email').value.trim();
-  var pass  = document.getElementById('reg-pass').value;
-  var errEl = document.getElementById('reg-error');
-  var sucEl = document.getElementById('reg-success');
-  var btn   = document.getElementById('btn-register');
-
-  errEl.style.display = 'none';
-  sucEl.style.display = 'none';
-
-  if(!name){ errEl.textContent = 'Preencha seu nome.'; errEl.style.display='block'; return; }
-  if(pass.length < 8){ errEl.textContent = 'A senha deve ter pelo menos 8 caracteres.'; errEl.style.display='block'; return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Criando conta...';
-
-  var { data, error } = await client.auth.signUp({
-    email: email,
-    password: pass,
-    options: { data: { full_name: name } }
-  });
-
-  if(error){
-    errEl.textContent = error.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Criar conta e acessar →';
-    return;
-  }
-
-  // Update profile with subscription status
-  if(data.user){
-    await client.from('profiles').update({
-      subscription_status: 'active',
-      name: name
-    }).eq('id', data.user.id);
-
-    await client.from('subscriptions').update({
-      user_id: data.user.id
-    }).eq('email', email);
-  }
-
-  sucEl.innerHTML = '✅ Conta criada com sucesso!<br>Verifique seu e-mail para confirmar e depois acesse o simulador.';
-  sucEl.style.display = 'block';
-  btn.textContent = 'Ir para o simulador →';
-  btn.disabled = false;
-  btn.onclick = function(){ window.location.href = 'https://simulador.revalidaosce.com.br/'; };
 }
 
 // Start
