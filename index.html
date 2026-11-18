@@ -480,13 +480,14 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
       </div>
       <!-- ============================================================ -->
       <style>
+        /* Demo da landing: espelha a tela s-sim do simulador (addMsg, buildExamChip, CSS .msg/.vpanel).
+           Se o visual do chat do simulador mudar, este bloco muda no mesmo pacote. */
         .rvd{
-          --bg:#050a0e; --panel:#0a1119; --panel2:#0b1521;
-          --border:rgba(0,201,255,.12); --border2:rgba(0,201,255,.22);
-          --cyan:#00c9ff; --cyan-dim:#3a8aa6; --cyan-bg:rgba(0,201,255,.09);
-          --text:#dde7ee; --text2:#7d96a8; --text3:#4d6373;
-          --red:#e0566b; --amber:#e0a93f;
-          --dr:#0c1c26; --ac:#0e1822; --ch:#151a12;
+          --bg:#050a0e; --bg2:#0a1520;
+          --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+          --text:#e8f0f8; --text2:#7a9ab5; --text3:#445566;
+          --accent:#00c9ff; --red:#ef4444; --green:#22c55e;
+          --chief-bg:rgba(0,119,204,.10); --chief-border:rgba(0,201,255,.22);
           --serif:'DM Serif Display',Georgia,serif;
           --mono:'DM Mono',ui-monospace,'SF Mono',Menlo,monospace;
           --sans:'DM Sans',system-ui,-apple-system,sans-serif;
@@ -497,15 +498,13 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
         .rvd *{box-sizing:border-box;}
 
         .rvd-window{
-          background:linear-gradient(180deg,#091018 0%,#05090e 100%);
-          border:1px solid var(--border2); border-radius:16px; overflow:hidden;
+          background:var(--bg);
+          border:1px solid rgba(0,201,255,.22); border-radius:16px; overflow:hidden;
           box-shadow:0 30px 80px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.02) inset;
         }
-        /* Reserva a altura do widget no desktop antes do JS montar o conteúdo,
-           eliminando o layout shift (CLS) do carregamento. No mobile o widget
-           fica oculto (.hero-mockup{display:none}), então não se aplica. */
+        /* Reserva a altura do widget no desktop antes do JS montar o conteúdo (evita CLS). */
         @media(min-width:769px){
-          .rvd-window{min-height:592px}
+          .rvd-window{min-height:636px}
         }
 
         .rvd-titlebar{
@@ -518,106 +517,98 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
         .rvd-dot:nth-child(3){background:#3fbf6b;}
         .rvd-url{margin-left:10px; font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; color:var(--text3);}
 
-        .rvd-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:20px 22px 16px;}
-        .rvd-header>div:first-child{min-width:0;}
-        .rvd-eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.2em; color:var(--cyan-dim); text-transform:uppercase; margin-bottom:9px;}
-        .rvd-title{font-family:var(--serif); font-weight:400; font-size:27px; margin:0; letter-spacing:.01em; color:#eef4f8; line-height:1.1;}
-        .rvd-header-right{display:flex; align-items:center; gap:12px; flex-shrink:0; padding-top:4px;}
-        .rvd-timer{
-          font-family:var(--mono); font-weight:500; font-size:19px; letter-spacing:.02em;
-          color:#f1f6f9; background:#0a1622; border:1px solid var(--border2); border-radius:9px;
-          padding:8px 14px; min-width:78px; text-align:center; font-variant-numeric:tabular-nums;
-        }
-        .rvd-end{font-family:var(--sans); font-weight:600; font-size:13.5px; color:var(--red);
-          background:transparent; border:1px solid rgba(224,86,107,.45); border-radius:9px; padding:9px 16px; cursor:default;}
+        .rvd-body{padding:18px 18px 16px;}
+        /* .sim-hdr */
+        .rvd-header{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px;}
+        .rvd-title{font-family:var(--serif); font-weight:400; font-size:24px; margin:0; color:var(--text); line-height:1.15; min-width:0;}
+        .rvd-header-right{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+        /* .timer-d */
+        .rvd-timer{font-family:var(--serif); font-weight:400; font-size:26px; line-height:1.3; letter-spacing:.02em; color:var(--text);
+          background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:4px 15px; font-variant-numeric:tabular-nums;}
+        /* .btn.btn-d */
+        .rvd-end{font-family:var(--sans); font-weight:500; font-size:13px; color:#ff6b6b; cursor:default;
+          background:linear-gradient(180deg,rgba(239,68,68,.12),rgba(239,68,68,.04)); border:1px solid rgba(239,68,68,.4); border-radius:8px; padding:8px 16px;}
 
-        .rvd-tabs{display:flex; gap:4px; padding:0 22px; border-bottom:1px solid var(--border);}
-        .rvd-tab{font-family:var(--sans); font-size:14px; font-weight:500; color:var(--text2);
-          background:transparent; border:0; cursor:default; padding:11px 12px 13px; position:relative;}
-        .rvd-tab.is-active{color:var(--cyan);}
-        .rvd-tab.is-active::after{content:""; position:absolute; left:8px; right:8px; bottom:-1px; height:2px; background:var(--cyan); border-radius:2px;}
-        .rvd-tab-badge{display:inline-block; margin-left:6px; min-width:17px; height:17px; line-height:17px;
-          font-family:var(--mono); font-size:10px; font-weight:500; text-align:center; color:#05121a;
-          background:var(--cyan); border-radius:5px; padding:0 4px; transform:scale(0); transition:transform .35s cubic-bezier(.3,1.4,.5,1);}
-        .rvd-tab-badge.show{transform:scale(1);}
+        /* .tabs / .tab */
+        .rvd-tabs{display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:16px;}
+        .rvd-tab{font-family:var(--sans); font-size:13px; color:var(--text2); background:transparent; border:0;
+          border-bottom:2px solid transparent; margin-bottom:-1px; padding:8px 16px; cursor:default;}
+        .rvd-tab.is-active{color:var(--accent); border-bottom-color:var(--accent); font-weight:600;}
+        .rvd-exam-dot{display:none; color:var(--green);}
+        .rvd-exam-dot.show{display:inline;}
 
-        .rvd-chat{height:392px; overflow:hidden; padding:22px 22px 8px; position:relative;
-          -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 14px),transparent 100%);
-                  mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 14px),transparent 100%);}
-        .rvd-sysline{text-align:center; font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--text3); text-transform:lowercase; margin-bottom:20px;}
-
-        .rvd-turn{display:flex; gap:11px; margin-bottom:18px; opacity:0; transform:translateY(8px);}
-        .rvd-turn.in{animation:rvd-rise .45s cubic-bezier(.2,.7,.3,1) forwards;}
+        /* .chat-area */
+        .rvd-chat{display:flex; flex-direction:column; gap:10px; height:318px; overflow:hidden; padding:14px;
+          background:var(--bg); border:1px solid var(--border); border-radius:12px; margin-bottom:14px;}
+        /* .ms */
+        .rvd-sys{align-self:center; text-align:center; font-family:var(--mono); font-size:10.8px; color:var(--text3);}
+        /* .msg / .ma / .md / .mc */
+        .rvd-msg{flex-shrink:0; max-width:85%; padding:10px 14px; border-radius:12px; font-size:13.2px; line-height:1.65; color:var(--text);
+          background:#1e2332; border:1px solid var(--border); align-self:flex-start; opacity:0; transform:translateY(6px);}
+        .rvd-msg.in{animation:rvd-rise .35s ease-out forwards;}
         @keyframes rvd-rise{to{opacity:1; transform:none;}}
-        .rvd-avatar{flex-shrink:0; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-          font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.03em; color:#7fdcef;
-          background:var(--cyan-bg); border:1px solid rgba(0,201,255,.30); margin-top:18px;}
-        .rvd-msgwrap{min-width:0; max-width:80%;}
-        .rvd-role{font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--text3); text-transform:uppercase; margin:0 0 6px 2px;}
-        .rvd-bubble{background:var(--ac); border:1px solid var(--border); border-radius:4px 14px 14px 14px; padding:13px 16px; font-size:15px; line-height:1.5; color:#e7eef4;}
-        .rvd-turn.dr .rvd-bubble{background:var(--dr); border-color:rgba(0,201,255,.18); border-radius:14px 4px 14px 14px;}
-        /* Chefe de estação: interlocutor próprio, acento âmbar (como no simulador) */
-        .rvd-turn.ch .rvd-avatar{color:#f0cf8a; background:rgba(224,169,63,.10); border-color:rgba(224,169,63,.38);}
-        .rvd-turn.ch .rvd-bubble{background:var(--ch); border-color:rgba(224,169,63,.28); border-radius:4px 14px 14px 14px;}
-        .rvd-turn.ch .rvd-role{color:rgba(224,169,63,.75);}
+        .rvd-msg.md{align-self:flex-end; background:#1a3a4a; border-color:rgba(79,195,247,.2);}
+        .rvd-msg.mc{background:var(--chief-bg); border-color:var(--chief-border); max-width:92%;}
+        .rvd-msnd{font-family:var(--mono); font-size:10.2px; font-weight:500; letter-spacing:.06em; margin-bottom:4px; color:var(--text3);}
+        .rvd-msg.mc .rvd-msnd{color:var(--accent);}
+        /* .df: AGUARDANDO... */
+        .rvd-df{display:inline-flex; gap:4px; padding:4px 0;}
+        .rvd-df span{width:6px; height:6px; border-radius:50%; background:var(--text2); display:inline-block; animation:rvd-db 1.2s ease-in-out infinite;}
+        .rvd-df span:nth-child(2){animation-delay:.2s;} .rvd-df span:nth-child(3){animation-delay:.4s;}
+        @keyframes rvd-db{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+        /* buildExamChip */
+        .rvd-chip{display:flex; align-items:center; gap:10px; margin-top:8px; padding:10px 12px; border:1px solid var(--chief-border);
+          border-radius:10px; background:rgba(79,195,247,.06);}
+        .rvd-chip-i{font-size:17px; flex-shrink:0;}
+        .rvd-chip-t{font-weight:600; font-size:12.8px; color:var(--text);}
+        .rvd-chip-s{font-size:10.8px; color:rgba(79,195,247,.9);}
 
-        .rvd-typing{display:flex; gap:5px; align-items:center; padding:15px 16px;}
-        .rvd-typing span{width:7px; height:7px; border-radius:50%; background:var(--cyan-dim); animation:rvd-blink 1.3s infinite both;}
-        .rvd-typing span:nth-child(2){animation-delay:.18s;}
-        .rvd-typing span:nth-child(3){animation-delay:.36s;}
-        @keyframes rvd-blink{0%,60%,100%{opacity:.25; transform:translateY(0);}30%{opacity:1; transform:translateY(-3px);}}
-
-        .rvd-voice{display:inline-flex; align-items:center; gap:9px; margin-top:9px; font-family:var(--mono);
-          font-size:10px; letter-spacing:.1em; color:var(--cyan-dim); text-transform:uppercase; opacity:0; transition:opacity .3s;}
-        .rvd-voice.on{opacity:1;}
-        .rvd-eq{display:flex; align-items:center; gap:2.5px; height:14px;}
-        .rvd-eq i{width:2.5px; height:4px; border-radius:2px; background:var(--cyan); display:block;}
-        .rvd-voice.on .rvd-eq i{animation:rvd-eq .7s ease-in-out infinite;}
-        .rvd-eq i:nth-child(1){animation-delay:0s;} .rvd-eq i:nth-child(2){animation-delay:.12s;}
-        .rvd-eq i:nth-child(3){animation-delay:.24s;} .rvd-eq i:nth-child(4){animation-delay:.08s;} .rvd-eq i:nth-child(5){animation-delay:.30s;}
-        @keyframes rvd-eq{0%,100%{height:4px;}50%{height:14px;}}
-
-        /* CHIP de impresso no fluxo (como no simulador: o impresso completo vive na aba Exames) */
-        .rvd-chip{margin:2px 0 20px 45px; opacity:0; transform:translateY(10px);}
-        .rvd-chip.in{animation:rvd-rise .5s cubic-bezier(.2,.7,.3,1) forwards;}
-        .rvd-chip-card{display:flex; align-items:center; gap:11px; max-width:360px;
-          background:linear-gradient(180deg,#0c1722 0%,#0a1019 100%);
-          border:1px solid var(--border2); border-radius:12px; padding:12px 15px;
-          box-shadow:0 12px 30px -16px rgba(0,0,0,.7);}
-        .rvd-chip-card svg{width:18px; height:18px; flex-shrink:0; color:var(--cyan);}
-        .rvd-chip-t{font-size:14px; font-weight:600; color:#e7eef4; line-height:1.3;}
-        .rvd-chip-s{font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--cyan-dim); text-transform:uppercase; margin-top:3px;}
-
-        /* Barra de voz: mic + status. A conversa é 100% por voz (sem campo de digitação). */
-        .rvd-inputbar{display:flex; align-items:center; gap:12px; padding:15px 22px 18px; border-top:1px solid var(--border); background:rgba(255,255,255,.012);}
-        .rvd-mic{flex-shrink:0; width:44px; height:44px; border-radius:50%; background:rgba(224,86,107,.08); border:1px solid rgba(224,86,107,.32);
-          display:flex; align-items:center; justify-content:center; cursor:default; color:var(--red); position:relative; transition:all .25s;}
-        .rvd-mic svg{width:19px; height:19px;}
-        .rvd-mic.rec{background:rgba(224,86,107,.16); border-color:rgba(224,86,107,.55);}
-        .rvd-mic.rec::before{content:""; position:absolute; inset:-1px; border-radius:50%; border:1.5px solid var(--red); animation:rvd-pulse 1.3s ease-out infinite;}
-        @keyframes rvd-pulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.5);opacity:0;}}
-        .rvd-field{flex:1; min-width:0; font-size:14.5px; color:var(--text3); background:#080f16; border:1px solid var(--border);
-          border-radius:11px; padding:13px 16px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; transition:color .2s,border-color .2s;}
-        .rvd-field.rec{color:var(--red); border-color:rgba(224,86,107,.3);}
-
-        .rvd-chat::-webkit-scrollbar{width:6px;}
-        .rvd-chat::-webkit-scrollbar-thumb{background:var(--border2); border-radius:3px;}
+        /* .vpanel / .vrow / .mic / .tbox / .vsett */
+        .rvd-vpanel{background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:14px 16px;}
+        .rvd-vrow{display:flex; align-items:center; gap:12px;}
+        .rvd-mic{flex-shrink:0; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:default;
+          background:rgba(239,68,68,.08); border:1.5px solid rgba(239,68,68,.25); color:var(--red); transition:all .15s;}
+        .rvd-mic svg{width:21px; height:21px; fill:currentColor;}
+        .rvd-mic.on{background:var(--red); border-color:var(--red); color:#fff; animation:rvd-mp 1.2s ease-in-out infinite;}
+        @keyframes rvd-mp{0%,100%{box-shadow:0 0 0 0 rgba(239,83,80,.4)}50%{box-shadow:0 0 0 10px rgba(239,83,80,0)}}
+        .rvd-tbox{flex:1; min-width:0; min-height:44px; padding:10px 14px; background:var(--bg); border:1px solid var(--border2); border-radius:8px;
+          font-size:13.2px; color:var(--text2); font-style:italic; display:flex; align-items:center;}
+        .rvd-tbox span{overflow:hidden; white-space:nowrap; text-overflow:ellipsis;}
+        .rvd-tbox.live{color:var(--text); font-style:normal; border-color:var(--accent);}
+        /* .btn.btn-p (desabilitado = .btn:disabled) */
+        .rvd-send{flex-shrink:0; font-family:var(--sans); font-size:13px; font-weight:600; color:#00222e; cursor:default; padding:9px 16px; border-radius:8px;
+          border:1px solid transparent; background:linear-gradient(180deg,#2ad3ff,#00c9ff); box-shadow:0 2px 10px rgba(0,201,255,.25),inset 0 1px 0 rgba(255,255,255,.25);
+          opacity:.35; transition:opacity .15s,transform .15s;}
+        .rvd-send.on{opacity:1;}
+        .rvd-send.press{transform:scale(.95);}
+        .rvd-vsett{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:11.7px; color:var(--text2);}
+        .rvd-vsett span{display:inline-flex; align-items:center; gap:8px;}
+        .rvd-range{position:relative; display:inline-block; width:64px; height:4px; border-radius:2px; background:rgba(255,255,255,.18);}
+        .rvd-range i{position:absolute; left:0; top:0; bottom:0; border-radius:2px; background:var(--accent);}
+        .rvd-range i::after{content:""; position:absolute; right:-6px; top:-4px; width:12px; height:12px; border-radius:50%; background:var(--accent);}
+        .rvd-check{display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; border-radius:3px; background:var(--accent); color:#00222e; font-size:10px; line-height:1; font-weight:700;}
 
         @media (max-width:560px){
           .rvd{padding:10px;}
-          .rvd-title{font-size:22px;}
-          .rvd-chat{height:360px; padding:18px 16px 8px;}
-          .rvd-header{padding:16px 16px 14px;}
-          .rvd-tabs,.rvd-inputbar{padding-left:16px; padding-right:16px;}
-          .rvd-msgwrap{max-width:84%;}
-          .rvd-tab{font-size:13px; padding:10px 8px 12px;}
-          .rvd-field{font-size:13.5px;}
-          .rvd-chip{margin-left:0;}
+          .rvd-body{padding:14px 12px 12px;}
+          .rvd-header{gap:10px;}
+          .rvd-header-right{gap:8px;}
+          .rvd-title{font-size:16px;}
+          .rvd-timer{font-size:19px; padding:2px 9px;}
+          .rvd-end{font-size:12px; padding:7px 10px;}
+          .rvd-tab{padding:8px 10px;}
+          .rvd-chat{height:300px; padding:12px;}
+          .rvd-vpanel{padding:12px;}
+          .rvd-vrow{gap:9px;}
+          .rvd-mic{width:46px; height:46px;}
+          .rvd-tbox{padding:10px 11px;}
+          .rvd-send{padding:9px 12px;}
+          .rvd-vsett{gap:12px;}
+          .rvd-range{width:48px;}
         }
         @media (prefers-reduced-motion:reduce){
-          .rvd-turn,.rvd-chip{opacity:1; transform:none; animation:none;}
-          .rvd-typing,.rvd-mic.rec::before{display:none;}
-          .rvd-voice{opacity:1;} .rvd-voice .rvd-eq i{animation:none; height:9px;}
+          .rvd-msg{opacity:1; transform:none; animation:none;}
+          .rvd-mic.on{animation:none;}
           .rvd-chat{overflow-y:auto;}
         }
 
@@ -626,94 +617,92 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
   #hero .hero-grid>*{min-width:0;}
       </style>
 
-      <div class="rvd" role="img" aria-label="Demonstração do simulador RevalidaOSCE: estação de pediatria com conversa 100% por voz, Chefe de estação entregando o impresso do exame físico na aba Exames e cronômetro de 10 minutos.">
+      <div class="rvd" role="img" aria-label="Demonstração do simulador RevalidaOSCE: tela de atendimento em curso com cronômetro, conversa por voz com o paciente, Chefe de estação entregando o impresso do exame físico, que fica disponível na aba Exames.">
         <div class="rvd-window">
           <div class="rvd-titlebar" aria-hidden="true">
             <span class="rvd-dot"></span><span class="rvd-dot"></span><span class="rvd-dot"></span>
             <span class="rvd-url">simulador.revalidaosce.com.br</span>
           </div>
-          <div class="rvd-header">
-            <div>
-              <div class="rvd-eyebrow">Pediatria &middot; Simulação 2</div>
+          <div class="rvd-body">
+            <div class="rvd-header">
               <h3 class="rvd-title">Atendimento em curso</h3>
+              <div class="rvd-header-right">
+                <div class="rvd-timer"><span id="rvd-timer">09:50</span></div>
+                <button class="rvd-end" tabindex="-1">Encerrar</button>
+              </div>
             </div>
-            <div class="rvd-header-right">
-              <div class="rvd-timer"><span id="rvd-timer">09:50</span></div>
-              <button class="rvd-end" tabindex="-1">Encerrar</button>
+            <div class="rvd-tabs" aria-hidden="true">
+              <button class="rvd-tab is-active" tabindex="-1">Atendimento</button>
+              <button class="rvd-tab" tabindex="-1">Instruções</button>
+              <button class="rvd-tab" tabindex="-1">Exames <span class="rvd-exam-dot" id="rvd-exam-dot">&#9679;</span></button>
             </div>
-          </div>
-          <div class="rvd-tabs" aria-hidden="true">
-            <button class="rvd-tab is-active" tabindex="-1">Atendimento</button>
-            <button class="rvd-tab" tabindex="-1">Instruções</button>
-            <button class="rvd-tab" tabindex="-1">Exames<span class="rvd-tab-badge" id="rvd-exam-badge">1</span></button>
-          </div>
-          <div class="rvd-chat" id="rvd-chat">
-            <div class="rvd-sysline">&mdash; simulação iniciada &middot; paciente por voz &mdash;</div>
-          </div>
-          <div class="rvd-inputbar" aria-hidden="true">
-            <button class="rvd-mic" id="rvd-mic" tabindex="-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/>
-              </svg>
-            </button>
-            <div class="rvd-field" id="rvd-field">Pressione o microfone e fale&hellip;</div>
+            <div class="rvd-chat" id="rvd-chat">
+              <div class="rvd-sys">&mdash; simulação iniciada &mdash; apresente-se ao paciente para iniciar o atendimento &mdash;</div>
+            </div>
+            <div class="rvd-vpanel" aria-hidden="true">
+              <div class="rvd-vrow">
+                <button class="rvd-mic" id="rvd-mic" tabindex="-1">
+                  <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1.5 14.9A7 7 0 0 0 19 9h-2a5 5 0 0 1-10 0H5a7 7 0 0 0 8.5 6.9V18H11v2h4v-2h-2.5v-2.1z"/></svg>
+                </button>
+                <div class="rvd-tbox" id="rvd-tbox"><span>Pressione o microfone e fale...</span></div>
+                <button class="rvd-send" id="rvd-send" tabindex="-1">Enviar</button>
+              </div>
+              <div class="rvd-vsett">
+                <span>Volume <i class="rvd-range"><i style="width:90%"></i></i> 90%</span>
+                <span>Velocidade <i class="rvd-range"><i style="width:100%"></i></i> 1.3&times;</span>
+                <span><i class="rvd-check">&#10003;</i> Voz</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <script>
       (function(){
+        try{
         var chat=document.getElementById('rvd-chat'), timerEl=document.getElementById('rvd-timer'),
-            mic=document.getElementById('rvd-mic'), field=document.getElementById('rvd-field'),
-            badge=document.getElementById('rvd-exam-badge');
+            mic=document.getElementById('rvd-mic'), tbox=document.getElementById('rvd-tbox'),
+            send=document.getElementById('rvd-send'), dot=document.getElementById('rvd-exam-dot');
+        if(!chat||!timerEl||!mic||!tbox||!send||!dot) return;
         var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+        var SYS='<div class="rvd-sys">&mdash; simulação iniciada &mdash; apresente-se ao paciente para iniciar o atendimento &mdash;</div>';
+        var PH='Pressione o microfone e fale...';
 
         // Pediatria. Exantema craniocaudal + tosse/coriza/conjuntivite + nao vacinado
-        // => sarampo. Fluxo fiel ao simulador atual: conversa 100% por voz; ao solicitar
-        // o exame, o CHEFE DE ESTACAO entrega um CHIP e o impresso completo vai
-        // para a aba Exames (badge acende). O medico le o impresso e conclui.
+        // => sarampo. Aparencia fiel ao simulador atual (addMsg): medico a direita sem rotulo;
+        // paciente (inclusive a mae) com rotulo PACIENTE; Chefe de estacao entrega o chip
+        // (buildExamChip) e o ponto verde acende na aba Exames.
         var turns=[
-          {who:'dr', role:'Médico',             text:'Bom dia, meu nome \u00e9 Dr. Bruno. Pode me contar o que trouxe a senhora aqui hoje?'},
-          {who:'ac', role:'Acompanhante (mãe)', text:'Bom dia, doutor. Meu filho est\u00e1 com febre h\u00e1 tr\u00eas dias, quase 39 graus, e hoje apareceram umas manchas vermelhas no corpo dele.'},
-          {who:'dr', role:'Médico',             text:'A febre come\u00e7ou antes das manchas? E elas surgiram primeiro em que parte do corpo?'},
-          {who:'ac', role:'Acompanhante (mãe)', text:'A febre veio primeiro. As manchas come\u00e7aram atr\u00e1s da orelha e no rostinho, e foram descendo pelo corpo.'},
-          {who:'dr', role:'Médico',             text:'Ele teve tosse, coriza ou os olhos avermelhados nesses dias?'},
-          {who:'ac', role:'Acompanhante (mãe)', text:'Teve sim, bastante coriza e tosse. E os olhinhos ficaram vermelhos, lacrimejando.'},
-          {who:'dr', role:'Médico',             text:'A vacina\u00e7\u00e3o dele est\u00e1 em dia? Chegou a tomar a tr\u00edplice viral?'},
-          {who:'ac', role:'Acompanhante (mãe)', text:'Atrasou algumas, doutor\u2026 acho que essa ele ainda n\u00e3o tomou.'},
-          {who:'dr', role:'Médico',             text:'Vou examin\u00e1-lo agora. Solicito o exame f\u00edsico, com aten\u00e7\u00e3o \u00e0 orofaringe.'}
+          {who:'dr', text:'Bom dia, meu nome é Dr. Bruno. Pode me contar o que trouxe a senhora aqui hoje?'},
+          {who:'ac', text:'Bom dia, doutor. Meu filho está com febre há três dias, quase 39 graus, e hoje apareceram umas manchas vermelhas no corpo dele.'},
+          {who:'dr', text:'A febre começou antes das manchas? E elas surgiram primeiro em que parte do corpo?'},
+          {who:'ac', text:'A febre veio primeiro. As manchas começaram atrás da orelha e no rostinho, e foram descendo pelo corpo.'},
+          {who:'dr', text:'Ele teve tosse, coriza ou os olhos avermelhados nesses dias?'},
+          {who:'ac', text:'Teve sim, bastante coriza e tosse. E os olhinhos ficaram vermelhos, lacrimejando.'},
+          {who:'dr', text:'A vacinação dele está em dia? Chegou a tomar a tríplice viral?'},
+          {who:'ac', text:'Atrasou algumas, doutor… acho que essa ele ainda não tomou.'},
+          {who:'dr', text:'Vou examiná-lo agora. Solicito o exame físico, com atenção à orofaringe.'}
         ];
 
-        var chiefTurn={who:'ch', role:'Chefe de estação', text:'Segue o impresso 1 &mdash; Exame f\u00edsico.'};
+        var chiefTurn={who:'ch', text:'Segue Exame físico.'};
 
-        var closing={who:'dr', role:'Médico', text:'Vi o exame f\u00edsico: exantema descendo da face e manchas de Koplik na mucosa jugal. Quadro compat\u00edvel com sarampo &mdash; vou notificar o caso e orientar isolamento e cuidados de suporte.'};
+        var closing={who:'dr', text:'Vi o exame físico: exantema descendo da face e manchas de Koplik na mucosa jugal. Quadro compatível com sarampo — vou notificar o caso e orientar isolamento e cuidados de suporte.'};
+
+        var CHIP='<div class="rvd-chip"><span class="rvd-chip-i">&#128203;</span><div style="flex:1;min-width:0">'+
+          '<div class="rvd-chip-t">Exame físico</div><div class="rvd-chip-s">Toque para abrir na aba Exames &rsaquo;</div></div></div>';
 
         function wait(ms){return new Promise(function(r){setTimeout(r, reduce?0:ms);});}
         function readTime(t){return Math.min(4800, Math.max(2300, t.length*38));}
         function scrollChat(){chat.scrollTo({top:chat.scrollHeight, behavior:reduce?'auto':'smooth'});}
+        function setBox(txt, live){ tbox.firstChild.textContent=txt; tbox.className='rvd-tbox'+(live?' live':''); }
 
-        function addBubble(t){
-          var turn=document.createElement('div'); turn.className='rvd-turn '+t.who+' in';
-          var voice=t.who==='ac'?'<div class="rvd-voice"><span>reproduzindo voz</span><span class="rvd-eq"><i></i><i></i><i></i><i></i><i></i></span></div>':'';
-          var av = t.who==='dr' ? 'DR' : (t.who==='ch' ? 'CH' : 'AC');
-          turn.innerHTML='<div class="rvd-avatar">'+av+'</div>'+
-            '<div class="rvd-msgwrap"><div class="rvd-role">'+t.role+'</div><div class="rvd-bubble">'+t.text+'</div>'+voice+'</div>';
-          chat.appendChild(turn); scrollChat(); return turn;
-        }
-        function addTyping(){
-          var w=document.createElement('div'); w.className='rvd-turn ac in';
-          w.innerHTML='<div class="rvd-avatar">AC</div><div class="rvd-msgwrap"><div class="rvd-role">Acompanhante (mãe)</div>'+
-            '<div class="rvd-bubble" style="padding:4px 6px"><div class="rvd-typing"><span></span><span></span><span></span></div></div></div>';
-          chat.appendChild(w); scrollChat(); return w;
-        }
-        function addChip(){
-          var el=document.createElement('div'); el.className='rvd-chip in';
-          el.innerHTML='<div class="rvd-chip-card">'+
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>'+
-            '<div><div class="rvd-chip-t">Exame f\u00edsico</div>'+
-            '<div class="rvd-chip-s">Toque para abrir na aba Exames &rsaquo;</div></div></div>';
-          chat.appendChild(el); scrollChat();
-          badge.classList.add('show');
+        function addMsg(t){
+          var d=document.createElement('div');
+          if(t.who==='dr'){ d.className='rvd-msg md in'; d.textContent=t.text; }
+          else if(t.who==='ch'){ d.className='rvd-msg mc in'; d.innerHTML='<div class="rvd-msnd">CHEFE DE ESTAÇÃO</div>'+t.text+CHIP; }
+          else if(t.who==='load'){ d.className='rvd-msg in'; d.innerHTML='<div class="rvd-msnd">AGUARDANDO...</div><div class="rvd-df"><span></span><span></span><span></span></div>'; }
+          else { d.className='rvd-msg in'; d.innerHTML='<div class="rvd-msnd">PACIENTE</div>'+t.text; }
+          chat.appendChild(d); scrollChat(); return d;
         }
 
         var secs=590, timerInt=null;
@@ -721,20 +710,20 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
         function startTimer(){ if(reduce){timerEl.textContent='09:50';return;} clearInterval(timerInt);
           timerInt=setInterval(function(){secs=Math.max(0,secs-1); timerEl.textContent=fmt(secs);},1000);}
 
+        // Fluxo do simulador: microfone ativo -> Transcrevendo -> texto na caixa com ponto -> Enviar -> balao.
         async function doctorSpeak(t){
-          mic.classList.add('rec'); field.classList.add('rec'); field.textContent='Gravando\u2026 toque para parar';
-          await wait(1200);
-          mic.classList.remove('rec'); field.classList.remove('rec'); field.textContent='Pressione o microfone e fale\u2026';
-          addBubble(t); await wait(readTime(t.text));
+          if(!reduce){
+            mic.classList.add('on'); await wait(700);
+            mic.classList.remove('on'); setBox('⏳ Transcrevendo...', false); await wait(450);
+            setBox(t.text+' ●', true); send.classList.add('on'); await wait(700);
+            send.classList.add('press'); await wait(150);
+            send.classList.remove('press','on'); setBox(PH, false);
+          }
+          addMsg(t); await wait(readTime(t.text));
         }
         async function patientSpeak(t){
-          var typ=addTyping(); await wait(1400); chat.removeChild(typ);
-          var b=addBubble(t), v=b.querySelector('.rvd-voice'), rt=readTime(t.text);
-          if(v){ v.classList.add('on'); await wait(rt); v.classList.remove('on'); } else { await wait(rt); }
-          await wait(700);
-        }
-        async function chiefSpeak(t){
-          addBubble(t); await wait(1600);
+          if(!reduce){ var ld=addMsg({who:'load'}); await wait(1400); chat.removeChild(ld); }
+          addMsg(t); await wait(readTime(t.text)); await wait(700);
         }
 
         async function run(){
@@ -742,25 +731,25 @@ nav.footer-links{position:static;padding:0;background:none;backdrop-filter:none;
             if(turns[i].who==='dr') await doctorSpeak(turns[i]); else await patientSpeak(turns[i]);
           }
           await wait(600);
-          await chiefSpeak(chiefTurn);
-          addChip();
-          await wait(2600);
+          addMsg(chiefTurn); dot.classList.add('show');
+          await wait(4200);
           await doctorSpeak(closing);
           await wait(1200);
 
           if(reduce) return;
           await wait(2600);
           chat.style.transition='opacity .6s'; chat.style.opacity='0'; await wait(650);
-          chat.innerHTML='<div class="rvd-sysline">&mdash; simulação iniciada &middot; paciente por voz &mdash;</div>';
-          badge.classList.remove('show'); secs=590; timerEl.textContent='09:50'; chat.style.opacity='1';
+          chat.innerHTML=SYS;
+          dot.classList.remove('show'); secs=590; timerEl.textContent='09:50'; chat.style.opacity='1';
           await wait(800); run();
         }
 
-        function begin(){ startTimer(); run(); }
+        function begin(){ startTimer(); run().catch(function(){}); }
         if('IntersectionObserver' in window && !reduce){
           var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.disconnect(); begin();}});},{threshold:.35});
           io.observe(chat);
         } else { begin(); }
+        }catch(_e){}
       })();
       </script>
       <!-- ============================================================ -->
