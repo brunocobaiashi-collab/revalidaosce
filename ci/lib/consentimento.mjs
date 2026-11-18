@@ -135,6 +135,13 @@ export async function verificarComportamento(codigo, { JSDOM, CookieJar, Virtual
   let chamou = 0;
   t.w.RoConsent.quandoAceitar(() => { chamou++; });
   if (chamou) err('quandoAceitar rodou antes do aceite');
+  // v1.1: origem() só com aceite; aoMudar avisa cada escolha
+  const mudancas = [];
+  if (typeof t.w.RoConsent.aoMudar !== 'function' || typeof t.w.RoConsent.origem !== 'function') err('RoConsent sem aoMudar ou origem (v1.1)');
+  else {
+    t.w.RoConsent.aoMudar(ad => mudancas.push(ad));
+    if (t.w.RoConsent.origem() !== null) err('origem() devolve dado antes do aceite');
+  }
 
   // 2. Aceitar
   if (!clicar(t.d, '#ro-consent button[data-ro-c="sim"]')) err('banner sem botão Aceitar');
@@ -149,6 +156,10 @@ export async function verificarComportamento(codigo, { JSDOM, CookieJar, Virtual
   if (!c1 || !/"ad":true/.test(c1) || !/"v":1/.test(c1)) err(`rosce_consent depois do Aceitar: ${c1}`);
   if (banner(t.d)) err('banner continua aberto depois do Aceitar');
   if (chamou !== 1) err(`quandoAceitar rodou ${chamou} vez(es) depois do aceite (esperado 1)`);
+  if (typeof t.w.RoConsent.origem === 'function') {
+    const o = t.w.RoConsent.origem();
+    if (!o || o.gclid !== 'TESTE123') err('origem() não devolve o gclid depois do aceite');
+  }
   const dl = (t.w.dataLayer || []).map(a => Array.from(a));
   const iDef = dl.findIndex(a => a[0] === 'consent' && a[1] === 'default');
   const iCfg = dl.findIndex(a => a[0] === 'config');
@@ -165,6 +176,8 @@ export async function verificarComportamento(codigo, { JSDOM, CookieJar, Virtual
   k = t.d.getElementById('k').href;
   if (/sck=/.test(k)) err(`recusar depois de aceitar deixou o sck no link: ${k}`);
   if (!/"ad":false/.test(cookie(t.d, 'rosce_consent') || '')) err('recusar não gravou ad:false');
+  if (typeof t.w.RoConsent.origem === 'function' && t.w.RoConsent.origem() !== null) err('origem() devolve dado depois de recusar');
+  if (JSON.stringify(mudancas) !== '[true,false]') err(`aoMudar avisou ${JSON.stringify(mudancas)} (esperado [true,false])`);
   t.dom.window.close();
 
   // 4. volta com aceite gravado
@@ -185,6 +198,11 @@ export async function verificarComportamento(codigo, { JSDOM, CookieJar, Virtual
   t = await abrir(URL1, '', ['rosce_consent=' + encodeURIComponent(rec || '') + '; path=/']);
   if (banner(t.d)) err('com recusa gravada o banner voltou');
   if (tags(t.d) || cookie(t.d, 'rosce_attr')) err('com recusa gravada houve tag ou rosce_attr');
+  t.dom.window.close();
+  // v1.1: cookie de origem esquecido + recusa gravada: origem() não entrega nada
+  t = await abrir('https://simulador.revalidaosce.com.br/', '', ['rosce_consent=' + encodeURIComponent(rec || '') + '; path=/',
+    'rosce_attr=' + encodeURIComponent(JSON.stringify({ gclid: 'TESTE123' })) + '; path=/'], '');
+  if (typeof t.w.RoConsent.origem === 'function' && t.w.RoConsent.origem() !== null) err('origem() devolve dado com a recusa gravada');
   t.dom.window.close();
 
   // 6. versão diferente pergunta de novo

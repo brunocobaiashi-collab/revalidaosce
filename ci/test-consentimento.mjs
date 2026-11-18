@@ -77,6 +77,8 @@ export async function autoteste({ silencioso = false } = {}) {
     ['rosce_attr fora do ramo aceito reprova', estragar('function decorar(attr) {', 'function decorar(attr) {\n      gravarCookie(ATTR, attr, 7776000);'), ['rosce_attr gravado fora', 'grava rosce_attr sem consentimento']],
     ['banner no login do simulador reprova', estragar("var HUBS = ['s-dashboard',", "var HUBS = ['s-login', 's-dashboard',"), ['banner aparece na tela de login']],
     ['links sem rótulo fixo reprova', estragar('if (modoAtribuicao && !aceito()) decorar({});', ''), ['perdeu os rótulos fixos']],
+    ['origem() sem aceite reprova', estragar('return aceito() ? lerCookie(ATTR) : null;', 'return lerCookie(ATTR);'), ['origem() devolve dado com a recusa gravada']],
+    ['recusa sem avisar o simulador reprova', estragar('      avisarMudanca(!!ad);\n', ''), ['aoMudar avisou']],
     ['recusa sem apagar rosce_attr reprova', estragar('if (eraAceito || tagCarregada) apagarCookiesDePublicidade();', ''), ['não apagou o rosce_attr']],
   ];
   for (const [nome, codigo, esperado] of mutantes) {
