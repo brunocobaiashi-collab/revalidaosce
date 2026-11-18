@@ -9,7 +9,8 @@
 //  - clicar em #acct-cookies-btn reabre o banner e nao navega; clicar no link da politica nao abre o banner;
 //  - depois de escolher no banner, a linha de estado se atualiza (RoConsent.aoMudar), sem ouvinte duplicado;
 //  - sem window.RoConsent, renderAccountScreen termina sem excecao e a linha fica vazia;
-//  - o botao do avatar #btn-menu-cookies continua existindo, fechando o menu e abrindo o banner;
+//  - o menu do avatar nao tem mais item de cookies (#btn-menu-cookies ausente, nenhum [data-ro-cookies] no dropdown)
+//    e os demais itens do menu continuam la;
 //  - as 6 funcoes criticas existem e a matriz de acesso dos 4 perfis e igual a da main.
 // Contra a 1.6.181 (sem o cartao) reprova.
 // Requer jsdom:  npm install --no-save jsdom
@@ -271,16 +272,16 @@ for (const perfil of Object.keys(PERFIS)) {
   t.dom.window.close();
 }
 
-// ── 5) Botao do avatar intacto ─────────────────────────────────────────────────
-{
-  const t = await abrir({ cookies: [consent(true, '2026-03-05')] });
-  await t.T.login(usuario('u-avatar')); await espera(60);
-  const b = t.d.getElementById('btn-menu-cookies');
-  confere(!!b && b.hasAttribute('data-ro-cookies'), 'botao do avatar #btn-menu-cookies existe com data-ro-cookies');
-  t.d.getElementById('user-dropdown').style.display = 'block';
-  clicar(t, b); await espera(20);
-  confere(t.d.getElementById('user-dropdown').style.display === 'none', 'botao do avatar fecha o menu');
-  confere(banner(t), 'botao do avatar reabre o banner');
+// ── 5) Menu do avatar sem item de cookies, nos 4 perfis ────────────────────────
+const ITENS_MENU = ['btn-menu-account', 'btn-menu-history', 'btn-menu-messages', 'btn-admin-link', 'menu-sub-link', 'btn-change-pass', 'btn-delete-account', 'btn-logout'];
+for (const perfil of Object.keys(PERFIS)) {
+  const t = await abrir({ cookies: [consent(true, '2026-03-05')], perfil });
+  await t.T.login(usuario('u-avatar-' + perfil)); await espera(60);
+  const dd = t.d.getElementById('user-dropdown');
+  confere(!!dd && !t.d.getElementById('btn-menu-cookies') && dd.querySelectorAll('[data-ro-cookies]').length === 0,
+    `${perfil}: menu do avatar sem item de cookies`);
+  const faltam = ITENS_MENU.filter((id) => !(dd && dd.querySelector('#' + id)));
+  confere(faltam.length === 0, `${perfil}: demais itens do menu presentes`, faltam.join(','));
   t.dom.window.close();
 }
 
