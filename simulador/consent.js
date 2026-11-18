@@ -1,4 +1,4 @@
-/* consent.js v1 (17/11/2026) — consentimento de cookies do RevalidaOSCE.
+/* consent.js v1.1 (18/11/2026; v1 de 17/11) — consentimento de cookies do RevalidaOSCE.
  *
  * Uma cópia idêntica vive em simulador/consent.js (são dois projetos da Vercel);
  * o portão 8 do CI confere que as duas são iguais byte a byte. Edite as duas juntas.
@@ -14,6 +14,10 @@
  *   nos links e, com aceite, gclid/utm (o antigo bloco v2.2 das páginas).
  *   window.RO_GTAG_CONFIG = {...}  antes do include: opções do gtag('config') da página
  *   RoConsent.quandoAceitar(fn)   roda fn uma vez, já ou quando a pessoa aceitar
+ *   RoConsent.aoMudar(fn)         (v1.1) roda fn(ad) toda vez que a pessoa escolhe no banner
+ *                                 (true = aceitou, false = recusou), depois de aplicar a escolha
+ *   RoConsent.origem()            (v1.1) a origem do anúncio guardada no cookie de origem, só
+ *                                 com aceite (sem aceite devolve null); só leitura, nunca grava
  *   script com data-sem-banner    não mostra o banner nessa página (ex.: /obrigado, que
  *                                 redireciona sozinha); o aceite já dado continua valendo
  *   link com data-ro-cookies (Preferências de cookies)  reabre o banner
@@ -65,6 +69,8 @@
       return e;
     }
     function aceito() { var e = estado(); return !!(e && e.ad === true); }
+    // v1.1: leitura da origem para o simulador (que não pode citar o cookie); nunca grava.
+    function origem() { return aceito() ? lerCookie(ATTR) : null; }
 
     /* ── tag do Google (só depois do aceite) ────────────────────────────── */
     var tagCarregada = false;
@@ -155,6 +161,13 @@
       if (aceito()) rodar(item);
     }
 
+    // v1.1: quem precisa saber da escolha (o simulador apaga a origem gravada no banco ao recusar)
+    var ouvintes = [];
+    function aoMudar(fn) { if (typeof fn === 'function') ouvintes.push(fn); }
+    function avisarMudanca(ad) {
+      ouvintes.forEach(function (fn) { try { fn(ad); } catch (_e) { /* nunca quebra a página */ } });
+    }
+
     function aplicarAceite() {
       carregarTag();
       if (modoAtribuicao) quandoPronto(atribuirComConsentimento);
@@ -170,6 +183,7 @@
       gravarCookie(NOME, { v: V, ad: !!ad, ts: new Date().toISOString().slice(0, 10) }, 31536000);  // 12 meses
       fecharBanner();
       if (ad) aplicarAceite(); else aplicarRecusa(antes);
+      avisarMudanca(!!ad);
     }
 
     /* ── banner ─────────────────────────────────────────────────────────── */
@@ -279,6 +293,8 @@
       estado: estado,
       aceito: aceito,
       quandoAceitar: quandoAceitar,
+      aoMudar: aoMudar,
+      origem: origem,
       abrir: abrirBanner
     };
 
