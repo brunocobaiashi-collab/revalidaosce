@@ -1,7 +1,7 @@
 // Teste da política de privacidade: origem do anúncio por usuário (18/11/2026). Sem rede.
 // Rodar a partir da raiz:  node ci/test-politica-origem-anuncio.mjs [arquivo]   (saída 1 = falhou)
 //
-// Prova: os cinco trechos novos (§2.4, §4, §6, §7, §12) estão na página uma vez só cada,
+// Prova: os cinco trechos novos (§2.4, §4, §6, §7, §12) e o item da §5 (adendo) estão na página uma vez só cada,
 // a data da atualização é 18/11/2026, a âncora #cookies existe uma vez e o HTML monta
 // num DOM com as tabelas e listas editadas no lugar certo.
 // Requer jsdom:  npm install --no-save jsdom
@@ -47,6 +47,17 @@ const tr7 = [...doc.querySelectorAll('table.data-table tr')].find((tr) => txt(tr
 confere(tr7 && tr7.querySelectorAll('td').length === 2 && txt(tr7).includes('(até 5 anos)'), '§7 linha com 2 colunas');
 const li24 = [...doc.querySelectorAll('li')].find((li) => txt(li).startsWith('Origem do anúncio (só com o seu consentimento):'));
 confere(li24 && li24.querySelectorAll('code').length === 3, '§2.4 item com gclid, gbraid e wbraid');
+
+// Adendo: §5 ganha o item de medição de anúncios (contradizia o "exclusivamente").
+const ITEM5 = 'Medir de qual anúncio veio cada cadastro e cada assinatura, só se você aceitar os cookies de mensuração e publicidade (seção 12).';
+confere(conta(ITEM5) === 1, '§5 item de medição aparece uma vez', 'encontrado ' + conta(ITEM5) + 'x');
+const h5 = [...doc.querySelectorAll('h2')].find((h) => txt(h).startsWith('5. Como usamos'));
+const bloco5 = h5 && h5.parentElement;
+const ul5 = bloco5 && bloco5.querySelector('ul');
+const itens5 = ul5 ? [...ul5.querySelectorAll('li')].map(txt) : [];
+confere(itens5.length > 0 && itens5[itens5.length - 1] === ITEM5, '§5 item é o último da lista da §5');
+const depois5 = ul5 && ul5.nextElementSibling;
+confere(depois5 && depois5.tagName === 'P' && txt(depois5).startsWith('Não usamos seus dados para publicidade direcionada por terceiros'), '§5 parágrafo "Não usamos seus dados" segue a lista');
 
 console.log(`\n${ok} ok, ${falhas} falha(s)`);
 process.exit(falhas ? 1 : 0);
