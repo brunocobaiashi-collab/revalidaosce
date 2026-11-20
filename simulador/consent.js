@@ -1,4 +1,5 @@
-/* consent.js v1.1 (18/11/2026; v1 de 17/11) — consentimento de cookies do RevalidaOSCE.
+/* consent.js v1.2 (19/11/2026; v1.1 de 18/11; v1 de 17/11) — consentimento de cookies do RevalidaOSCE.
+ * v1.2: só o texto do banner (título "Sua privacidade", redação nova); V e regras iguais.
  *
  * Uma cópia idêntica vive em simulador/consent.js (são dois projetos da Vercel);
  * o portão 8 do CI confere que as duas são iguais byte a byte. Edite as duas juntas.
@@ -194,6 +195,7 @@
       'display:flex;gap:14px;align-items:center;flex-wrap:wrap}' +
       '#ro-consent[hidden]{display:none!important}' +
       '#ro-consent p{margin:0;flex:1 1 320px;color:#c5d4e2}' +
+      '#ro-consent .ro-c-t{display:block;font-weight:600;color:#e8f0f8;margin-bottom:2px}' +
       '#ro-consent a{color:#00c9ff;text-decoration:underline}' +
       '#ro-consent .ro-c-btns{display:flex;gap:8px;flex:0 0 auto}' +
       '#ro-consent button{font-weight:600;font-size:14px;line-height:1;font-family:inherit;padding:10px 18px;border-radius:10px;cursor:pointer;' +
@@ -203,7 +205,9 @@
       '@media(max-width:520px){#ro-consent{left:8px;right:8px;bottom:8px;padding:12px}#ro-consent .ro-c-btns{width:100%}#ro-consent button{flex:1}}' +
       '@media print{#ro-consent,#ro-consent-espaco{display:none!important}}';
     var TEXTO =
-      'Usamos cookies para medir de qual anúncio você veio. ' +
+      '<strong class="ro-c-t">Sua privacidade</strong>' +
+      'Usamos cookies para entender como você chegou até aqui e melhorar a nossa divulgação. ' +
+      'Recusar não muda nada no simulador. ' +
       '<a href="https://revalidaosce.com.br/politica-privacidade.html#cookies">Política de privacidade</a>';
 
     // No simulador o banner só aparece nas telas-hub: nunca no login, no paywall,
