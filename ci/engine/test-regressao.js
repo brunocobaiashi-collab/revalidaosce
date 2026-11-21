@@ -31,7 +31,15 @@ function load(path) {
 }
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
-const PERMITIDAS = {};
+const MOTIVO_145 = '1.4.5 — impresso com interpretacao/diagnostico vira MEDIUM impresso_fora_do_nivel, nao HIGH (decisao do Bruno, 21/11)';
+const PERMITIDAS = {
+  'buildSysAudit("Intermediário")': MOTIVO_145,
+  'buildSysAudit("Avançado")': MOTIVO_145,
+  'buildSysAudit("Básico")': MOTIVO_145,
+  'buildSysAudit("")': MOTIVO_145,
+  'buildSysAudit("medium")': MOTIVO_145,
+  'buildSysAudit(ancorado)': MOTIVO_145,
+};
 
 const REF = load(P.base('1.4.3'));
 const PRE = load(P.base('pre-1.1.0'));
