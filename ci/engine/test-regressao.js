@@ -32,7 +32,13 @@ function load(path) {
 
 // Ex.: { 'buildSys2()': '1.4.1 — regra do binário conjuntivo (pedido do Bruno, dd/mm)' }
 const MOTIVO_145 = '1.4.5 — impresso com interpretacao/diagnostico vira MEDIUM impresso_fora_do_nivel, nao HIGH (decisao do Bruno, 21/11)';
+const MOTIVO_146 = '1.4.6 — regra 3 cobre alergias (decisão do Bruno, 16/11)';
 const PERMITIDAS = {
+  'buildSys1(["Clínica Médica","Emergência","Intermediário"])': MOTIVO_146,
+  'buildSys1(["Ginecologia e Obstetrícia","UBS","Avançado"])': MOTIVO_146,
+  'buildSys1(["Pediatria","","Básico"])': MOTIVO_146,
+  'buildSys1(["","",""])': MOTIVO_146,
+  'buildSys1(ancorado)': MOTIVO_146,
   'buildSysAudit("Intermediário")': MOTIVO_145,
   'buildSysAudit("Avançado")': MOTIVO_145,
   'buildSysAudit("Básico")': MOTIVO_145,
@@ -77,6 +83,7 @@ const difsAudit = ['Intermediário', 'Avançado', 'Básico', '', 'medium'];
 // Estação de exemplo válida para o preValidate da 1.4.x (3 faixas com crit_parc).
 const st = {
   name: 'Dor abdominal em adulto jovem', orientMed: 'template', caso: 'Voce e medico em UBS.',
+  orientAtor: { se_perguntado_sobre: { alergias: 'Nao tenho alergia a remedio.' } }, // 1.4.6: estacao valida tem a chave de alergia
   checklist: [{ id: '1', text: 'Anamnese', scores: [0, 0.5, 1], labels: ['a','b','c'], crit_adeq: 'x', crit_parc: 'y' }],
   exams: [{ title: 'EXAME FISICO', rows: ['PA: 120x80 mmHg'], images: [], trigger_keywords: ['exame fisico','fisico geral','sinais vitais'] }]
 };

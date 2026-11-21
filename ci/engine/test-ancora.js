@@ -75,6 +75,7 @@ ok(baseC.exams.length === 1 && baseC.exams[0].rows.length === 1 && /incidência/
 function mkStation(over) {
   return Object.assign({
     name: 'Dispneia em adulto', orientMed: '(1) realize a anamnese...', caso: 'Voce e medico no pronto-socorro.',
+    orientAtor: { se_perguntado_sobre: { alergias: 'Nao tenho alergia a remedio.' } }, // 1.4.6: estacao valida tem a chave de alergia
     checklist: [
       { id: '1', text: 'Anamnese', subitens: '', scores: [0, 0.5, 1], labels: ['a','b','c'], crit_adeq: 'realiza os 3', crit_parc: 'realiza 1-2' },
       { id: '2', text: 'Interpreta a radiografia de tórax e reconhece o achado', subitens: '', scores: [0, 1, 2], labels: ['a','b','c'], crit_adeq: 'descreve hipertransparência e conclui', crit_parc: 'descreve sem concluir' }
@@ -226,7 +227,7 @@ async function aiCallStub(params) {
 
   // 5d) sem âncora: fluxo normal segue funcionando (sorteio de área/tema)
   callN = 0; sysCapturados.length = 0;
-  const CALL1_SIMPLES = JSON.stringify({ name: 'Febre em adulto', area: 'Clínica', caso: 'Voce e medico em UBS.', orientMed: 'template', complexity: 'medium', orientAtor: { regra_fundamental: 'x'.repeat(30), se_perguntado_sobre: { a: '1' } }, exams: [{ title: 'EXAME FÍSICO', rows: ['Temp: 38°C'], images: [], trigger_keywords: ['exame fisico','fisico','sinais vitais'] }] });
+  const CALL1_SIMPLES = JSON.stringify({ name: 'Febre em adulto', area: 'Clínica', caso: 'Voce e medico em UBS.', orientMed: 'template', complexity: 'medium', orientAtor: { regra_fundamental: 'x'.repeat(30), se_perguntado_sobre: { a: '1', alergias: 'nenhuma' } }, exams: [{ title: 'EXAME FÍSICO', rows: ['Temp: 38°C'], images: [], trigger_keywords: ['exame fisico','fisico','sinais vitais'] }] });
   let n2 = 0;
   const res2 = await SE.generate({
     aiCall: async () => { n2++; return mkResp(n2 === 1 ? CALL1_SIMPLES : (n2 === 2 ? CALL2_JSON : AUDIT_JSON)); },

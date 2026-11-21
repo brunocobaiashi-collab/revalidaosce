@@ -6,7 +6,8 @@
 //  (d) "name" com diagnóstico: continua FAIL;
 //  (e) "caso" ou "orientMed" com diagnóstico: continua FAIL;
 //  (f) buildSysAudit de cada nível (e ancorado): sem a frase de HIGH para impresso, com a categoria nova;
-//  (g) buildSys1 / buildSys2 idênticos byte a byte à 1.4.4 (o gerador não muda);
+//  (g) buildSys2 idêntico byte a byte à 1.4.4; buildSys1 = 1.4.5 sem o trecho da alergia da 1.4.6
+//      (único trecho novo, removido e o resto comparado byte a byte);
 //  (h) IA devolve WARN com 1 medium impresso_fora_do_nivel + 1 medium de outra categoria: OK, aviso em warnings;
 //  (i) IA devolve FAIL só por 1 high impresso_fora_do_nivel: OK;
 //  (j) IA devolve FAIL por 1 high de coerencia: continua FAIL;
@@ -18,6 +19,8 @@ const P = require('./_paths');
 function load(p) { const c = {}; vm.createContext(c); vm.runInContext(fs.readFileSync(p, 'utf8'), c); return c.StationEngine; }
 const SE = load(P.ENGINE);
 const REF = load(P.base('1.4.4'));
+const REF145 = load(P.base('1.4.5'));
+const { semTrechoAlergia } = require('./_alergia-1.4.6');
 
 let pass = 0, fail = 0;
 function ok(cond, nome, extra) {
@@ -32,6 +35,7 @@ function estacao(exams, extra) {
   return Object.assign({
     name: 'Dor abdominal em adulto jovem', orientMed: 'Atenda o paciente.', caso: 'Voce e medico em UBS.',
     local: 'UBS',
+    orientAtor: { se_perguntado_sobre: { alergias: 'Nao tenho alergia a remedio.' } }, // 1.4.6: estacao valida tem a chave de alergia
     checklist: [{ id: '1', text: 'Anamnese', scores: [0, 0.5, 1], labels: ['a', 'b', 'c'], crit_adeq: 'x', crit_parc: 'y' }],
     exams: [{ title: 'EXAME FISICO', rows: ['PA: 120x80 mmHg'], images: [], trigger_keywords: ['exame fisico', 'fisico geral', 'sinais vitais'] }].concat(exams || [])
   }, extra || {});
@@ -129,17 +133,24 @@ const temVazImpresso = (arr) => (arr || []).some((w) => w.category === 'vazament
      && SE.buildSysAudit('Avançado', ANCHOR).indexOf('  - HIGH: hipotese diagnostica premiada pelo PEP incompativel') >= 0,
      '(f) ancorado: os outros dois HIGH do bloco ficam');
 
-  // (g) gerador idêntico à 1.4.4
+  // (g) gerador: buildSys2 idêntico à 1.4.4; buildSys1 = 1.4.5 + o trecho da alergia (1.4.6), e nada além.
+  // A 1.4.6 mudou o buildSys1 de propósito (regra 3 cobre alergias, decisão do Bruno de 16/11): o
+  // trecho novo é removido e o resto é comparado byte a byte com a baseline 1.4.5.
   const ancRef = REF.normalizeAnchor({
     image_file: 'exemplo_a1b2c3d4.png', modality: 'radiografia de tórax', incidence: 'PA',
     finding_truth: 'hipertransparência em hemitórax direito', diagnosis_truth: 'pneumotórax',
     area: 'Clínica Médica', image_credits: { license: 'CC BY 4.0', author: 'A', year: '2024' }
   });
+  const ancRef145 = REF145.normalizeAnchor({
+    image_file: 'exemplo_a1b2c3d4.png', modality: 'radiografia de tórax', incidence: 'PA',
+    finding_truth: 'hipertransparência em hemitórax direito', diagnosis_truth: 'pneumotórax',
+    area: 'Clínica Médica', image_credits: { license: 'CC BY 4.0', author: 'A', year: '2024' }
+  });
   for (const dif of ['Básico', 'Intermediário', 'Avançado']) {
-    ok(SE.buildSys1('Clínica Médica', 'UBS', 'FEWSHOT', dif) === REF.buildSys1('Clínica Médica', 'UBS', 'FEWSHOT', dif), '(g) buildSys1(' + dif + ') = 1.4.4');
+    ok(semTrechoAlergia(SE.buildSys1('Clínica Médica', 'UBS', 'FEWSHOT', dif)) === REF145.buildSys1('Clínica Médica', 'UBS', 'FEWSHOT', dif), '(g) buildSys1(' + dif + ') = 1.4.5 + trecho da alergia (1.4.6)');
     ok(SE.buildSys2() === REF.buildSys2(), '(g) buildSys2 (' + dif + ') = 1.4.4');
   }
-  ok(SE.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ANCHOR) === REF.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ancRef), '(g) buildSys1(ancorado) = 1.4.4');
+  ok(semTrechoAlergia(SE.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ANCHOR)) === REF145.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ancRef145), '(g) buildSys1(ancorado) = 1.4.5 + trecho da alergia (1.4.6)');
   ok(SE.buildSys2(ANCHOR) === REF.buildSys2(ancRef), '(g) buildSys2(ancorado) = 1.4.4');
 
   // (h) WARN = 1 medium impresso_fora_do_nivel + 1 medium de outra categoria -> OK
