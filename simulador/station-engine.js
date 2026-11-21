@@ -199,8 +199,14 @@
        para MEDIUM 'impresso_fora_do_nivel'; categoria nova no formato de saida. A regra 4 ("vazamento
        e SEMPRE high") fica restrita a name, caso e orientMed.
      • Nao muda: vazamento em name/caso/orientMed (HIGH, reprova), buildSys1, buildSys2 e os blocos de
-       geracao (impresso bruto por nivel), a rede deterministica do impresso-ancora
-       (achado_no_tier_avancado), modelo e orcamento do auditor. ENGINE_VERSION 1.4.5.
+       geracao (impresso bruto por nivel), modelo e orcamento do auditor. ENGINE_VERSION 1.4.5.
+     • Ajustes antes do merge (decisao do Bruno: impresso com diagnostico so avisa, nunca reprova):
+       - audit(): toda issue da IA com category 'impresso_fora_do_nivel' vai para warnings, qualquer
+         que seja a severidade; o status e recalculado com o que sobra (FAIL = 1+ high; WARN = 2+
+         medium; senao OK) e passed = status OK. AUDIT_ERROR/TRUNCATED nao mudam.
+       - preValidate ancorado: 'achado_no_tier_avancado' (HIGH) sai; softWarnings (agora com anchor
+         opcional) avisa 'impresso_fora_do_nivel' com a mesma mensagem. ancora_sem_imagem,
+         credito_desalinhado, segundo_impresso_imagem e pep_sem_interpretacao continuam HIGH.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -1257,11 +1263,8 @@
           issues.push({ severity: 'high', category: 'credito_desalinhado',
             message: 'Impresso-ancora "' + (ancEx.title || '') + '": images[] e image_credits[] devem estar alinhados por indice e sem nulos (bug conhecido de producao — nao repetir).' });
         }
-        var _rowsA = Array.isArray(ancEx.rows) ? ancEx.rows : [];
-        if (_rowsA.some(function (r) { return ANCHOR_ACHADO_RX.test(String(r == null ? '' : r)); })) {
-          issues.push({ severity: 'high', category: 'achado_no_tier_avancado',
-            message: 'Impresso-ancora "' + (ancEx.title || '') + '" contem linha de achado/laudo — contradiz o tier avancado (imagem CRUA: apenas tecnica/incidencia; a ausencia do achado e o que define o tier).' });
-        }
+        // Linha de achado/laudo no impresso-ancora saiu daqui na 1.4.5 (decisao do Bruno, 21/11):
+        // virou aviso 'impresso_fora_do_nivel' no softWarnings.
       }
       examsArr.forEach(function (e) {
         if (!e || e === ancEx) return;
@@ -1444,7 +1447,8 @@
   var LEAK_RX = /\bdiagn[o\u00f3]stic[oa]s?\b|\bhip[o\u00f3]tese\s+diagn|compat[i\u00ed]ve(l|is)\s+com|sugest[i\u00ed]v[oa]s?\s+de|caracter[i\u00ed]stic[oa]s?\s+de|padr\w+\s+t[i\u00ed]pic|patognom|consistentes?\s+com|indicativ[oa]s?\s+de|confirma\w*\s+(o\s+)?(diagn|quadro)|\((febril|alterad[oa]?|leucocitose|leucopenia|anormal|aumentad[oa]?|diminuid[oa]?|reduzid[oa]?|elevad[oa]?|baix[oa]|alt[oa]|positiv[oa]|negativ[oa]|normal|desvio|reagente|hipertrofi)\b/i;
   var IMG_LAUDO_RX = /ultrass|ecograf|tomograf|ressonanc|ecocardiogram|doppler|mamograf|angiotomograf/i;
   // Avisos NAO bloqueantes (portao de qualidade p/ curadoria). Nao gasta retry.
-  function softWarnings(stObj, dificuldade) {
+  // anchor (opcional, 1.4.5): estacao ancorada — avisa linha de achado/laudo no impresso-ancora.
+  function softWarnings(stObj, dificuldade, anchor) {
     var warns = [];
     var clArr = Array.isArray(stObj.checklist) ? stObj.checklist : [];
     var pepTxt = clArr.map(function (it) {
@@ -1560,8 +1564,24 @@
     // deteccao da 1.4.4 (LEAK_RX + citaDiagnostico nos rows), agora como aviso. Um aviso por impresso.
     // No nivel MEDIO, o LAUDO DE IMAGEM pode trazer o diagnostico; laboratorio/fisico/raio-x seguem brutos.
     // Testar TITLE + ROWS (2026-08-11): so o titulo perdia a excecao com titulo generico ("EXAME DE IMAGEM").
+    // Modo ancorado: linha de achado/laudo no impresso-ancora (ate a 1.4.4, HIGH 'achado_no_tier_avancado'
+    // no preValidate). Mesma deteccao (ANCHOR_ACHADO_RX), agora aviso. O impresso ja avisado aqui nao
+    // ganha um segundo aviso no laco geral abaixo.
+    var _avisados = [];
+    if (anchor) {
+      var _ancW = null;
+      examsArr.forEach(function (e) {
+        if (!_ancW && e && Array.isArray(e.images) && e.images.indexOf(anchor.image_file) >= 0) _ancW = e;
+      });
+      var _rowsW = (_ancW && Array.isArray(_ancW.rows)) ? _ancW.rows : [];
+      if (_rowsW.some(function (r) { return ANCHOR_ACHADO_RX.test(String(r == null ? '' : r)); })) {
+        _avisados.push(_ancW);
+        warns.push({ severity: 'warn', category: 'impresso_fora_do_nivel',
+          message: 'Impresso-ancora "' + (_ancW.title || '') + '" contem linha de achado/laudo — contradiz o tier avancado (imagem CRUA: apenas tecnica/incidencia; a ausencia do achado e o que define o tier). Aviso, não bloqueia (decisão de 21/11).' });
+      }
+    }
     examsArr.forEach(function (e) {
-      if (!e) return;
+      if (!e || _avisados.indexOf(e) >= 0) return;
       var rowsTxt = Array.isArray(e.rows) ? e.rows.join(' ') : '';
       if (!rowsTxt) return;
       if (nivelPermiteDx(dificuldade) && IMG_LAUDO_RX.test((e.title || '') + ' ' + rowsTxt)) return;
@@ -1575,7 +1595,7 @@
 
   async function audit(stObj, aiCall, modelAudit, pepResult, dificuldade, anchor, maxTokensAudit) {
     var local = preValidate(stObj, pepResult, dificuldade, anchor);
-    var warnings = softWarnings(stObj, dificuldade);
+    var warnings = softWarnings(stObj, dificuldade, anchor);
     if (local.length > 0) return { passed: false, status: 'FAIL', score: 0, issues: local, warnings: warnings };
     var mtAudit = maxTokensAudit || 4000; // Fable 5 gasta thinking no mesmo orcamento (media 1.860); 1500 truncava
     try {
@@ -1605,7 +1625,24 @@
       }
       if (!parsed || !parsed.status) return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
         issues: [{ severity: 'high', category: 'auditor_resposta_invalida', message: 'Auditor sem campo status.' }] };
-      return { passed: parsed.status === 'OK', status: parsed.status, score: parsed.score || 0, issues: parsed.issues || [], warnings: warnings };
+      // IMPRESSO FORA DO NIVEL (1.4.5, decisao do Bruno, 21/11): so avisa, nunca reprova — qualquer que
+      // seja a severidade que a IA tenha dado. Vai para warnings e o status e recalculado com o que sobra,
+      // pela regra do prompt (FAIL = 1+ high; WARN = 2+ medium; senao OK).
+      var _iss = Array.isArray(parsed.issues) ? parsed.issues : [];
+      var _foraNivel = _iss.filter(function (i) { return i && i.category === 'impresso_fora_do_nivel'; });
+      var status = parsed.status, issuesIA = parsed.issues || [];
+      if (_foraNivel.length) {
+        issuesIA = _iss.filter(function (i) { return !(i && i.category === 'impresso_fora_do_nivel'); });
+        _foraNivel.forEach(function (i) {
+          warnings.push({ severity: 'warn', category: 'impresso_fora_do_nivel',
+            message: (i.message || 'Impresso traz interpretacao/diagnostico fora do nivel.') + ' (auditor IA; aviso, não bloqueia — decisão de 21/11)' });
+        });
+        var _sev = function (i) { return String((i && i.severity) || '').toLowerCase(); };
+        var nHigh = issuesIA.filter(function (i) { return _sev(i) === 'high'; }).length;
+        var nMed = issuesIA.filter(function (i) { return _sev(i) === 'medium'; }).length;
+        status = nHigh > 0 ? 'FAIL' : (nMed >= 2 ? 'WARN' : 'OK');
+      }
+      return { passed: status === 'OK', status: status, score: parsed.score || 0, issues: issuesIA, warnings: warnings };
     } catch (e) {
       return { passed: false, status: 'AUDIT_ERROR', score: 0, warnings: warnings,
         issues: [{ severity: 'high', category: 'auditor_excecao', message: 'Erro na auditoria: ' + (e && e.message ? e.message : e) }] };

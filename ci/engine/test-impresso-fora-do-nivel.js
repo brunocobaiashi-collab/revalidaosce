@@ -6,8 +6,12 @@
 //  (d) "name" com diagnóstico: continua FAIL;
 //  (e) "caso" ou "orientMed" com diagnóstico: continua FAIL;
 //  (f) buildSysAudit de cada nível (e ancorado): sem a frase de HIGH para impresso, com a categoria nova;
-//  (g) buildSys1 / buildSys2 idênticos byte a byte à 1.4.4 (o gerador não muda).
-// Sem IA: aiCall é um stub que devolve {"status":"OK"}.
+//  (g) buildSys1 / buildSys2 idênticos byte a byte à 1.4.4 (o gerador não muda);
+//  (h) IA devolve WARN com 1 medium impresso_fora_do_nivel + 1 medium de outra categoria: OK, aviso em warnings;
+//  (i) IA devolve FAIL só por 1 high impresso_fora_do_nivel: OK;
+//  (j) IA devolve FAIL por 1 high de coerencia: continua FAIL;
+//  (k) estação ancorada com linha de achado no impresso-âncora: não reprova e gera o aviso.
+// Sem IA: aiCall é um stub que devolve uma resposta fixa.
 const fs = require('fs');
 const vm = require('vm');
 const P = require('./_paths');
@@ -39,11 +43,12 @@ const TC_APENDICITE = { title: 'TOMOGRAFIA DE ABDOME', rows: ['Apendice com 12 m
 const US_APENDICITE = { title: 'ULTRASSOM DE ABDOME', rows: ['Estrutura tubular nao compressivel em FID, 9 mm', 'Diagnostico: apendicite aguda'], images: [],
   trigger_keywords: ['ultrassom', 'usg de abdome', 'ultrassonografia'] };
 
-function stubOK() {
+function stubIA(resp) {
   return async function () {
-    return { ok: true, status: 200, json: async () => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"status":"OK","score":9,"issues":[]}' }] }) };
+    return { ok: true, status: 200, json: async () => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: JSON.stringify(resp) }] }) };
   };
 }
+function stubOK() { return stubIA({ status: 'OK', score: 9, issues: [] }); }
 const temCat = (arr) => (arr || []).some((w) => w.category === CAT);
 const temVazImpresso = (arr) => (arr || []).some((w) => w.category === 'vazamento_impresso');
 
@@ -136,6 +141,63 @@ const temVazImpresso = (arr) => (arr || []).some((w) => w.category === 'vazament
   }
   ok(SE.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ANCHOR) === REF.buildSys1('Clínica Médica', 'Emergência', 'FEWSHOT', 'Avançado', ancRef), '(g) buildSys1(ancorado) = 1.4.4');
   ok(SE.buildSys2(ANCHOR) === REF.buildSys2(ancRef), '(g) buildSys2(ancorado) = 1.4.4');
+
+  // (h) WARN = 1 medium impresso_fora_do_nivel + 1 medium de outra categoria -> OK
+  const stH = estacao([]);
+  const auH = await SE.audit(stH, stubIA({ status: 'WARN', score: 7, issues: [
+    { severity: 'medium', category: CAT, message: 'Laboratorio traz "compativel com".' },
+    { severity: 'medium', category: 'pep', message: 'PEP nao cobre a conduta.' }] }), 'stub', PEP_OK, 'Básico');
+  ok(auH.status === 'OK' && auH.passed === true, '(h) WARN com 1 medium ' + CAT + ' + 1 medium pep: OK', J([auH.status, auH.passed]));
+  ok(temCat(auH.warnings), '(h) o aviso da IA aparece em warnings');
+  ok(auH.issues.length === 1 && auH.issues[0].category === 'pep', '(h) issues fica só com a de pep', J(auH.issues));
+  ok(auH.warnings.some((w) => w.category === CAT && w.severity === 'warn' && /compativel com/.test(w.message)), '(h) aviso com severity warn e a mensagem da IA');
+
+  // (i) FAIL só por 1 high impresso_fora_do_nivel -> OK
+  const auI = await SE.audit(estacao([]), stubIA({ status: 'FAIL', score: 4, issues: [
+    { severity: 'high', category: CAT, message: 'Exame fisico traz "(FEBRIL)".' }] }), 'stub', PEP_OK, 'Avançado');
+  ok(auI.status === 'OK' && auI.passed === true, '(i) FAIL só por high ' + CAT + ': OK', J([auI.status, auI.passed]));
+  ok(temCat(auI.warnings) && auI.issues.length === 0, '(i) a issue foi para warnings');
+
+  // (i2) 2 medium de outras categorias + 1 impresso_fora_do_nivel -> continua WARN
+  const auI2 = await SE.audit(estacao([]), stubIA({ status: 'WARN', score: 6, issues: [
+    { severity: 'medium', category: CAT, message: 'x' }, { severity: 'medium', category: 'pep', message: 'y' },
+    { severity: 'medium', category: 'coerencia', message: 'z' }] }), 'stub', PEP_OK, 'Básico');
+  ok(auI2.status === 'WARN' && auI2.passed === false, '(i2) 2 medium de outras categorias: continua WARN', J(auI2.status));
+
+  // (j) FAIL por 1 high de coerencia -> continua FAIL (com ou sem impresso_fora_do_nivel junto)
+  const auJ = await SE.audit(estacao([]), stubIA({ status: 'FAIL', score: 3, issues: [
+    { severity: 'high', category: 'coerencia', message: 'Conduta perigosa.' }] }), 'stub', PEP_OK, 'Intermediário');
+  ok(auJ.status === 'FAIL' && auJ.passed === false, '(j) FAIL por high de coerencia: continua FAIL', J(auJ.status));
+  const auJ2 = await SE.audit(estacao([]), stubIA({ status: 'FAIL', score: 3, issues: [
+    { severity: 'high', category: CAT, message: 'x' }, { severity: 'high', category: 'coerencia', message: 'Conduta perigosa.' }] }), 'stub', PEP_OK, 'Intermediário');
+  ok(auJ2.status === 'FAIL' && auJ2.passed === false && auJ2.issues.length === 1, '(j2) high de coerencia + high ' + CAT + ': FAIL só pela coerencia', J(auJ2));
+
+  // (j3) erro da IA não muda
+  const auJ3 = await SE.audit(estacao([]), async () => ({ ok: false, status: 503 }), 'stub', PEP_OK, 'Básico');
+  ok(auJ3.status === 'AUDIT_ERROR' && auJ3.passed === false, '(j3) AUDIT_ERROR não muda', J(auJ3.status));
+  const auJ4 = await SE.audit(estacao([]), async () => ({ ok: true, status: 200, json: async () => ({ stop_reason: 'max_tokens', content: [{ type: 'text', text: '{"status":"OK"' }] }) }), 'stub', PEP_OK, 'Básico');
+  ok(auJ4.status === 'AUDIT_ERROR' && auJ4.passed === false, '(j4) auditoria truncada continua AUDIT_ERROR', J(auJ4.status));
+
+  // (k) estação ancorada com linha de achado no impresso-âncora
+  const stK = estacao([{ title: 'RADIOGRAFIA DE TÓRAX', rows: ['Radiografia de tórax, incidência PA.', 'Achado: hipertransparência em hemitórax direito'],
+    images: [ANCHOR.image_file], image_credits: [{ license: 'CC BY 4.0', author: 'A', year: '2024' }],
+    trigger_keywords: ['radiografia', 'raio x', 'radiografia de torax'] }], {
+    local: 'Pronto-socorro', caso: 'Voce e medico no pronto-socorro.',
+    checklist: [
+      { id: '1', text: 'Anamnese', scores: [0, 0.5, 1], labels: ['a', 'b', 'c'], crit_adeq: 'x', crit_parc: 'y' },
+      { id: '2', text: 'Interpreta a radiografia de tórax e reconhece o achado', scores: [0, 1, 2], labels: ['a', 'b', 'c'], crit_adeq: 'descreve e conclui', crit_parc: 'descreve' }] });
+  const preK = SE.preValidate(stK, PEP_OK, 'Avançado', ANCHOR);
+  ok(preK.length === 0, '(k) ancorado com achado no impresso-âncora: preValidate sem issue', J(preK));
+  const wK = SE.softWarnings(stK, 'Avançado', ANCHOR).filter((w) => w.category === CAT);
+  ok(wK.length === 1 && /Impresso-ancora "RADIOGRAFIA DE TÓRAX" contem linha de achado\/laudo/.test(wK[0].message)
+     && /Aviso, não bloqueia \(decisão de 21\/11\)\.$/.test(wK[0].message), '(k) um aviso com a mensagem da âncora + "Aviso, não bloqueia"', J(wK));
+  const auK = await SE.audit(stK, stubOK(), 'stub', PEP_OK, 'Avançado', ANCHOR);
+  ok(auK.status === 'OK' && auK.passed === true && temCat(auK.warnings), '(k) audit() não reprova e traz o aviso', J([auK.status, auK.issues]));
+  // (k2) as outras redes da âncora continuam HIGH
+  const stK2 = JSON.parse(JSON.stringify(stK)); stK2.exams[1].image_credits = [null];
+  ok(SE.preValidate(stK2, PEP_OK, 'Avançado', ANCHOR).some((i) => i.category === 'credito_desalinhado' && i.severity === 'high'), '(k2) credito_desalinhado continua high');
+  const stK3 = JSON.parse(JSON.stringify(stK)); stK3.exams[1].images = [];
+  ok(SE.preValidate(stK3, PEP_OK, 'Avançado', ANCHOR).some((i) => i.category === 'ancora_sem_imagem' && i.severity === 'high'), '(k3) ancora_sem_imagem continua high');
 
   console.log('\n=== ' + pass + ' OK / ' + fail + ' FAIL ===');
   process.exit(fail === 0 ? 0 : 1);
