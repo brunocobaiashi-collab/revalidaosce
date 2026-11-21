@@ -104,10 +104,12 @@ const stC2 = mkStation(); delete stC2.exams[1].image_credits;
 iss = SE.preValidate(stC2, { ok: true, total: 10 }, 'Avançado', anc);
 ok(iss.some(i => i.category === 'credito_desalinhado'), 'preValidate: credito_desalinhado com ausente', cats(iss));
 
-// 3d) achado no impresso-âncora → achado_no_tier_avancado
+// 3d) achado no impresso-âncora → desde a 1.4.5 (decisão do Bruno, 21/11) é aviso, não issue
 const stD = mkStation(); stD.exams[1].rows.push('Achado: hipertransparência em hemitórax direito');
 iss = SE.preValidate(stD, { ok: true, total: 10 }, 'Avançado', anc);
-ok(iss.some(i => i.category === 'achado_no_tier_avancado'), 'preValidate: achado_no_tier_avancado', cats(iss));
+ok(iss.length === 0, 'preValidate: achado no impresso-âncora não reprova (1.4.5)', cats(iss));
+ok(SE.softWarnings(stD, 'Avançado', anc).some(w => w.category === 'impresso_fora_do_nivel'),
+   'softWarnings: achado no impresso-âncora vira impresso_fora_do_nivel (1.4.5)');
 
 // 3e) segundo impresso de imagem → segundo_impresso_imagem
 const stE = mkStation(); stE.exams.push({ title: 'ULTRASSONOGRAFIA DE TÓRAX', rows: ['linhas B ausentes'], images: [], trigger_keywords: ['ultrassom','ultrassonografia','exame de imagem'] });

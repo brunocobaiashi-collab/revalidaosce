@@ -3,10 +3,10 @@
 //   ENGINE=<arquivo>          engine sob teste (padrão: simulador/station-engine.js do repositório)
 //   EXPECT_VERSION=<x.y.z>    versão esperada na asserção de ENGINE_VERSION
 //                             (o portão 6 passa a versão declarada no próprio arquivo)
-//   BASE_PRE, BASE_1_1_0, BASE_1_2_0, BASE_1_4_0, BASE_1_4_2, BASE_1_4_3   troca uma baseline (padrão: ./baselines)
+//   BASE_PRE, BASE_1_1_0, BASE_1_2_0, BASE_1_4_0, BASE_1_4_2, BASE_1_4_3, BASE_1_4_4   troca uma baseline (padrão: ./baselines)
 //
 // As baselines são cópias exatas do station-engine.js em commits da main:
-//   pre-1.1.0 = d0e4f62 · 1.1.0 = 90cc0f8 · 1.2.0 = 3ace155 · 1.4.0 = c7c3f5b · 1.4.2 = d904515 · 1.4.3 = c393d13
+//   pre-1.1.0 = d0e4f62 · 1.1.0 = 90cc0f8 · 1.2.0 = 3ace155 · 1.4.0 = c7c3f5b · 1.4.2 = d904515 · 1.4.3 = c393d13 · 1.4.4 = a5df598
 const path = require('path');
 
 exports.ENGINE = process.env.ENGINE ||
