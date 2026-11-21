@@ -21,7 +21,7 @@ import { ler, relatorio } from './lib/html.mjs';
 
 const ARQUIVO = 'simulador/station-engine.js';
 const DIR = 'ci/engine';
-const SUITES = ['test-regressao.js', 'test-ancora.js', 'test-audit-budget.js', 'test-area-canonica.js', 'test-binario-conjuntivo.js', 'test-parcial-exata.js', 'test-diagnostico-gabarito.js', 'test-impresso-fora-do-nivel.js'];
+const SUITES = ['test-regressao.js', 'test-ancora.js', 'test-audit-budget.js', 'test-area-canonica.js', 'test-binario-conjuntivo.js', 'test-parcial-exata.js', 'test-diagnostico-gabarito.js', 'test-impresso-fora-do-nivel.js', 'test-alergia-roteiro.js'];
 
 // Uma linha por baseline. Baseline nova entra aqui no mesmo commit em que entra no diretório.
 const BASELINES = {
@@ -32,6 +32,7 @@ const BASELINES = {
   'station-engine.1.4.2.js':     '166360945018979da91afb0ef7b5e938522a4115418bf18e797908a2d45e85c0', // d904515
   'station-engine.1.4.3.js':     'dc4492215b759ee47b85f1b2f5350db569c56f1692e3145497890b5af0ae93da', // c393d13
   'station-engine.1.4.4.js':     '4cd14b13bf395071f07f531fd0e485473fad72f3b8df88ab13ac7954ab1b89e3', // a5df598
+  'station-engine.1.4.5.js':     'd269d4a137c1e00bee41ce6e74b2ac1e5f35a4914f41e4b594ffbbe86df175ca', // 475e696
 };
 
 const erros = [];

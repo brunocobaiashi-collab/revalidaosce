@@ -207,13 +207,23 @@
        - preValidate ancorado: 'achado_no_tier_avancado' (HIGH) sai; softWarnings (agora com anchor
          opcional) avisa 'impresso_fora_do_nivel' com a mesma mensagem. ancora_sem_imagem,
          credito_desalinhado, segundo_impresso_imagem e pep_sem_interpretacao continuam HIGH.
+   ROTEIRO DO ATOR SEMPRE RESPONDE ALERGIA (2026-11-21, decisao do Bruno de 16/11): em 68 de 119
+   sessoes o candidato perguntou alergia; 99/162 curadas e 14/16 geradas nao tinham a chave.
+     • buildSys1, regra 3: "alergias" entra na lista Cobrir, com a resposta coerente com o caso
+       (nao contradiz a prescricao; alergia relevante e declarada e paga no PEP; em pediatria
+       responde o acompanhante).
+     • preValidate: 'roteiro_sem_alergia' (HIGH) quando nenhuma chave de se_perguntado_sobre casa
+       /alergi/i. So roda na geracao (audit via generate); estacoes existentes nao mudam.
+     • buildSysAudit: uma linha em HIGH/ESTRUTURA QUEBRADA. A checagem alergia x PEP fica como esta.
+     • Nao muda: prompt do ator ("Nao consta"), procedencia, buildSys2, resumo da Call 2, modelo e
+       orcamento. ENGINE_VERSION 1.4.6.
    ════════════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
 
   var NL = '\n';
   // Versionamento do engine (disciplina do projeto: todo arquivo entregue incrementa versao).
-  var ENGINE_VERSION = '1.4.5'; // 2026-11-21 — impresso com interpretacao/diagnostico vira aviso, nao reprova
+  var ENGINE_VERSION = '1.4.6'; // 2026-11-21 — roteiro do ator sempre responde alergia (regra 3 + preValidate)
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROMPTS CANÔNICOS
@@ -360,7 +370,14 @@
       '   • tom_emocional: ex "ansiosa, preocupada".',
       '   • se_perguntado_sobre: 12-15 chaves em snake_case, respostas em 1a pessoa CURTAS.',
       '     Cobrir: queixa, tempo_inicio, sintomas_associados, antecedentes_pessoais,',
-      '     medicacoes, habitos (fumo/alcool), e topicos especificos do caso.',
+      '     medicacoes, alergias, habitos (fumo/alcool), e topicos especificos do caso.',
+      '     • Chave "alergias" OBRIGATORIA, com resposta coerente com o caso:',
+      '       - Se a conduta esperada prescreve um farmaco, a resposta NAO pode contradize-la.',
+      '         Padrao: "Nao tenho alergia a remedio."',
+      '       - Se o caso DEPENDE de uma alergia (ex: alergia a penicilina que muda o antibiotico),',
+      '         a resposta declara a alergia E o PEP paga por pergunta-la OU por escolher a alternativa.',
+      '       - Pediatria/acompanhante (regra 4): quem responde e o acompanhante, sobre a crianca',
+      '         (ex: "Ele nao tem alergia a remedio.").',
       '   • nao_falar_espontaneamente: ver regra 2.',
       '   • se_perguntado_sobre_exame_fisico: ver regra 5 (instrucao operacional, SEM achado).',
       '',
@@ -611,6 +628,7 @@
       '    tipo de inversao premia o aluno errado e penaliza o correto — reporte como high/coerencia.',
       '  - ITEM SEM PONTO: algum item do PEP tem pontuacao maxima 0 (nao pontua nada).',
       '  - ESTRUTURA QUEBRADA: orientAtor sem regra_fundamental ou se_perguntado_sobre vazio.',
+      '  - ESTRUTURA QUEBRADA: orientAtor sem chave de alergia em se_perguntado_sobre.',
       '  - ESPECIALISTA NO CASO: "caso" diz "Voce e ginecologista/cardiologista/etc".',
       '    Revalida simula GENERALISTA — caso so pode dizer "Voce e medico em UBS/PA/Ambulatorio/PS".',
       '    (Encaminhar para especialista no orientMed/checklist e CORRETO — so nao no "caso".)',
@@ -1232,6 +1250,17 @@
     });
     if (vazios.length) {
       issues.push({ severity: 'high', category: 'impresso_vazio', message: vazios.length + ' impresso(s) sem dados: ' + vazios.map(function (e) { return e.title; }).join('; ') + '. Estacao incompleta (provavel truncamento).' });
+    }
+    // ROTEIRO SEM ALERGIA (1.4.6, decisao do Bruno, 16/11): a regra 3 do buildSys1 exige a chave.
+    // Checagem MECANICA (nome da chave), sem heuristica: pode ser high. So roda via audit(), que so
+    // e chamado pelo generate() — estacoes ja gravadas nao passam por aqui (sem efeito retroativo).
+    var _oaAl = stObj.orientAtor;
+    if (typeof _oaAl === 'string') { try { _oaAl = JSON.parse(_oaAl); } catch (_eAl) { _oaAl = null; } }
+    var _spsAl = (_oaAl && typeof _oaAl === 'object' && _oaAl.se_perguntado_sobre && typeof _oaAl.se_perguntado_sobre === 'object')
+      ? _oaAl.se_perguntado_sobre : {};
+    if (!Object.keys(_spsAl).some(function (k) { return /alergi/i.test(k); })) {
+      issues.push({ severity: 'high', category: 'roteiro_sem_alergia',
+        message: 'Roteiro do ator sem chave de alergia em se_perguntado_sobre (regra 3 do gerador, 1.4.6).' });
     }
     // Interpretacao/diagnostico nos impressos saiu daqui na 1.4.5 (decisao do Bruno, 21/11): virou
     // aviso 'impresso_fora_do_nivel' no softWarnings. Vazamento em name/caso/orientMed segue HIGH acima.

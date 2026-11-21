@@ -18,6 +18,7 @@ ok(SE.ENGINE_VERSION === VER, 'ENGINE_VERSION = ' + VER, 'veio ' + SE.ENGINE_VER
 // Estação mínima válida (passa no preValidate sem anchor)
 const ST = {
   name: 'Dor abdominal em adulto jovem', orientMed: 'template', caso: 'Voce e medico em UBS.',
+  orientAtor: { se_perguntado_sobre: { alergias: 'Nao tenho alergia a remedio.' } }, // 1.4.6: estacao valida tem a chave de alergia
   checklist: [{ id: '1', text: 'Anamnese', scores: [0, 0.5, 1], labels: ['a','b','c'], crit_adeq: 'x', crit_parc: 'y' }],
   exams: [{ title: 'EXAME FISICO', rows: ['PA: 120x80 mmHg'], images: [], trigger_keywords: ['exame fisico','fisico geral','sinais vitais'] }]
 };
@@ -52,7 +53,7 @@ function mkResp(text, stop) {
   ok(rNew2.passed === false && rNew2.issues[0].category === 'auditor_truncado', '(prova) v1.2.0 reprova o mesmo payload com auditor_truncado', JSON.stringify(rNew2.issues));
 
   // 4) via generate: opts.maxTokensAudit propagado até a 3a chamada
-  const CALL1 = JSON.stringify({ name: 'Febre em adulto', area: 'Clínica', caso: 'Voce e medico em UBS.', orientMed: 'template', complexity: 'medium', orientAtor: { regra_fundamental: 'x'.repeat(30), se_perguntado_sobre: { a: '1' } }, exams: [{ title: 'EXAME FÍSICO', rows: ['Temp: 38°C'], images: [], trigger_keywords: ['exame fisico','fisico','sinais vitais'] }] });
+  const CALL1 = JSON.stringify({ name: 'Febre em adulto', area: 'Clínica', caso: 'Voce e medico em UBS.', orientMed: 'template', complexity: 'medium', orientAtor: { regra_fundamental: 'x'.repeat(30), se_perguntado_sobre: { a: '1', alergias: 'nenhuma' } }, exams: [{ title: 'EXAME FÍSICO', rows: ['Temp: 38°C'], images: [], trigger_keywords: ['exame fisico','fisico','sinais vitais'] }] });
   const CALL2 = JSON.stringify([{ id: '1', text: 'Anamnese', subitens: '', scores: [0, 5, 10], labels: ['a','b','c'], crit_adeq: 'x', crit_parc: 'y' }]);
   let mts = [];
   const res = await SE.generate({
