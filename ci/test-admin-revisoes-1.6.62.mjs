@@ -1,6 +1,6 @@
-// Teste de Estações › Revisões e da Fila de curadoria só de resumo (admin v1.6.61), em
-// jsdom, com rpcAdmin simulado. Nada de rede, nada de produção. Substitui o teste da 1.6.60.
-// Rodar a partir da raiz: node ci/test-admin-revisoes-1.6.61.mjs   (saída 1 = falhou)
+// Teste de Estações › Revisões e da Fila de curadoria só de resumo (admin v1.6.62), em
+// jsdom, com rpcAdmin simulado. Nada de rede, nada de produção. Substitui o teste da 1.6.61.
+// Rodar a partir da raiz: node ci/test-admin-revisoes-1.6.62.mjs   (saída 1 = falhou)
 // (precisa de jsdom em ci/: cd ci && npm install --no-save jsdom)
 //
 // Prova, em Revisões: (a) a aba carrega o painel e a lista só com itens de estação, pedindo
@@ -9,6 +9,10 @@
 // Revisões, não a Fila. Na Fila de resumo: (f) nenhum item de estação, sem ff-estacao, com a
 // linha que aponta para Revisões e contagens só de resumo. Segurança: (g) campos do banco
 // escapados (ultimas.name e trecho); (h) ok:false gera alert e não recarrega.
+// 1.6.62: (i) em Revisões o título do cartão é a estação, o tema vai numa linha "tema: …",
+// sem Abrir resumo nem travado, e o aviso sobre Aprovar fica no topo; sem station_nome o
+// título cai para o tema; (j) na Fila o título continua o tema, com Abrir resumo; (k) estado
+// inactive aparece como "inativa" nas duas telas; (l) station_nome e tema_nome escapados.
 import fs from 'node:fs';
 import path from 'node:path';
 import { JSDOM, VirtualConsole } from 'jsdom';
@@ -53,13 +57,17 @@ function dublar(w) {
 
 const HOSTIL = '<script>window.__xss=1</script><img src=x onerror="window.__xss2=1">';
 const PEND_EST = { id: 302, categoria: 'estacao', tipo: 'revisor', status: 'pendente', prioridade: 2, criado_em: '2026-11-20T12:00:00Z',
-  tema_id: 't1', tema_nome: 'Tema um', station_nome: 'Estação 15d1c68c', trecho: 'trecho ' + HOSTIL,
+  tema_id: 't1', tema_nome: 'Tema um ' + HOSTIL, station_nome: 'Estação 15d1c68c ' + HOSTIL, station_status: 'inactive',
+  resumo_status: 'publicado', resumo_travado: true, trecho: 'trecho ' + HOSTIL,
   camada: 'clinica', correcao_proposta: 'trocar dose ' + HOSTIL, fonte: 'Diretriz ' + HOSTIL, fonte_verificada: false,
   station_fonte: 'inep', conteudo_mudou: true };
+const PEND_EST_SEM_NOME = { id: 307, categoria: 'estacao', tipo: 'revisor', status: 'pendente', prioridade: 3, criado_em: '2026-11-20T12:00:00Z',
+  tema_id: 't7', tema_nome: 'Tema sete', trecho: 'sem nome de estação', station_status: 'pending' };
 const PEND_RES = { id: 303, categoria: 'resumo', tipo: 'editorial', status: 'pendente', prioridade: 3, criado_em: '2026-11-20T12:00:00Z',
   tema_id: 't2', tema_nome: 'Tema dois', trecho: 'resumo com erro' };
 const PEND_DES = { id: 306, categoria: 'desatualizado', tipo: 'desatualizado', status: 'pendente', prioridade: 1, criado_em: '2026-11-20T12:00:00Z',
-  tema_id: 't5', tema_nome: 'Tema cinco', trecho: 'estação mudou' };
+  tema_id: 't5', tema_nome: 'Tema cinco', station_nome: 'Estação cinco', station_status: 'inactive',
+  resumo_status: 'publicado', resumo_travado: true, trecho: 'estação mudou' };
 const APROVADAS = [
   { id: 304, categoria: 'estacao', tipo: 'revisor', status: 'aprovada', prioridade: 2, criado_em: '2026-11-19T12:00:00Z',
     tema_id: 't3', tema_nome: 'Tema três', trecho: 'x', camada: 'coerencia', fonte: 'PDF INEP', fonte_verificada: true,
@@ -109,7 +117,7 @@ w.rpcAdmin = async (fn, args) => {
   chamadas.push([fn, JSON.parse(JSON.stringify(args || {}))]);
   if (fn === 'admin_revisor_painel') return painel();
   if (fn === 'admin_curadoria_list') {
-    let itens = args.p_status === 'aprovada' ? APROVADAS : args.p_status === 'resolvida' ? RESOLVIDAS : [PEND_EST, PEND_RES, PEND_DES];
+    let itens = args.p_status === 'aprovada' ? APROVADAS : args.p_status === 'resolvida' ? RESOLVIDAS : [PEND_EST, PEND_EST_SEM_NOME, PEND_RES, PEND_DES];
     if (args.p_categoria) itens = itens.filter((i) => i.categoria === args.p_categoria);
     return { itens, counts: { pendente_total: 41, por_categoria: { estacao: 39, resumo: 1, desatualizado: 1 }, temas_travados: 2, aprovada_total: 1,
       freio_estacao: { em_fila: emFila, limite: 40 } } };
@@ -151,17 +159,39 @@ confere(ult && !ult.open && ult.textContent.includes('Últimas revisões (2)') &
   '(a) Últimas revisões recolhido, com selo, origem e achados');
 confere(d.getElementById('rv-n-aba').textContent === '(39)', '(a) contador da aba (39)');
 const rvCards = [...d.querySelectorAll('#rv-list .st-card')];
-confere(rvCards.length === 1 && !!cartao('#rv-list', 302), '(a) lista de Revisões só com o item de estação');
+confere(rvCards.length === 2 && !!cartao('#rv-list', 302) && !!cartao('#rv-list', 307), '(a) lista de Revisões só com os itens de estação');
 const r302 = cartao('#rv-list', 302);
 confere(JSON.stringify(botoes(r302)) === JSON.stringify(['Aprovar', 'Rejeitar', '✓ Resolver']), '(c) pendente de estação: Aprovar, Rejeitar e Resolver');
 confere(r302.textContent.includes('revisor automático') && r302.textContent.includes('clínica') && r302.textContent.includes('INEP')
   && r302.textContent.includes('Correção proposta:') && r302.textContent.includes('não verificada') && r302.textContent.includes('A estação mudou depois desta proposta'),
   '(c) selos, correção proposta, fonte e aviso de estação mudada');
 
+// (i) 1.6.62: título = estação, tema numa linha discreta, sem Abrir resumo nem travado
+const nome302 = r302.querySelector('.st-name');
+confere(nome302 && nome302.textContent === 'Estação 15d1c68c ' + HOSTIL + '(estação inativa)', '(i) .st-name em Revisões é o station_nome, com o estado');
+const linhaTema = [...r302.querySelectorAll('div')].find((x) => x.textContent === 'tema: Tema um ' + HOSTIL);
+confere(!!linhaTema && /var\(--text3\)/.test(linhaTema.getAttribute('style')) && !linhaTema.querySelector('button'), '(i) linha discreta "tema: …", sem botão');
+confere(!d.getElementById('rv-list').textContent.includes('Abrir resumo') && !d.getElementById('rv-list').textContent.includes('travado'),
+  '(i) Revisões sem Abrir resumo e sem travado');
+const r307 = cartao('#rv-list', 307);
+confere(r307 && r307.querySelector('.st-name').textContent === 'Tema sete(estação pendente)', '(i) sem station_nome o título cai para o tema_nome; pending = pendente');
+const aviso = d.getElementById('rv-aviso-aprovar');
+const txtAviso = 'Aprovar não altera a estação: só marca a proposta como aprovada. A correção é aplicada depois pelo Orquestrador, com cópia de segurança e conferência do resumo do tema.';
+const pr = d.getElementById('panel-revisoes');
+confere(aviso && aviso.textContent === txtAviso && pr.contains(aviso)
+  && (aviso.compareDocumentPosition(d.getElementById('rv-list')) & w.Node.DOCUMENT_POSITION_FOLLOWING), '(i) aviso sobre Aprovar no topo do painel');
+let txtPrompt = '';
+w.prompt = (m) => { txtPrompt = String(m); return null; };
+await w.aprovarItemFila(302, 'rv');
+confere(txtPrompt.includes('Aprovar não aplica a correção; o Orquestrador aplica depois.'), '(i) prompt de Aprovar avisa que não aplica');
+w.prompt = () => 'nota de teste';
+
 // (g) escape
 confere(d.querySelectorAll('#panel-revisoes script, #panel-revisoes img').length === 0 && w.__xss === undefined && w.__xss2 === undefined,
   '(g) nada vindo do banco vira elemento em Revisões');
 confere(r302.textContent.includes('trecho ' + HOSTIL) && ult.textContent.includes('Estação hostil ' + HOSTIL), '(g) trecho e ultimas.name aparecem literais');
+confere(r302.querySelectorAll('script, img').length === 0 && r302.textContent.includes('Estação 15d1c68c ' + HOSTIL) && r302.textContent.includes('tema: Tema um ' + HOSTIL),
+  '(l) station_nome e tema_nome com <script> aparecem literais, sem virar elemento');
 
 // (b) em_fila = 40 → aviso em âmbar
 emFila = 40;
@@ -226,6 +256,11 @@ confere(ultimaList()[1].p_categoria === null, '(f) Fila pede p_categoria null');
 const fl = [...d.querySelectorAll('#fila-list .st-card')];
 confere(fl.length === 2 && !cartao('#fila-list', 302) && !!cartao('#fila-list', 303) && !!cartao('#fila-list', 306), '(f) Fila sem item de estação, com resumo e desatualizado');
 confere(!d.getElementById('fila-list').textContent.includes('Aprovar'), '(f) Fila sem Aprovar');
+// (j) 1.6.62: Fila de resumos igual — título é o tema, estação na linha de baixo, Abrir resumo e travado
+const f306 = cartao('#fila-list', 306);
+confere(f306 && f306.querySelector('.st-name').textContent === 'Tema cinco🔒 travado', '(j) Fila: título continua o tema, com travado');
+confere(f306 && botoes(f306).includes('Abrir resumo') && !f306.textContent.includes('tema:'), '(j) Fila: Abrir resumo continua, sem linha tema:');
+confere(f306 && f306.textContent.includes('Estação cinco(estação inativa)') && !f306.textContent.includes('inactive'), '(k) Fila: inactive aparece como inativa');
 const ap = d.getElementById('fila-aponta-revisoes');
 confere(ap && ap.textContent.includes('Itens de estação estão em Estações › 🔎 Revisões') && ap.textContent.includes('(39 pendentes)'), '(f) linha que aponta para Revisões com N pendentes');
 const cont = d.getElementById('fila-resumo-contagens').textContent;
